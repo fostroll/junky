@@ -123,7 +123,7 @@ def pad_array_torch(array, padding_value=0, **kwargs):
     :param kwargs: keyword args for the ``tensor.tensor()`` method.
     :rtype: torch.Tensor
     """
-    return torch.tensor(pad_array(sequences, padding_value=padding_value),
+    return torch.tensor(pad_array(array, padding_value=padding_value),
                         **kwargs)
 
 def torch_autotrain(
