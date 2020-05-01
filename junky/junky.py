@@ -938,3 +938,40 @@ class CharEmbeddingCNN(nn.Module):
         '{}, external embedding layer, kernels={}'.format(
             self.alphabet_size, self.kernels
         )
+
+class HighwayNetwork(nn.Module):
+        """ 
+        Applies sigm(x) * (f(G(x))) + (1 - sigm(x)) * (Q(x)) transformation, where 
+        .. G and Q - affine transformation
+        .. f - non-linear transformation
+        .. sigm(x) - affine transformation with sigmoid non-linearization
+        .. * - element-wise multiplication
+        """
+
+    def __init__(self, in_features, out_features, activation_function=nn.ReLU()):
+        super().__init__()
+        
+        self.nonlinear = nn.Linear(in_features, out_features)
+        self.linear = nn.Linear(in_features, out_features)
+        self.gate = nn.Linear(in_features, out_features)
+        
+        self.gate_function = nn.Sigmoid()
+        self.activation_function = activation_function
+        
+    def forward(self, x):
+        '''
+        :param x: tensor with shape [batch_size, seq_len, emb_size]
+        :return: tensor with shape [batch_size, seq_len, emb_size]
+        '''
+        
+        gate = self.gate(x)
+        gate = self.gate_function(gate)
+        
+        nonlinear = self.nonlinear(x)
+        nonlinear = self.activation_function(nonlinear)
+        
+        linear = self.linear(x)
+        
+        x = gate * nonlinear + (1 - gate) * linear
+        
+        return x
