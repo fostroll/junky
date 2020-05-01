@@ -607,6 +607,38 @@ class Masking(nn.Module):
 
 class CharEmbeddingRNN(nn.Module):
 
+    """
+    Initializes character embeddings using bidirectional LSTM.
+
+    Args:
+        alphabet_size: length of character vocabulary.
+        emb_layer: optional pre-trained embeddings, 
+            initialized as torch.nn.Embedding.from_pretrained() or elsewise.
+        emb_dim: character embedding dimensionality.
+        pad_idx: id of padding element in character vocabulary.
+        out_type: 'final_concat'|'final_mean'|'all_mean'.
+            `out_type` defines what to get as a result from the LSTM. 
+            'final_concat' concatenate final hidden states of forward and backward lstm;
+            'final_mean' take mean of final hidden states of forward and backward lstm;
+            'all_mean' take mean of all timeframes.
+        
+    Shape:
+        - Input: x: [batch[seq[word[ch_idx + pad] + word[pad]]]]; 
+                    torch tensor of shape :math:`(N, S(padded), C(padded))`, 
+                    where `N` is batch_size, `S` is seq_len 
+                    and `C` is max char_len in a word in current batch. 
+                 lens: [seq[word_char_count]]; 
+                    torch tensor of shape :math:`(N, S(padded), C(padded))`, 
+                    word lengths for each sequence in batch. 
+                    Used for masking & packing/unpacking sequences for LSTM.
+        - Output: :math:`(N, S, H)` where `N`, `S` are the same shape as the input
+                  and :math:` H = \text{lstm hidden size}`.
+    
+    .. note:: In LSTM layer, we ignore padding by applying mask 
+              to the tensor and eliminating all words of len=0.
+              After LSTM layer, initial dimensions are restored using the same mask.
+    
+    """
     def __init__(self, alphabet_size,
                  emb_layer=None, emb_dim=300, pad_idx=0,
                  out_type='final_concat'):
@@ -764,6 +796,32 @@ class CharEmbeddingRNN(nn.Module):
 
 class CharEmbeddingCNN(nn.Module):
 
+    """
+    Initializes character embeddings using multiple-filter CNN. 
+    Max-over-time pooling and ReLU are applied to concatenated convolution layers.
+    
+
+    Args:
+        alphabet_size: length of character vocabulary.
+        emb_layer: optional pre-trained embeddings, 
+            initialized as torch.nn.Embedding.from_pretrained() or elsewise.
+        emb_dim: character embedding dimensionality.
+        pad_idx: id of padding element in character vocabulary.
+        kernels: convoluiton filter sizes for CNN layers. 
+        
+    Shape:
+        - Input: x: [batch[seq[word[ch_idx + pad] + word[pad]]]]; 
+                    torch tensor of shape :math:`(N, S(padded), C(padded))`, 
+                    where `N` is batch_size, `S` is seq_len with padding 
+                    and `C` is char_len with padding in current batch. 
+                 lens: [seq[word_char_count]]; 
+                    torch tensor of shape :math:`(N, S, C)`,
+                    word lengths for each sequence in batch. 
+                    Used for eliminating padding in CNN layers.
+        - Output: :math:`(N, S, E)` where `N`, `S` are the same shape as the input
+                  and :math:` E = \text{emb_dim}`.
+    
+    """
     def __init__(self, alphabet_size,
                  emb_layer=None, emb_dim=300, pad_idx=0,
                  kernels=[3, 4, 5]):
