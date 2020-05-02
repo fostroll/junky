@@ -7,4 +7,4 @@
 Provides a bunch of tools and utilities to use with PyTorch.
 """
 from junky._version import __version__
-import * from .junky
+from junky.junky import *

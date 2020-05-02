@@ -16,8 +16,7 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence, pad_se
 
 
 def get_max_dims(array, max_dims=None, str_isarray=False, dim_no=0):
-    """Returns max sizes of nested **array** on the all levels
-    of nestedness.
+    """Returns max sizes of nested *array* on the all levels of nestedness.
 
     :param array: nested lists or tuples.
     :param str_isarray: if True, strings are treated as arrays of chars and
@@ -69,14 +68,13 @@ def get_max_dims(array, max_dims=None, str_isarray=False, dim_no=0):
     return res
 
 def insert_to_ndarray(array, ndarray, shift='left'):
-    """Inserts a nested **array** with data of any allowed for *numpy* type to
-    the *numpy* **ndarray**. NB: all dimensions of **ndarray** must be no less
-    than sizes of corresponding subarrays of the
-    **array**.
+    """Inserts a nested *array* with data of any allowed for numpy type to the
+    numpy *ndarray*. NB: all dimensions of *ndarray* must be no less than sizes
+    of corresponding subarrays of the *array*.
 
     :param array: nested lists or tuples.
-    :param shift: how to place data of **array** to **ndarray** if size of
-        some subarray less than corresponding dimension of **ndarray**.
+    :param shift: how to place data of *array* to *ndarray* in the case if
+        size of some subarray less than corresponding dimension of *ndarray*.
         Allowed values:
             'left': shift to start;
             'right': shift to end;
@@ -108,8 +106,8 @@ def insert_to_ndarray(array, ndarray, shift='left'):
         ndarray[start_idx:start_idx + len(array)] = array
 
 def pad_array(array, padding_value=0):
-    """Converts nested **array** with data of any allowed for *numpy* type to
-    *numpy.ndarray* with **padding_value** instead of missing data.
+    """Converts nested *array* with data of any allowed for numpy type to
+    numpy.ndarray with *padding_value* instead of missing data.
 
     :param array: nested lists or tuples.
     :rtype: numpy.ndarray
@@ -124,7 +122,7 @@ def pad_array(array, padding_value=0):
 def pad_array_torch(array, padding_value=0, **kwargs):
     """Just a wropper for ``pad_array()`` that returns *torch.Tensor*.
 
-    :param kwargs: keyword args for the ``tensor.tensor()`` method.
+    :param kwargs: keyword args for the ``torch.tensor()`` method.
     :rtype: torch.Tensor
     """
     return torch.tensor(pad_array(array, padding_value=padding_value),
@@ -136,24 +134,24 @@ def torch_autotrain(
     train_args=(), train_kwargs=None, devices=torch.device('cpu'),
     best_model_file_name='model.pt', best_model_device=None, seed=None
 ):
-    """Model hyperparameters selection. May work in parallel using multiple
-    devices. If some of parallel threads die during training (because of
-    `MemoryError` of anything, their tasks will be redone after all other
-    threads have finished with their work.
+    """This is a tool for model's hyperparameters selection. May work in
+    parallel using multiple devices. If some of parallel threads die during
+    training (because of `MemoryError` of anything), their tasks will be
+    redone after all other threads have finished with their work.
 
     :param make_model_method: method to create the model. Returns the model
         and, maybe, some other params that should be passed to *train_method*.
     :type make_model_method: callable(
             *make_model_args, **make_model_kwargs,
             **fit_kwargs
-        ) -> model|tuple(model, <other_train_args>)
+        ) -> model|tuple(model, <other train args>)
         fit_kwargs - params that are constructed from *make_model_fit_params*.
     :param train_method: method to train and validate the model.
     :type train_method: callable(
             device, loaders, model, *other_train_args,
             best_model_backup_method, log_prefix,
             *train_args, **train_kwargs
-        )
+        ) -> <train statistics>
         device - one of *devices* that is assigned to train the model;
         loaders - the return of *create_loaders_method* or () if
             *create_loaders_method* is None (default);
@@ -179,7 +177,7 @@ def torch_autotrain(
     :type make_model_args: tuple
     :param make_model_kwargs: keyword args for *make_model_method*. Will be
         passed as is.
-    :type make_model_args: dict
+    :type make_model_kwargs: dict
     :param make_model_fit_params: a list of combinations of varying
         *make_model_method*'s fit_kwargs among which we want to find the best.
     :type make_model_fit_params: iterable of iterables; nestedness is
@@ -216,14 +214,15 @@ def torch_autotrain(
     :param best_model_file_name: a name of the file to save the best model
         where. Default 'model.pt'.
     :type best_model_file_name: str
-    :param best_model_device: device to load best model where. If None, we
+    :param best_model_device: device to load the best model where. If None, we
         won't load the best model in memory.
-    :return: (best_model, best_model_score, best_model_name, stats)
+    :return: tuple(best_model, best_model_name, best_model_score,
+                   best_model_params, stats)
         best_model - the best model if best_model_device is not None,
             else None;
         best_model_name - the key of the best model stats;
         best_model_score - the score of the best model;
-        best_model_params - fit params of the best model;
+        best_model_params - fit_kwargs of the best model;
         stats - all returns of all *train_method*s. Format:
             [(<model name>, <model best score>, <model params>,
               <*train_method* return>),
@@ -455,8 +454,9 @@ def torch_autotrain(
     print_items([make_model_kwargs.items()])
     print()
     print('=========')
-    head = 'make_model fit kwargs: ['
-    print(head, end='')
+    print('make_model fit kwargs (total {} combinations): ['
+              .format(len(fit_kwargs)),
+          end='')
     print_items(fit_kwargs)
     print(']')
     print('=========')
@@ -566,11 +566,18 @@ def torch_autotrain(
     return best_model, best_model_name, best_model_score, best_model_params, \
            sorted(stats, key=lambda x: (-x[1], x[2]))
 
-def autotrain_log_parse(log_fn, silent=False):
+def parse_autotrain_log(log_fn, silent=False):
+    """The tool to parse output of the ``torch_autotrain()`` method.
+
+    :param log_fn: a file name of the ``torch_autotrain()`` log file.
+    :type log_fn: str
+    :param silent: if True, suppress output.
+    :return: list[tuple(<model_name>, <best_model_score>, <model fit kwargs>)]
+    """
     scores = {}
     with open(log_fn, 'rt', encoding='utf-8') as f:
         for line in f:
-            match = re.match('([^:]+): (\(\(.+\)\))', line)
+            match = re.match('([^:\s]+): (\((?:\(.+\))?\))$', line.strip())
             if match:
                 name, args = match.groups()
                 if name in scores:
@@ -589,12 +596,12 @@ def autotrain_log_parse(log_fn, silent=False):
                         scores[name] = (None, score)
 
     stat = []
-    for name in sorted(scores, key=lambda x: (scores[x][1], scores[x][0])):
-        stat.append(name, scores[name][0], scores[name][1])
+    for name in sorted(scores, key=lambda x: (-scores[x][1], scores[x][0])):
+        stat.append((name, scores[name][1], scores[name][0]))
         if not silent:
-            print('{}\t{}\t{}'.format(name, scores[name][0], scores[name][1]))
+            print('{}\t{}\t{}'.format(name, scores[name][1], scores[name][0]))
 
-    return list(reversed(stat))
+    return stat
 
 
 class Masking(nn.Module):
