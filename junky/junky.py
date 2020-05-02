@@ -130,9 +130,12 @@ def torch_autotrain(
     make_model_method, train_method, create_loaders_method=None,
     make_model_args=(), make_model_kwargs=None, make_model_fit_params=None,
     train_args=(), train_kwargs=None, devices=torch.device('cpu'),
-    best_model_file_name='model.pt', best_model_device=None, seed=None):
+    best_model_file_name='model.pt', best_model_device=None, seed=None
+):
     """Model hyperparameters selection. May work in parallel using multiple
-    devices.
+    devices. If some of parallel threads die during training (because of
+    `MemoryError` of anything, their tasks will be redone after all other
+    threads have finished with their work.
 
     :param make_model_method: method to create the model. Returns the model
         and, maybe, some other params that should be passed to *train_method*.
@@ -153,7 +156,7 @@ def torch_autotrain(
         other_train_args - params returned by *make_model_method* besides the
             model (if any). E.g.: optimizer, criterion, etc.;
         best_model_backup_method - the method that saves the best model over
-all runs. Signature: callable(best_model, best_model_score).
+            all runs. Signature: callable(best_model, best_model_score).
             This method must be invoked in *train_method* to save its best
             model;
         log_prefix - prefix that should use *train_method* in the beginning of
@@ -169,10 +172,10 @@ all runs. Signature: callable(best_model, best_model_score).
     :type create_loaders_method: callable() -> <loader>|tuple(<loaders>)
     :param make_model_args: positional args for *make_model_method*. Will be
         passed as is.
-    :type make_model_args: tuple.
+    :type make_model_args: tuple
     :param make_model_kwargs: keyword args for *make_model_method*. Will be
         passed as is.
-    :type make_model_args: dict.
+    :type make_model_args: dict
     :param make_model_fit_params: a list of combinations of varying
         *make_model_method*'s fit_kwargs among which we want to find the best.
     :type make_model_fit_params: iterable of iterables; nestedness is
@@ -194,10 +197,10 @@ all runs. Signature: callable(best_model, best_model_score).
                      {'a': 100, 'b': None, 'c': 'Y'}.
     :param train_args: positional args for *train_method*. Will be passed
         as is.
-    :type train_args: tuple.
+    :type train_args: tuple
     :param train_kwargs: keyword args for *train_method*. Will be passed
         as is.
-    :type make_model_args: dict.
+    :type make_model_args: dict
     :param devices: what devices use for training. This can be a separate
         device, a list of available devices, or a dict of available devices
         with max number of simultaneous threads.
@@ -207,17 +210,22 @@ all runs. Signature: callable(best_model, best_model_score).
                   {'cuda:0': 3, 'cuda:1': 3} - 2 GPU, 3 threads on each.
         NB: <device> == (<device>,) == {<device>: 1}
     :param best_model_file_name: a name of the file to save the best model
-        where. Default 'model.pt'
-    :type best_model_file_name: str.
+        where. Default 'model.pt'.
+    :type best_model_file_name: str
     :param best_model_device: device to load best model where. If None, we
         won't load the best model in memory.
     :return: (best_model, best_model_score, best_model_name, stats)
         best_model - the best model if best_model_device is not None,
             else None;
-        best_model_score - the score of the best model;
         best_model_name - the key of the best model stats;
+        best_model_score - the score of the best model;
+        best_model_params - fit params of the best model;
         stats - all returns of all *train_method*s. Format:
-            [(<model name>, <model fit_kwargs>, <*train_method* return>), ...]
+            [(<model name>, <model best score>, <model params>,
+              <*train_method* return>),
+             ...]
+            stats is sorted by <model best score>, in such a way that stats[0]
+            corresponds to the best model.
     """
 
     def run_model(lock, device, seed, best_model_file_name,
@@ -236,30 +244,35 @@ all runs. Signature: callable(best_model, best_model_score).
         if not isinstance(loaders, tuple):
             loaders = [loaders]
 
+        class local_model_score: value = -1.
         def backup_method(model, model_score):
             e = get_exception_method()
             if e:
                 raise e
             with lock:
-                print('{}: new maximum score {:.8f}'
-                          .format(iter_name, model_score),
-                      end='')
-                if model_score > best_model_score.value:
-                    print(': OVERALL MAXIMUM')
-                    best_model_score.value = model_score
-                    best_model_name.value = iter_name
-                    torch.save(model.state_dict(), best_model_file_name)
-                else:
-                    print(' (less than maximum {:.8f} of {})' \
-                              .format(best_model_score.value,
-                                      best_model_name.value))
+                if model_score > local_model_score.value:
+                    local_model_score.value = model_score
+                    print('{}: new maximum score {:.8f}'
+                              .format(iter_name, model_score),
+                          end='')
+                    if model_score > best_model_score.value:
+                        print(': OVERALL MAXIMUM')
+                        best_model_score.value = model_score
+                        best_model_name.value = iter_name
+                        torch.save(model.state_dict(), best_model_file_name)
+                    else:
+                        print(' (less than maximum {:.8f} of {})' \
+                                  .format(best_model_score.value,
+                                          best_model_name.value))
 
         iter_no = 0
         while True:
+            local_model_score.value = -1.
+
             iter_name = '{}_{}'.format(t.name, iter_no)
 
-            #if seed:
-            #    enforce_reproducibility(seed=seed)
+            if seed:
+                enforce_reproducibility(seed=seed)
 
             kwargs = None
             with lock:
@@ -298,7 +311,8 @@ all runs. Signature: callable(best_model, best_model_score).
                 '{}: '.format(iter_name), *train_args, **train_kwargs
             )
             with lock:
-                stats.append((iter_name, kwargs, stat))
+                stats.append((iter_name, local_model_score.value, kwargs,
+                              stat))
 
             iter_no += 1
 
@@ -324,23 +338,28 @@ all runs. Signature: callable(best_model, best_model_score).
         res = []
         if isinstance(kwargs, dict):
             kwargs = kwargs.items()
-        for param, vals in kwargs:
-            assert isinstance(param, str), \
-                   'ERROR: make_model_fit_params has invalid format'
-            vals = list(vals if isinstance(vals, Iterable) else [vals])
-            if len(vals) > 0:
-                res = [
-                    kwarg + [(param, val)] for val in vals
-                                           for kwarg in res
-                ] if res else [
-                    [(param, val)] for val in vals
-                ]
+        if len(kwargs) == 0:
+            res = [[]]
+        else:
+            for param, vals in kwargs:
+                assert isinstance(param, str), \
+                       'ERROR: make_model_fit_params has invalid format'
+                vals = list(vals if isinstance(vals, Iterable) else [vals])
+                if len(vals) > 0:
+                    res = [
+                        [(param, val)] + kwarg for val in vals
+                                               for kwarg in res
+                    ] if res else [
+                        [(param, val)] for val in vals
+                    ]
         return res
 
     def parse_params(params):
         assert isinstance(params, Iterable), \
                'ERROR: make_model_fit_params has invalid format'
         res = []
+        if len(params) == 0:
+            res = [[]]
         if isinstance(params, dict):
             res = parse_kwargs(params)
         else:
@@ -348,8 +367,10 @@ all runs. Signature: callable(best_model, best_model_score).
             kwargs = []
             params_ = []
             for pars in params:
-                if not isinstance(pars, dict) and len(pars) == 2 \
-                                              and isinstance(pars[0], str):
+                if not isinstance(pars, dict) and (
+                    len(pars) == 0
+                 or (len(pars) == 2 and isinstance(pars[0], str))
+                ):
                     kwargs.append(pars)
                 else:
                     params_.append(pars)
@@ -369,7 +390,12 @@ all runs. Signature: callable(best_model, best_model_score).
                 res = kwargs
         return res
 
-    fit_kwargs = parse_params(make_model_fit_params)
+    fit_kwargs = []
+    for kwargs in [tuple(sorted(x, key=lambda x: str(x)))
+                       for x in parse_params(make_model_fit_params)]:
+        if kwargs not in fit_kwargs:
+            fit_kwargs.append(kwargs)
+    fit_kwargs = sorted(fit_kwargs, key=lambda x: str(x))
 
     if isinstance(devices, dict):
         devices = {torch.device(x): y for x, y in devices.items()}
@@ -400,6 +426,7 @@ all runs. Signature: callable(best_model, best_model_score).
             print('{', end='')
             last_jdx = len(item) - 1
             if last_jdx < 0:
+                print()
                 print('}', end='')
             else:
                 print()
@@ -444,7 +471,7 @@ all runs. Signature: callable(best_model, best_model_score).
     print('=========')
     print()
 
-    class best_model_score: value = -1
+    class best_model_score: value = -1.
     class best_model_name: value = None
     stats = []
     params = {}
@@ -454,19 +481,32 @@ all runs. Signature: callable(best_model, best_model_score).
     def get_exception():
         return exception
     try:
-        for device in devices:
-            t = threading.Thread(target=run_model,
-                                 args=(lock, device, seed, best_model_file_name,
-                                       best_model_score, best_model_name, stats,
-                                       make_model_method, make_model_args,
-                                       make_model_kwargs, fit_kwargs,
-                                       train_method, train_args, train_kwargs,
-                                       create_loaders_method, get_exception),
-                                 kwargs={})
-            threads_pool.append(t)
-            t.start()
-        for t in threads_pool:
-            t.join()
+        has_errors = False
+        while fit_kwargs:
+            if has_errors:
+                print('\n=== {} thread{} terminated abnormally. Repeating ==='
+                          .format(len(fit_kwargs), 's were'
+                                      if len(fit_kwargs) > 1 else
+                                  ' was'))
+            has_errors = True
+            pool_size = min(len(devices), len(fit_kwargs))
+            print('\n=== Creating {} threads ===\n'.format(pool_size))
+            fit_kwargs_ = fit_kwargs[:]
+            for device in devices[:pool_size]:
+                t = threading.Thread(target=run_model,
+                                     args=(lock, device, seed, best_model_file_name,
+                                           best_model_score, best_model_name, stats,
+                                           make_model_method, make_model_args,
+                                           make_model_kwargs, fit_kwargs_,
+                                           train_method, train_args, train_kwargs,
+                                           create_loaders_method, get_exception),
+                                     kwargs={})
+                threads_pool.append(t)
+                t.start()
+            for t in threads_pool:
+                t.join()
+            for stat in stats:
+                fit_kwargs.remove(stat[2])
 
     except BaseException as e:
         exception = SystemExit()
@@ -479,10 +519,13 @@ all runs. Signature: callable(best_model, best_model_score).
             break
         raise e
 
-    best_model, best_model_score, best_model_name, args_ = \
-        None, best_model_score.value, best_model_name.value, None
-    for model_name, kwargs, _ in stats:
+    best_model, best_model_name, best_model_score,
+    best_model_params, args_ = \
+        None, best_model_name.value, best_model_score.value, \
+        None, None
+    for model_name, _, kwargs, _ in stats:
         if model_name == best_model_name:
+            best_model_params = kwargs
             if best_model_device:
                 best_model, _, _ = make_model(
                     *deepcopy(make_model_args),
@@ -516,8 +559,8 @@ all runs. Signature: callable(best_model, best_model_score).
         print('best_model.load_state_dict(torch.load({}))'
                   .format(best_model_file_name))
 
-    return best_model, best_model_score, best_model_name, stats
-
+    return best_model, best_model_name, best_model_score, best_model_params, \
+           sorted(stats, key=lambda x: (-x[1], x[2]))
 
 class Masking(nn.Module):
     """
@@ -606,7 +649,6 @@ class Masking(nn.Module):
 
 
 class CharEmbeddingRNN(nn.Module):
-
     """
     Initializes character embeddings using bidirectional LSTM.
 
@@ -617,30 +659,31 @@ class CharEmbeddingRNN(nn.Module):
         emb_dim: character embedding dimensionality.
         pad_idx: id of padding element in character vocabulary.
         out_type: 'final_concat'|'final_mean'|'all_mean'.
-            `out_type` defines what to get as a result from the LSTM. 
-            'final_concat' concatenate final hidden states of forward and backward lstm;
-            'final_mean' take mean of final hidden states of forward and backward lstm;
+            `out_type` defines what to get as a result from the LSTM.
+            'final_concat' concatenate final hidden states of forward and
+                           backward lstm;
+            'final_mean' take mean of final hidden states of forward and
+                         backward lstm;
             'all_mean' take mean of all timeframes.
-        
+
     Shape:
-        - Input: x: [batch[seq[word[ch_idx + pad] + word[pad]]]]; 
-                    torch tensor of shape :math:`(N, S(padded), C(padded))`, 
-                    where `N` is batch_size, `S` is seq_len 
-                    and `C` is max char_len in a word in current batch. 
-                 lens: [seq[word_char_count]]; 
-                    torch tensor of shape :math:`(N, S(padded), C(padded))`, 
-                    word lengths for each sequence in batch. 
-                    Used for masking & packing/unpacking sequences for LSTM.
-        - Output: :math:`(N, S, H)` where `N`, `S` are the same shape as the input
-                  and :math:` H = \text{lstm hidden size}`.
+        - Input:
+            x: [batch[seq[word[ch_idx + pad] + word[pad]]]]; torch tensor of
+                shape :math:`(N, S(padded), C(padded))`, where `N` is
+                batch_size, `S` is seq_len and `C` is max char_len in a word
+                in current batch.
+            lens: [seq[word_char_count]]; torch tensor of shape
+                :math:`(N, S(padded), C(padded))`, word lengths for each
+                sequence in batch. Used in masking & packing/unpacking
+                sequences for LSTM.
+        - Output: :math:`(N, S, H)` where `N`, `S` are the same shape as the
+            input and :math:` H = \text{lstm hidden size}`.
     
-    .. note:: In LSTM layer, we ignore padding by applying mask 
-              to the tensor and eliminating all words of len=0.
-              After LSTM layer, initial dimensions are restored using the same mask.
-    
+    .. note:: In LSTM layer, we ignore padding by applying mask to the tensor
+        and eliminating all words of len=0. After LSTM layer, initial
+        dimensions are restored using the same mask.
     """
-    def __init__(self, alphabet_size,
-                 emb_layer=None, emb_dim=300, pad_idx=0,
+    def __init__(self, alphabet_size, emb_layer=None, emb_dim=300, pad_idx=0,
                  out_type='final_concat'):
         """
         :param out_type: 'final_concat'|'final_mean'|'all_mean'
@@ -657,7 +700,8 @@ class CharEmbeddingRNN(nn.Module):
                                    padding_idx=pad_idx)
         self._rnn_l = nn.LSTM(input_size=self._emb_l.embedding_dim,
                               hidden_size=self._emb_l.embedding_dim // (
-                                  2 if out_type in ['final_concat', 'all_mean'] else
+                                  2 if out_type in ['final_concat',
+                                                    'all_mean'] else
                                   1 if out_type in ['final_mean'] else
                                   0 # error
                               ),
@@ -672,13 +716,15 @@ class CharEmbeddingRNN(nn.Module):
         device = next(self.parameters()).device
 
         # сохраняем форму батча символов:
-        # [#предложение в батче:#слово в предложении:#символ в слове] <==> [N, S, C]
+        # [#предложение в батче:#слово в предложении:#символ в слове]
+        #                                                       <==> [N, S, C]
         x_shape = x.shape
-        # все слова во всех батчах сцепляем вместе. из-за паддинга все предложения
-        # одной длины, так что расцепить обратно не будет проблемой. теперь у нас
-        # один большой батч из всех слов: [N, S, C] --> [N * S, C]
-        # важно: слова из-за паддинга тоже все одной длины. при этом многие пустые,
-        #        т.е., состоят только из паддинга
+        # все слова во всех батчах сцепляем вместе. из-за паддинга все
+        # предложения одной длины, так что расцепить обратно не будет
+        # проблемой. теперь у нас один большой батч из всех слов:
+        #                                             [N, S, C] --> [N * S, C]
+        # важно: слова из-за паддинга тоже все одной длины. при этом многие
+        #        пустые, т.е., состоят только из паддинга
         x = x.flatten(end_dim=1)
 
         # прогоняем через слой символьного эмбеддинга (обучаемый):
@@ -693,7 +739,7 @@ class CharEmbeddingRNN(nn.Module):
         # сцепили символы: [N, S] --> [N * S]
         lens0 = pad_sequence(lens, batch_first=True).flatten()
 
-        # дальше предполагалось передать x и lens0 в pack_padded_sequence
+        # дальше предполагалось передать x и lens0 в pack_padded_sequence,
         # в надежде что она нейтрализует влияние слов нулевой длины. однако
         # выяснилось, что эта функция нулевые длины не принимает. поэтому:
         # 1. делаем маску длин слов: True, если длина не равна нулю (слово не
@@ -723,7 +769,8 @@ class CharEmbeddingRNN(nn.Module):
         ### чем реальная размерность, которую мы хотим получить на входе
         ### в результате.
         if self.out_type == 'all_mean':
-            ## если результат - среднее значение hidden state на всех таймфреймах:
+            ## если результат - среднее значение hidden state на всех
+            ## таймфреймах:
             # 1. распаковываем hidden state. 
             x_m, _ = pad_packed_sequence(x_m, batch_first=True)
             # 2. теперь x_m имеет ту же форму, что и перед запаковыванием.
@@ -733,13 +780,13 @@ class CharEmbeddingRNN(nn.Module):
             # 3. теперь нужно результат усреднить. нам не нужны значения для
             # каждого символа, мы хотим получить эмбеддинги слов. мы решили,
             # что эмбеддинг слова - это среднее значение эмбеддингов всех
-            # входящих в него символов. т.е., нужно сложить эмбеддинги символов
-            # и разделить на длину слова. в слове есть паддинг, но после
-            # pad_packed_sequence его вектора должны быть нулевыми. однако
-            # у нас есть слова полностью из паддинга, которые мы удаляли,
-            # а теперь вернули. их вектора после слоя эмбеддинга будут
-            # нулевыми, поскольку при создании слоя мы указали индекс паддинга.
-            # иначе можно было бы их занулить явно: x[~mask] = .0
+            # входящих в него символов. т.е., нужно сложить эмбеддинги
+            # символов и разделить на длину слова. в слове есть паддинг, но
+            # после pad_packed_sequence его вектора должны быть нулевыми.
+            # однако у нас есть слова полностью из паддинга, которые мы
+            # удаляли, а теперь вернули. их вектора после слоя эмбеддинга
+            # будут нулевыми, поскольку при создании слоя мы указали индекс
+            # паддинга. иначе можно было бы их занулить явно: x[~mask] = .0
             # 4. чтобы посчитать среднее значение эмбеддинга слова, нужно
             # сложить эмбеддинги его символов и разделить на длину слова:
             # 4a. установим длину нулевых слов в 1, чтобы не делить на 0.
@@ -795,11 +842,10 @@ class CharEmbeddingRNN(nn.Module):
 
 
 class CharEmbeddingCNN(nn.Module):
-
     """
     Initializes character embeddings using multiple-filter CNN. 
-    Max-over-time pooling and ReLU are applied to concatenated convolution layers.
-    
+    Max-over-time pooling and ReLU are applied to concatenated convolution
+    layers.
 
     Args:
         alphabet_size: length of character vocabulary.
@@ -810,20 +856,18 @@ class CharEmbeddingCNN(nn.Module):
         kernels: convoluiton filter sizes for CNN layers. 
         
     Shape:
-        - Input: x: [batch[seq[word[ch_idx + pad] + word[pad]]]]; 
-                    torch tensor of shape :math:`(N, S(padded), C(padded))`, 
-                    where `N` is batch_size, `S` is seq_len with padding 
-                    and `C` is char_len with padding in current batch. 
-                 lens: [seq[word_char_count]]; 
-                    torch tensor of shape :math:`(N, S, C)`,
-                    word lengths for each sequence in batch. 
-                    Used for eliminating padding in CNN layers.
-        - Output: :math:`(N, S, E)` where `N`, `S` are the same shape as the input
-                  and :math:` E = \text{emb_dim}`.
-    
+        - Input:
+            x: [batch[seq[word[ch_idx + pad] + word[pad]]]]; torch tensor of
+                shape :math:`(N, S(padded), C(padded))`, where `N` is
+                batch_size, `S` is seq_len with padding and `C` is char_len
+                with padding in current batch. 
+            lens: [seq[word_char_count]]; torch tensor of shape
+                :math:`(N, S, C)`, word lengths for each sequence in batch.
+                Used for eliminating padding in CNN layers.
+        - Output: :math:`(N, S, E)` where `N`, `S` are the same shape as the
+            input and :math:` E = \text{emb_dim}`.
     """
-    def __init__(self, alphabet_size,
-                 emb_layer=None, emb_dim=300, pad_idx=0,
+    def __init__(self, alphabet_size, emb_layer=None, emb_dim=300, pad_idx=0,
                  kernels=[3, 4, 5]):
         super().__init__()
 
@@ -838,8 +882,8 @@ class CharEmbeddingCNN(nn.Module):
 
         self._conv_ls = nn.ModuleList(
             [nn.Conv1d(in_channels=self._emb_l.embedding_dim,
-                      out_channels=self._emb_l.embedding_dim,
-                      padding=0, kernel_size=kernel)
+                       out_channels=self._emb_l.embedding_dim,
+                       padding=0, kernel_size=kernel)
                  for kernel in kernels]
         )
 
@@ -852,13 +896,15 @@ class CharEmbeddingCNN(nn.Module):
         max_len = x.shape[-1]
 
         # сохраняем форму батча символов:
-        # [#предложение в батче:#слово в предложении:#символ в слове] <==> [N, S, C]
+        # [#предложение в батче:#слово в предложении:#символ в слове]
+        #                                                       <==> [N, S, C]
         x_shape = x.shape
-        # все слова во всех батчах сцепляем вместе. из-за паддинга все предложения
-        # одной длины, так что расцепить обратно не будет проблемой. теперь у нас
-        # один большой батч из всех слов: [N, S, C] --> [N * S, C]
-        # важно: слова из-за паддинга тоже все одной длины. при этом многие пустые,
-        #        т.е., состоят только из паддинга
+        # все слова во всех батчах сцепляем вместе. из-за паддинга все
+        # предложения одной длины, так что расцепить обратно не будет
+        # проблемой. теперь у нас один большой батч из всех слов:
+        #                                             [N, S, C] --> [N * S, C]
+        # важно: слова из-за паддинга тоже все одной длины. при этом многие
+        #        пустые, т.е., состоят только из паддинга
         x = x.flatten(end_dim=1)
 
         # прогоняем через слой символьного эмбеддинга (обучаемый):
@@ -873,9 +919,7 @@ class CharEmbeddingCNN(nn.Module):
         # сцепили символы: [N, S] --> [N * S]
         lens0 = pad_sequence(lens, batch_first=True).flatten()
 
-        # дальше предполагалось передать x_ch_cnn и lens_ch0 в pack_padded_sequence
-        # в надежде что она нейтрализует влияние слов нулевой длины. однако
-        # выяснилось, что эта функция нулевые длины не принимает. поэтому:
+        # теперь маскируем слова нулевой длины:
         # 1. делаем маску длин слов: True, если длина не равна нулю (слово не
         # из паддинга)
         mask = lens0 != 0
@@ -893,7 +937,8 @@ class CharEmbeddingCNN(nn.Module):
         # tensor after convolution shape:
         #     [nonzero(N * S), E, C - cnn_kernel_size + 1]
         # tensor after pooling:
-        #     [nonzero(N * S), E, (C - cnn_kernel_size + 1) - (pool_kernel_size - 1)]
+        #     [nonzero(N * S), E, (C - cnn_kernel_size + 1)
+        #                       - (pool_kernel_size - 1)]
         # example:
         ## N=32, E=300, C=45
         ## CNN (kernel_size=5) [32, 300, 41]
@@ -939,39 +984,41 @@ class CharEmbeddingCNN(nn.Module):
             self.alphabet_size, self.kernels
         )
 
-class HighwayNetwork(nn.Module):
-        """ 
-        Applies sigm(x) * (f(G(x))) + (1 - sigm(x)) * (Q(x)) transformation, where 
-        .. G and Q - affine transformation
-        .. f - non-linear transformation
-        .. sigm(x) - affine transformation with sigmoid non-linearization
-        .. * - element-wise multiplication
-        """
 
-    def __init__(self, in_features, out_features, activation_function=nn.ReLU()):
+class HighwayNetwork(nn.Module):
+    """ 
+    Applies sigm(x) * (f(G(x))) + (1 - sigm(x)) * (Q(x)) transformation,
+    where:
+    .. G and Q - affine transformation
+    .. f - non-linear transformation
+    .. sigm(x) - affine transformation with sigmoid non-linearization
+    .. * - element-wise multiplication
+    """
+    def __init__(self, in_features, out_features,
+                 activation_function=nn.ReLU()):
         super().__init__()
-        
+
         self.nonlinear = nn.Linear(in_features, out_features)
         self.linear = nn.Linear(in_features, out_features)
         self.gate = nn.Linear(in_features, out_features)
-        
+
         self.gate_function = nn.Sigmoid()
         self.activation_function = activation_function
-        
+
     def forward(self, x):
-        '''
+        """
         :param x: tensor with shape [batch_size, seq_len, emb_size]
         :return: tensor with shape [batch_size, seq_len, emb_size]
-        '''
-        
+        """
+
         gate = self.gate(x)
         gate = self.gate_function(gate)
-        
+
         nonlinear = self.nonlinear(x)
         nonlinear = self.activation_function(nonlinear)
-        
+
         linear = self.linear(x)
-        
+
         x = gate * nonlinear + (1 - gate) * linear
-        
+
         return x
