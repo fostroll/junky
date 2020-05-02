@@ -109,16 +109,16 @@ The tool returns `tuple(best_model, best_model_name, best_model_score,
 best_model_params, stats)`. Here:<br/>
 ***best_model*** - the best *model* if best_model_device is not `None`, else
 `None`;<br/>
-***best_model_name*** - the key of the best *model* stats;
-***best_model_score*** - the score of the best *model*;
-***best_model_params*** - ***fit_kwargs*** of the best *model*;
+***best_model_name*** - the key of the best *model* stats;<br/>
+***best_model_score*** - the score of the best *model*;<br/>
+***best_model_params*** - ***fit_kwargs*** of the best *model*;<br/>
 ***stats*** - all returns of all **train_method**s. Format:<br/>
 `[(<model name>, <model best score>, <model params>, <*train_method* return>),
 ...]`<br/>
 ***stats*** is sorted by `<model best score>`, in such a way that stats[0]
 corresponds to the best *model*.
 
-Sometimes, it's needed to extract results from the ouput of
+Sometimes, it's necessary to extract results from the ouput of
 `torch_autotrain()`. The method to do it is:
 ```python
 junky.parse_autotrain_log(log_fn, silent=False)
@@ -127,4 +127,5 @@ Here, **log_fn** is a file name of the ``torch_autotrain()`` log file.
 
 **silent**: if True, suppress output.
 
-Returns `list([tuple(<model_name>, <best_model_score>, <model params>)]`
+Returns `list([tuple(<model name>, <model best score>, <model params>)]`
+sorted by `<model best score>`.

@@ -572,7 +572,7 @@ def parse_autotrain_log(log_fn, silent=False):
     :param log_fn: a file name of the ``torch_autotrain()`` log file.
     :type log_fn: str
     :param silent: if True, suppress output.
-    :return: list[tuple(<model_name>, <best_model_score>, <model fit kwargs>)]
+    :return: list[tuple(<model name>, <model best score>, <model params>)]
     """
     scores = {}
     with open(log_fn, 'rt', encoding='utf-8') as f:
