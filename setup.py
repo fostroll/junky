@@ -9,7 +9,7 @@ VERSION = version_file_contents.strip()[len('__version__ = "'):-1]
 setup(
     name='junky',
     version=VERSION,
-    description='For now, just unsorted utilites for PyTorch',
+    description='For now, just unsorted utilities for PyTorch',
     long_description=open('README.md', 'rt', encoding='utf-8').read(),
     long_description_content_type='text/markdown',
     author='Sergei Ternovykh, Anastasiya Nikiforova',
