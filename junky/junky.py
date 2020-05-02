@@ -7,8 +7,12 @@
 Provides a bunch of tools and utilities to use with PyTorch.
 """
 import numpy as np
+import re
 import threading
 import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence, pad_sequence
 
 
 def get_max_dims(array, max_dims=None, str_isarray=False, dim_no=0):
@@ -519,7 +523,7 @@ def torch_autotrain(
             break
         raise e
 
-    best_model, best_model_name, best_model_score,
+    best_model, best_model_name, best_model_score, \
     best_model_params, args_ = \
         None, best_model_name.value, best_model_score.value, \
         None, None
@@ -561,6 +565,37 @@ def torch_autotrain(
 
     return best_model, best_model_name, best_model_score, best_model_params, \
            sorted(stats, key=lambda x: (-x[1], x[2]))
+
+def autotrain_log_parse(log_fn, silent=False):
+    scores = {}
+    with open(log_fn, 'rt', encoding='utf-8') as f:
+        for line in f:
+            match = re.match('([^:]+): (\(\(.+\)\))', line)
+            if match:
+                name, args = match.groups()
+                if name in scores:
+                    scores[name] = (args, scores[name][1])
+                else:
+                    scores[name] = (args, -1.)
+            else:
+                match = re.match('([^:]+): new maximum score ([.\d]+)', line)
+                if match:
+                    name, score = match.groups()
+                    score = float(score)
+                    if name in scores:
+                        if score > scores[name][1]:
+                            scores[name] = (scores[name][0], score)
+                    else:
+                        scores[name] = (None, score)
+
+    stat = []
+    for name in sorted(scores, key=lambda x: (scores[x][1], scores[x][0])):
+        stat.append(name, scores[name][0], scores[name][1])
+        if not silent:
+            print('{}\t{}\t{}'.format(name, scores[name][0], scores[name][1]))
+
+    return list(reversed(stat))
+
 
 class Masking(nn.Module):
     """
