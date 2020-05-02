@@ -168,8 +168,8 @@ def torch_autotrain(
         in *train_method*. Every thread creates it only once and then pass to
         *train_method* of every model that this thread is assigned for. If
         None (default), *train_method* must create loaders by itself.
-        Important: you can't use one DataLoader in several threads; you must
-        have separate DataLoader for every thread, otherwise, your training is
+        Important: you can't use one DataLoader in several threads. You must
+        have separate DataLoader for every thread; otherwise, your training is
         gonna be broken.
     :type create_loaders_method: callable() -> <loader>|tuple(<loaders>)
     :param make_model_args: positional args for *make_model_method*. Will be

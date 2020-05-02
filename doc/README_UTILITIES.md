@@ -2,7 +2,7 @@
 
 ## Utilities
 
-The lib contains some utilities to use in *PyTorch* models.
+The lib contains some utilities to use with *PyTorch* models.
 
 ```python
 import junky
@@ -10,7 +10,7 @@ junky.get_max_dims(array, max_dims=None, str_isarray=False, dim_no=0)
 ```
 Returns max sizes of nested **array** on the all levels of nestedness.
 
-Here, **array**: nested `lists` or `tuples`.
+Here, **array**: nested lists or tuples.
 
 **str_isarray**: if `True`, strings are treated as arrays of chars and form
 additional dimension.
@@ -28,7 +28,7 @@ corresponding subarrays of the **array**.
 
 Params:
 
-**array**: nested `list`s or `tuple`s.
+**array**: nested lists or tuples.
 
 **shift**: how to place data of **array** to **ndarray** in the case if size
 of some subarray less than corresponding dimension of **ndarray**. Allowed
@@ -46,7 +46,7 @@ junky.pad_array(array, padding_value=0)
 Converts nested **array** with data of any allowed for *numpy* type to
 `numpy.ndarray` with **padding_value** instead of missing data.
 
-**array**: nested `list`s or `tuple`s.
+**array**: nested lists or tuples.
 
 Returns `numpy.ndarray` with padded **array**.
 
