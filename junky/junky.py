@@ -747,6 +747,8 @@ class CharEmbeddingRNN(nn.Module):
         and eliminating all words of len=0. After LSTM layer, initial
         dimensions are restored using the same mask.
     """
+    __constants__ = ['alphabet_size', 'emb_dim', 'out_type', 'pad_idx']
+
     def __init__(self, alphabet_size, emb_layer=None, emb_dim=300, pad_idx=0,
                  out_type='final_concat'):
         """
@@ -930,6 +932,8 @@ class CharEmbeddingCNN(nn.Module):
         - Output: :math:`(N, S, E)` where `N`, `S` are the same shape as the
             input and :math:` E = \text{emb_dim}`.
     """
+    __constants__ = ['alphabet_size', 'emb_dim', 'kernels', 'pad_idx']
+
     def __init__(self, alphabet_size, emb_layer=None, emb_dim=300, pad_idx=0,
                  kernels=[3, 4, 5]):
         super().__init__()
