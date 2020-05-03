@@ -31,13 +31,14 @@ data will keep as is. Default is `1`
 **batch_first**: If `True`, then the input and output tensors are provided
 as `(batch, seq, feature)` (<==> `(N, *, H)`). Default: `False`.
 
-**x**: Input data.
+Shape:
 
-**lens**: Array of lengths of **x** by the `seq` dimension.
-
-Shape:<br/>
-- Input: :math:`(*, N, H)` where :math:`*` means any number of additional
+- Input:<br/>
+**x**: :math:`(*, N, H)` where :math:`*` means any number of additional
 dimensions and :math:`H = \text{input_size}`.<br/>
+**lens**: Array of lengths of **x** by the `seq` dimension. We mask data in
+all `seq` positions that greater than **lens**.
+
 - Output: :math:`(*, N, H)` where all are the same shape as the input and
 :math:`H = \text{input_size}`.
 
@@ -53,32 +54,32 @@ prevents your model for learning on padding.
 Examples:
 
 ```python
-    >>> m = Masking(4, batch_first=True)
-    >>> input = torch.randn(2, 3, 4)
-    >>> output = m(input, [1, 3])
-    >>> print(output)
-    tensor([[[ 1.1912, -0.6164,  0.5299, -0.6446],
-             [   -inf,    -inf,    -inf,  1.0000],
-             [   -inf,    -inf,    -inf,  1.0000]],
+>>> m = Masking(4, batch_first=True)
+>>> input = torch.randn(2, 3, 4)
+>>> output = m(input, [1, 3])
+>>> print(output)
+tensor([[[ 1.1912, -0.6164,  0.5299, -0.6446],
+         [   -inf,    -inf,    -inf,  1.0000],
+         [   -inf,    -inf,    -inf,  1.0000]],
 
-            [[-0.3011, -0.7185,  0.6882, -0.1656],
-             [-0.3316, -0.3521, -0.9717,  0.5551],
-             [ 0.7721,  0.2061,  0.8932, -1.5827]]])
+        [[-0.3011, -0.7185,  0.6882, -0.1656],
+         [-0.3316, -0.3521, -0.9717,  0.5551],
+         [ 0.7721,  0.2061,  0.8932, -1.5827]]])
 ```
 
 ```python
-    >>> m = Masking(4, batch_first=True, mask=4.,
-                    indices_to_highlight=(1, -1), highlighting_mask=None)
-    >>> input = torch.randn(2, 3, 4)
-    >>> output = m(input, [1, 3])
-    >>> print(output)
-    tensor([[[-0.4479, -0.8719, -1.0129, -1.5431],
-             [ 4.0000,  0.6978,  4.0000,  0.1203],
-             [ 4.0000,  0.1990,  4.0000, -0.4277]],
+>>> m = Masking(4, batch_first=True, mask=4.,
+                indices_to_highlight=(1, -1), highlighting_mask=None)
+>>> input = torch.randn(2, 3, 4)
+>>> output = m(input, [1, 3])
+>>> print(output)
+tensor([[[-0.4479, -0.8719, -1.0129, -1.5431],
+         [ 4.0000,  0.6978,  4.0000,  0.1203],
+         [ 4.0000,  0.1990,  4.0000, -0.4277]],
 
-            [[ 0.2840,  1.1241, -0.5342,  0.2857],
-             [ 0.3409,  0.7630,  0.4099,  0.1182],
-             [ 1.3610, -0.1528, -1.7044, -0.4466]]])
+        [[ 0.2840,  1.1241, -0.5342,  0.2857],
+         [ 0.3409,  0.7630,  0.4099,  0.1182],
+         [ 1.3610, -0.1528, -1.7044, -0.4466]]])
 ```
 
 ### CharEmbeddingRNN
@@ -87,3 +88,75 @@ Examples:
 layer = junky.CharEmbeddingRNN(alphabet_size, emb_layer=None, emb_dim=300,
                                pad_idx=0, out_type='final_concat')
 ```
+Produces character embeddings using *Bidirectional LSTM*.
+
+Args:
+
+**alphabet_size**: Length of character vocabulary.
+
+**emb_layer**: Optional pre-trained embeddings initialized as
+`torch.nn.Embedding.from_pretrained()` or elsewise.
+
+**emb_dim**: Character embedding dimensionality.
+
+**pad_idx**: Indices of padding element in character vocabulary.
+
+**out_type** - defines what to get as a result after the *BiLSTM*. Possible
+values:<br/>
+`'final_concat'` - concatenate final hidden states of forward and backward
+*LSTM*;<br/>
+`'final_mean'` - take mean of final hidden states of forward and backward
+*LSTM*;
+`'all_mean'` - take mean of all timeframes.
+
+Shape:<br/>
+
+- Input:<br/>
+**x**: [batch[seq[word[ch_idx + pad] + word[pad]]]]; `torch.Tensor` of shape
+:math:`(N, S(padded), C(padded))`, where `N` is batch_size, `S` is seq_len and
+`C` is max char_len in a word in current batch.<br/>
+**lens**: [seq[word_char_count]]; `torch.Tensor` of shape
+:math:`(N, S(padded), C(padded))`, word lengths for each sequence in batch.
+Used in masking & packing/unpacking sequences for *LSTM*.
+
+- Output: :math:`(N, S, H)` where `N`, `S` are the same shape as the input and
+:math:`H = \text{lstm hidden size}`.
+
+**NB:** In *LSTM* layer, we ignore padding by applying mask to the tensor and
+eliminating all words of len = `0`. After *LSTM* layer, initial dimensions are
+restored using the same mask.
+
+### CharEmbeddingCNN
+
+```python
+layer = junky.CharEmbeddingCNN(alphabet_size, emb_layer=None, emb_dim=300,
+                               pad_idx=0, out_type='final_concat')
+```
+Produces character embeddings using multiple-filter *CNN*. *Max-over-time
+pooling* and *ReLU* are applied to concatenated convolution layers.
+
+Args:
+
+**alphabet_size**: Length of character vocabulary.
+
+**emb_layer**: Optional pre-trained embeddings, initialized as
+`torch.nn.Embedding.from_pretrained()` or elsewise.
+
+**emb_dim**: Character embedding dimensionality.
+
+**pad_idx**: Indices of padding element in character vocabulary.
+
+**kernels**: Convoluiton filter sizes for *CNN* layers. 
+    
+Shape:
+
+- Input:<br/>
+**x**: [batch[seq[word[ch_idx + pad] + word[pad]]]]; `torch.Tensor` of shape
+:math:`(N, S(padded), C(padded))`, where `N` is batch_size, `S` is seq_len
+with padding and `C` is char_len with padding in current batch.<br/>
+**lens**: [seq[word_char_count]]; `torch.Tensor` of shape :math:`(N, S, C)`,
+word lengths for each sequence in batch. Used for eliminating padding in *CNN*
+layers.
+
+- Output: :math:`(N, S, E)` where `N`, `S` are the same shape as the input and
+:math:`E = \text{emb_dim}`.

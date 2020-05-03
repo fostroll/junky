@@ -714,14 +714,14 @@ class Masking(nn.Module):
 
 class CharEmbeddingRNN(nn.Module):
     """
-    Initializes character embeddings using bidirectional LSTM.
+    Produces character embeddings using bidirectional LSTM.
 
     Args:
         alphabet_size: length of character vocabulary.
         emb_layer: optional pre-trained embeddings, 
             initialized as torch.nn.Embedding.from_pretrained() or elsewise.
         emb_dim: character embedding dimensionality.
-        pad_idx: id of padding element in character vocabulary.
+        pad_idx: indices of padding element in character vocabulary.
         out_type: 'final_concat'|'final_mean'|'all_mean'.
             `out_type` defines what to get as a result from the LSTM.
             'final_concat' concatenate final hidden states of forward and
@@ -907,16 +907,15 @@ class CharEmbeddingRNN(nn.Module):
 
 class CharEmbeddingCNN(nn.Module):
     """
-    Initializes character embeddings using multiple-filter CNN. 
-    Max-over-time pooling and ReLU are applied to concatenated convolution
-    layers.
+    Produces character embeddings using multiple-filter CNN. Max-over-time
+    pooling and ReLU are applied to concatenated convolution layers.
 
     Args:
         alphabet_size: length of character vocabulary.
         emb_layer: optional pre-trained embeddings, 
             initialized as torch.nn.Embedding.from_pretrained() or elsewise.
         emb_dim: character embedding dimensionality.
-        pad_idx: id of padding element in character vocabulary.
+        pad_idx: indices of padding element in character vocabulary.
         kernels: convoluiton filter sizes for CNN layers. 
         
     Shape:
