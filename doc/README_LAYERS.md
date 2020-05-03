@@ -52,9 +52,10 @@ prevents your model for learning on padding.
 
 Examples:
 
+```python
     >>> m = Masking(4, batch_first=True)
     >>> input = torch.randn(2, 3, 4)
-    >>> output = m(input, torch.tensor([1, 3]))
+    >>> output = m(input, [1, 3])
     >>> print(output)
     tensor([[[ 1.1912, -0.6164,  0.5299, -0.6446],
              [   -inf,    -inf,    -inf,  1.0000],
@@ -63,19 +64,22 @@ Examples:
             [[-0.3011, -0.7185,  0.6882, -0.1656],
              [-0.3316, -0.3521, -0.9717,  0.5551],
              [ 0.7721,  0.2061,  0.8932, -1.5827]]])
+```
 
-    >>> m = Masking(4, batch_first=True, indices_to_highlight=0, mask=4.,
-                    highlighting_mask=None)
+```python
+    >>> m = Masking(4, batch_first=True, mask=4.,
+                    indices_to_highlight=(1, -1), highlighting_mask=None)
     >>> input = torch.randn(2, 3, 4)
-    >>> output = m(input, torch.tensor([1, 3]))
+    >>> output = m(input, [1, 3])
     >>> print(output)
-    tensor([[[ 0.0276, -0.2515,  1.4126, -1.8119],
-             [ 1.3107,  4.0000,  4.0000,  4.0000],
-             [-0.8493,  4.0000,  4.0000,  4.0000]],
+    tensor([[[-0.4479, -0.8719, -1.0129, -1.5431],
+             [ 4.0000,  0.6978,  4.0000,  0.1203],
+             [ 4.0000,  0.1990,  4.0000, -0.4277]],
 
-            [[-0.1689,  0.4366,  1.3716, -0.3592],
-             [-1.1231,  0.3744,  0.8811, -0.5598],
-             [-0.3785, -0.7456,  2.3164,  0.7856]]])
+            [[ 0.2840,  1.1241, -0.5342,  0.2857],
+             [ 0.3409,  0.7630,  0.4099,  0.1182],
+             [ 1.3610, -0.1528, -1.7044, -0.4466]]])
+```
 
 ### CharEmbeddingRNN
 
