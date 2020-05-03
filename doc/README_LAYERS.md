@@ -106,7 +106,7 @@ values:<br/>
 `'final_concat'` - concatenate final hidden states of forward and backward
 *LSTM*;<br/>
 `'final_mean'` - take mean of final hidden states of forward and backward
-*LSTM*;
+*LSTM*;<br/>
 `'all_mean'` - take mean of all timeframes.
 
 Shape:<br/>
