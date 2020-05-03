@@ -610,11 +610,15 @@ class Masking(nn.Module):
 
     Args:
         input_size: The number of expected features in the input `x`.
-        indices_to_mask: What positions in the `feature` dimension of the
-            incoming data must be replaced to the `mask`.
         mask: Replace to what.
+        indices_to_highlight: What positions in the `feature` dimension of the
+            masked positions of the incoming data must not be replaced to the
+            `mask`.
+        highlighting_mask: Replace data in that positions to what. If
+            ``None``, the data will keep as is.
         batch_first: If ``True``, then the input and output tensors are
-            provided as `(batch, seq, feature)`. Default: ``False``.
+            provided as `(batch, seq, feature)` (<==> `(N, *, H)`). Default:
+            ``False``.
 
     Shape:
         - Input: :math:`(*, N, H)` where :math:`*` means any number of
@@ -645,49 +649,67 @@ class Masking(nn.Module):
                  [-0.3316, -0.3521, -0.9717,  0.5551],
                  [ 0.7721,  0.2061,  0.8932, -1.5827]]])
     """
-    __constants__ = ['batch_first', 'indices_to_mask', 'input_size', 'mask']
+    __constants__ = ['batch_first', 'highlighting_mask',
+                     'indices_to_highlight', 'input_size', 'mask']
 
-    def __init__(self, input_size, indices_to_mask=-1, mask=float('-inf'),
+    def __init__(self, input_size, mask=float('-inf'),
+                 indices_to_highlight=-1, highlighting_mask=1,
                  batch_first=False):
         super().__init__()
 
-        if not isinstance(indices_to_mask, Iterable):
-            indices_to_mask = [indices_to_mask]
+        if not isinstance(indices_to_highlight, Iterable):
+            indices_to_highlight = [indices_to_highlight]
 
         self.input_size = input_size
-        self.indices_to_mask = indices_to_mask
         self.mask = mask
+        self.indices_to_highlight = indices_to_highlight
+        self.highlighting_mask = highlighting_mask
         self.batch_first = batch_first
 
-        if indices_to_mask is not None:
-            output_mask = torch.tensor([mask] * input_size)
-            for idx in indices_to_mask:
-                output_mask[idx] = 1
-            self.register_buffer('output_mask', output_mask)
+        output_mask = torch.tensor([mask] * input_size)
+        if indices_to_highlight is not None:
+            if highlighting_mask is None:
+                output_mask0 = torch.tensor([0] * input_size,
+                                            dtype=output_mask.dtype)
+                for idx in indices_to_highlight:
+                    output_mask0[idx] = 1
+                    output_mask[idx] = 0
+                output_mask = torch.stack((output_mask0, output_mask))
+            else:
+                for idx in indices_to_highlight:
+                    output_mask[idx] = highlighting_mask
+        self.register_buffer('output_mask', output_mask)
 
     def forward(self, x, lens):
-        output_mask = self._buffers.get('output_mask')
-        if output_mask.is_cuda:
-            device = output_mask.get_device()
-        else:
-            device = CPU
+        """
+        :param lens: array of lengths of **x** by the `seq` dimension.
+        """
+        output_mask = self.output_mask
+        output_mask0, output_mask = \
+            output_mask if len(output_mask.shape) == 2 else \
+            (None, output_mask)
+        device = output_mask.get_device() if output_mask.is_cuda else \
+                 torch.device('cpu')
+        if not isinstance(lens, torch.Tensor):
+            lens = torch.tensor(lens, device=device)
 
-        if output_mask is not None:
-            seq_len = x.shape[self.batch_first]
-            padding_mask = \
-                torch.arange(seq_len) \
-                     .to(device) \
-                     .expand(lens.shape[0], seq_len) >= lens.unsqueeze(1)
-            if not self.batch_first:
-                padding_mask = padding_mask.transpose(0, 1)
-            x[padding_mask] = output_mask
+        seq_len = x.shape[self.batch_first]
+        padding_mask = \
+            torch.arange(seq_len, device=device) \
+                 .expand(lens.shape[0], seq_len) >= lens.unsqueeze(1)
+        if not self.batch_first:
+            padding_mask = padding_mask.transpose(0, 1)
+        x[padding_mask] = output_mask if output_mask0 is None else \
+                          x[padding_mask] * output_mask0 + output_mask
 
         return x
 
     def extra_repr(self):
-        return '{}, indices_to_mask={}, mask={}, batch_first={}'.format(
-            self.input_size, self.indices_to_mask, self.mask, self.batch_first
-        )
+        return ('{}, mask={}, indices_to_highlight={}, highlighting_mask={}, '
+                'batch_first={}').format(
+                    self.input_size, self.mask, self.indices_to_highlight,
+                    self.highlighting_mask, self.batch_first
+                )
 
 
 class CharEmbeddingRNN(nn.Module):
