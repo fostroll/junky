@@ -160,3 +160,20 @@ layers.
 
 - Output: :math:`(N, S, E)` where `N`, `S` are the same shape as the input and
 :math:`E = \text{emb_dim}`.
+
+### HighwayNetwork
+
+```python
+layer = junky.HighwayNetwork(in_features, out_features,
+                             activation_function=nn.ReLU())
+```
+Applies `sigm(x) * (f(G(x))) + (1 - sigm(x)) * (Q(x))` transformation,
+where:
+
+`G` and `Q` - affine transformation;
+
+`f` - non-linear transformation;
+
+`sigm(x)` - affine transformation with sigmoid non-linearity;
+
+`*` - element-wise multiplication.
