@@ -65,7 +65,7 @@ be broken.
 The type of **make_model_fit_params**: iterable of iterables; nestedness is
 unlimited. Examples:<br/>
 `[('a', [50, 100]), ('b': [.1, .5])]` produces ***fit_kwargs***:
-```
+```python
 {'a': 50, 'b': .1},
 {'a': 50, 'b': .5},
 {'a': 100, 'b': .1},
@@ -73,7 +73,7 @@ unlimited. Examples:<br/>
 ```
 `[('a', [50, 100]), [('b': [.1, .5])], [('b': None), ('c': ['X', 'Y'])]]`
 produces
-```
+```python
 {'a': 50, 'b': .1},
 {'a': 50, 'b': .5},
 {'a': 100, 'b': .1},
