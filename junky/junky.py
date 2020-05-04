@@ -15,13 +15,14 @@ import torch.nn.functional as F
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence, pad_sequence
 
 
-def get_max_dims(array, max_dims=None, str_isarray=False, dim_no=0):
+def get_max_dims(array, str_isarray=False, max_dims=None, dim_no=0):
     """Returns max sizes of nested *array* on the all levels of nestedness.
 
     :param array: nested lists or tuples.
     :param str_isarray: if True, strings are treated as arrays of chars and
         form additional dimension.
-    :param dim_no: for internal used only. Stay it as it is.
+    :param max_dims: for internal used only. Leave it as it is.
+    :param dim_no: for internal used only. Leave it as it is.
     """
     if max_dims is None:
         max_dims = []  # it's importaint! don't try to move
@@ -58,8 +59,8 @@ def get_max_dims(array, max_dims=None, str_isarray=False, dim_no=0):
         if res is not None and not isstr:
             dim_no_ = dim_no + 1
             for el in array:
-                if not get_max_dims(el, max_dims=max_dims, dim_no=dim_no_,
-                                    str_isarray=str_isarray):
+                if not get_max_dims(el, str_isarray=str_isarray,
+                                    max_dims=max_dims, dim_no=dim_no_):
                     break
 
     if dim_no == 0 and res is not None:

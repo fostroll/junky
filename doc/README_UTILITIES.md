@@ -6,7 +6,7 @@ The lib contains some utilities to use with *PyTorch* models.
 
 ```python
 import junky
-junky.get_max_dims(array, max_dims=None, str_isarray=False, dim_no=0)
+junky.get_max_dims(array, str_isarray=False, max_dims=None, dim_no=0)
 ```
 Returns max sizes of nested **array** on all levels of nestedness.
 
@@ -15,7 +15,7 @@ Here, **array**: nested lists or tuples.
 **str_isarray**: if `True`, strings are treated as arrays of chars and form
 additional dimension.
 
-**dim_no**: for internal used only. Leave it as is.
+**max_dims**, **dim_no**: for internal used only. Leave it as they are.
 
 ```python
 junky.insert_to_ndarray(array, ndarray, shift='left')
