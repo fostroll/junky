@@ -528,7 +528,7 @@ def torch_autotrain(
     best_model, best_model_name, best_model_score, \
     best_model_params, args_ = \
         None, best_model_name.value, best_model_score.value, \
-        None, None
+        None, ''
     for model_name, _, kwargs, _ in stats:
         if model_name == best_model_name:
             best_model_params = kwargs
@@ -545,7 +545,7 @@ def torch_autotrain(
                 )
                 best_model.eval()
                 break
-            args_ = ', '.join(make_model_args)
+            args_ += ', '.join(make_model_args)
             if args_:
                 args_ += ', '
             kwargs_ = ', '.join('{}={}'.format(x, y)
@@ -557,9 +557,17 @@ def torch_autotrain(
     print('==================')
     print('AUTOTRAIN FINISHED')
     print('==================')
-    print('best model score = {}, best model name = {}'
-              .format(best_model_score, best_model_name))
+    print('best model name = {}'.format(best_model_name))
+    print('best model score = {}'.format(best_model_score))
+    head = 'best_model_params=('
+    print(head, end='')
+    for i, param in enumerate(best_model_params):
+        if i:
+            print(',\n' + ' ' * len(head), end='')
+        print(param, end='')
+    print(')')
     if args_:
+        print()
         print('best_model = make_model{}'.format(args_))
         print('best_model = best_model.to({})'.format(best_model_device))
         print('best_model.load_state_dict(torch.load({}))'
