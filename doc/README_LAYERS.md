@@ -2,7 +2,7 @@
 
 ## Layers
 
-The lib contains some layers to use in *PyTorch* models.
+The lib contains several layers to use in *PyTorch* models.
 
 ### Masking
 
@@ -26,7 +26,7 @@ masked positions of the incoming data must not be replaced to the `mask`.
 Default is `-1`.
 
 **highlighting_mask**: Replace data in that positions to what. If `None`, the
-data will keep as is. Default is `1`
+data will be left as is. Default is `1`
 
 **batch_first**: If `True`, then the input and output tensors are provided
 as `(batch, seq, feature)` (<==> `(N, *, H)`). Default: `False`.

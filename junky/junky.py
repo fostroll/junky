@@ -1066,12 +1066,16 @@ class HighwayNetwork(nn.Module):
                  activation_function=nn.ReLU()):
         super().__init__()
 
-        self.nonlinear = nn.Linear(in_features, out_features)
-        self.linear = nn.Linear(in_features, out_features)
-        self.gate = nn.Linear(in_features, out_features)
+        self._nonlinear = nn.Linear(in_features, out_features)
+        self._linear = nn.Linear(in_features, out_features)
+        self._gate = nn.Linear(in_features, out_features)
+        
+        nn.init.kaiming_uniform_(self._nonlinear.weight)
+        nn.init.kaiming_uniform_(self._linear.weight)
+        nn.init.kaiming_uniform_(self._gate.weight)
 
-        self.gate_function = nn.Sigmoid()
-        self.activation_function = activation_function
+        self._gate_function = nn.Sigmoid()
+        self._activation_function = activation_function
 
     def forward(self, x):
         """
@@ -1079,13 +1083,13 @@ class HighwayNetwork(nn.Module):
         :return: tensor with shape [batch_size, seq_len, emb_size]
         """
 
-        gate = self.gate(x)
-        gate = self.gate_function(gate)
+        gate = self._gate(x)
+        gate = self._gate_function(gate)
 
-        nonlinear = self.nonlinear(x)
-        nonlinear = self.activation_function(nonlinear)
+        nonlinear = self._nonlinear(x)
+        nonlinear = self._activation_function(nonlinear)
 
-        linear = self.linear(x)
+        linear = self._linear(x)
 
         x = gate * nonlinear + (1 - gate) * linear
 

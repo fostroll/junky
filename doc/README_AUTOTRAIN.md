@@ -5,7 +5,7 @@
 This is a tool for *PyTorch* *model*'s hyperparameters selection. May work in
 parallel using multiple devices. If some of parallel threads die during
 training (because of `MemoryError` of anything), their tasks will be redone
-after all other threads have finished with their work.
+after all other threads have finished their work.
 
 ```python
 import junky
@@ -19,7 +19,7 @@ junky.torch_autotrain(
 Args:
 
 **make_model_method**: method to create the *model*. Returns the *model* and,
-maybe, some other params that should be passed to **train_method**. The method
+if specified, some other params that should be passed to **train_method**. The method
 has a signature as follows:<br/>
 `callable(*make_model_args, **make_model_kwargs,**fit_kwargs) ->
 model|tuple(model, <other train args>)`.<br/>
@@ -31,21 +31,21 @@ Here, ***fit_kwargs*** - params that are constructed from
 best_model_backup_method, log_prefix, *train_args, **train_kwargs) ->
 <train statistics>`.<br/>
 Here:<br/>
-***device*** - one of **devices** that is assigned to train the *model*;<br/>
+***device*** - one of the **devices** that is assigned to train the *model*;<br/>
 ***loaders*** - the return of **create_loaders_method** or `()` if
 **create_loaders_method** is `None` (default);<br/>
 ***other_train_args*** - params returned by **make_model_method** besides the
 *model* (if any). E.g.: *optimizer*, *criterion*, etc.;<br/>
-***best_model_backup_method*** - the method that saves the best *model* over
+***best_model_backup_method*** - method that saves the best *model* over
 all runs. Signature:<br/>
 `callable(best_model, best_model_score)`.<br/>
-This method must be invoked in **train_method** to save its best *model*;<br/>
+This method must be invoked in **train_method** to save the best *model*;<br/>
 ***log_prefix*** - prefix that should use **train_method** in the beginning of
 any output. Elsewise, you can't distinct messages from parallel threads.
 
 **create_loaders_method**: method to create `torch.utils.data.DataLoaders`
 objects to use in **train_method**. Every thread creates it only once and then
-pass to **train_method** of every *model* that this thread is assigned for.
+passes to **train_method** of every *model* that this thread is assigned for.
 The signature of **create_loaders_method**:<br/>
 `callable() -> <loader>|tuple(<loaders>)`.<br/>
 If `None` (default), **train_method** must create loaders by itself.
@@ -90,7 +90,7 @@ be passed as is.
 **train_kwargs**: keyword args (or `dict` type) for **train_method**. Will be
 passed as is.
 
-**devices**: what devices use for training. This can be a separate device, a
+**devices**: what devices to use for training. This can be a separate device, a
 `list` of available devices, or a `dict` of available devices with max number
 of simultaneous threads. The possible types are: `<device>`,
 `tuple(<device>)`, `dict({<device>: int})`. Examples:<br/>
@@ -99,11 +99,11 @@ of simultaneous threads. The possible types are: `<device>`,
 `{'cuda:0': 3, 'cuda:1': 3}` - 2 GPU, 3 threads on each.<br/>
 **NB:** `<device>` == `(<device>,)` == `{<device>: 1}`
 
-**best_model_file_name**: a name of the file to save the best *model* where.
+**best_model_file_name**: file name for the best *model* when saving.
 Default `'model.pt'`.
 
-**best_model_device**: device to load the best *model* where. If `None`, we
-won't load the best *model* in memory.
+**best_model_device**: the device where the best *model* will be loaded. 
+If `None`, the best *model* will not be loaded in memory.
 
 The tool returns `tuple(best_model, best_model_name, best_model_score,
 best_model_params, stats)`. Here:<br/>
@@ -119,7 +119,7 @@ best_model_params, stats)`. Here:<br/>
 corresponds to the best *model*.
 
 Sometimes, it's necessary to extract results from the ouput of
-`torch_autotrain()`. The method to do it is:
+`torch_autotrain()`. The method to do so is:
 ```python
 junky.parse_autotrain_log(log_fn, silent=False)
 ```
