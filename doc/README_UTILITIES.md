@@ -15,7 +15,7 @@ Here, **array**: nested lists or tuples.
 **str_isarray**: if `True`, strings are treated as arrays of chars and form
 additional dimension.
 
-**max_dims**, **dim_no**: for internal used only. Leave it as they are.
+**max_dims**, **dim_no**: for internal use only. Leave it as they are.
 
 ```python
 junky.insert_to_ndarray(array, ndarray, shift='left')

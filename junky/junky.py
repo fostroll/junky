@@ -21,8 +21,8 @@ def get_max_dims(array, str_isarray=False, max_dims=None, dim_no=0):
     :param array: nested lists or tuples.
     :param str_isarray: if True, strings are treated as arrays of chars and
         form additional dimension.
-    :param max_dims: for internal used only. Leave it as it is.
-    :param dim_no: for internal used only. Leave it as it is.
+    :param max_dims: for internal use only. Leave it as it is.
+    :param dim_no: for internal use only. Leave it as it is.
     """
     if max_dims is None:
         max_dims = []  # it's importaint! don't try to move
