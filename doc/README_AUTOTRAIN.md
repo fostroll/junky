@@ -125,7 +125,7 @@ junky.parse_autotrain_log(log_fn, silent=False)
 ```
 Here, **log_fn** is a file name of the `torch_autotrain()` log file.
 
-**silent**: if True, suppress output.
+**silent**: if `True`, suppress output.
 
 Returns `list([tuple(<model name>, <model best score>, <model params>)]`
 sorted by `<model best score>`.
