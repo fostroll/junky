@@ -510,7 +510,8 @@ def torch_autotrain(
             for t in threads_pool:
                 t.join()
             for stat in stats:
-                fit_kwargs.remove(stat[2])
+                if stat[2] in fit_kwargs:
+                    fit_kwargs.remove(stat[2])
 
     except BaseException as e:
         exception = SystemExit()

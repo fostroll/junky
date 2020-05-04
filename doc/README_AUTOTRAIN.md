@@ -123,9 +123,14 @@ Sometimes, it's necessary to extract results from the ouput of
 ```python
 junky.parse_autotrain_log(log_fn, silent=False)
 ```
-Here, **log_fn** is a file name of the ``torch_autotrain()`` log file.
+Here, **log_fn** is a file name of the `torch_autotrain()` log file.
 
 **silent**: if True, suppress output.
 
 Returns `list([tuple(<model name>, <model best score>, <model params>)]`
 sorted by `<model best score>`.
+
+**NB:** if you use `torch_autotrain()` from *jupyter notebook*, you don't have
+to copy only its output. Usually, you can just select and copy full text from
+the *notebook* page and save it to "log" file. Then, pass this file to
+`parse_autotrain_log()`.
