@@ -582,7 +582,8 @@ def parse_autotrain_log(log_fn, silent=False):
     :param log_fn: a file name of the ``torch_autotrain()`` log file.
     :type log_fn: str
     :param silent: if True, suppress output.
-    :return: list[tuple(<model name>, <model best score>, <model params>)]
+    :return: list[tuple(<model name>, <model best score>, <model params>,
+                        <is training finished>)]
     """
     scores = {}
     with open(log_fn, 'rt', encoding='utf-8') as f:
@@ -591,9 +592,9 @@ def parse_autotrain_log(log_fn, silent=False):
             if match:
                 name, args = match.groups()
                 if name in scores:
-                    scores[name] = (args, scores[name][1])
+                    scores[name] = (args, scores[name][1], False)
                 else:
-                    scores[name] = (args, -1.)
+                    scores[name] = (args, -1., False)
             else:
                 match = re.match('([^:]+): new maximum score ([.\d]+)', line)
                 if match:
@@ -601,15 +602,26 @@ def parse_autotrain_log(log_fn, silent=False):
                     score = float(score)
                     if name in scores:
                         if score > scores[name][1]:
-                            scores[name] = (scores[name][0], score)
+                            scores[name] = (scores[name][0], score, False)
                     else:
-                        scores[name] = (None, score)
+                        scores[name] = (None, score, False)
+                else:
+                    match = re.match('([^:]+): Maximum bad epochs exceeded. '
+                                     'Process has stopped', line)
+                    if match:
+                        name, = match.groups()
+                        if name in scores:
+                            scores[name] = (scores[name][0], scores[name][1],
+                                            score)
+                        else:
+                            scores[name] = (None, None, True)
 
     stat = []
     for name in sorted(scores, key=lambda x: (-scores[x][1], scores[x][0])):
-        stat.append((name, scores[name][1], scores[name][0]))
+        name_ = ('' if scores[name][2] else '*') + name
+        stat.append((name, scores[name][1], scores[name][0], scores[name][2]))
         if not silent:
-            print('{}\t{}\t{}'.format(name, scores[name][1], scores[name][0]))
+            print('{}\t{}\t{}'.format(name_, scores[name][1], scores[name][0]))
 
     return stat
 

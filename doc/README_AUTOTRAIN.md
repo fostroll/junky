@@ -127,10 +127,13 @@ Here, **log_fn** is a file name of the `torch_autotrain()` log file.
 
 **silent**: if `True`, suppress output.
 
-Returns `list([tuple(<model name>, <model best score>, <model params>)]`
-sorted by `<model best score>`.
+Returns `list([tuple(<model name>, <model best score>, <model params>,
+<is training finished>)]` sorted by `<model best score>`.
 
 **NB:** if you use `torch_autotrain()` from *jupyter notebook*, you don't have
 to copy only its output. Usually, you can just select and copy full text from
 the *notebook* page and save it to "log" file. Then, pass this file to
 `parse_autotrain_log()`.
+
+If training of some model has not finished yet, it's name in output will be
+started from `*` sign.
