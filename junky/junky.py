@@ -544,16 +544,16 @@ def torch_autotrain(
                                map_location=best_model_device)
                 )
                 best_model.eval()
+                args_ += ', '.join(make_model_args)
+                if args_:
+                    args_ += ', '
+                kwargs_ = ', '.join('{}={}'.format(x, y)
+                                        for x, y in make_model_kwargs.items())
+                if kwargs_:
+                    kwargs_ += ', '
+                args_ += kwargs_ + ', '.join('{}={}'.format(x, y)
+                                                 for x, y in kwargs)
                 break
-            args_ += ', '.join(make_model_args)
-            if args_:
-                args_ += ', '
-            kwargs_ = ', '.join('{}={}'.format(x, y)
-                                    for x, y in make_model_kwargs.items())
-            if kwargs_:
-                kwargs_ += ', '
-            args_ += kwargs_ + ', '.join('{}={}'.format(x, y)
-                                             for x, y in kwargs)
     print('==================')
     print('AUTOTRAIN FINISHED')
     print('==================')
