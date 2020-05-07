@@ -528,7 +528,7 @@ def torch_autotrain(
     best_model, best_model_name, best_model_score, \
     best_model_params, args_ = \
         None, best_model_name.value, best_model_score.value, \
-        None, ''
+        None, None
     for model_name, _, kwargs, _ in stats:
         if model_name == best_model_name:
             best_model_params = kwargs
@@ -544,7 +544,7 @@ def torch_autotrain(
                                map_location=best_model_device)
                 )
                 best_model.eval()
-                args_ += ', '.join(make_model_args)
+                args_ = ', '.join(str(x) for x in make_model_args)
                 if args_:
                     args_ += ', '
                 kwargs_ = ', '.join('{}={}'.format(x, y)
