@@ -1148,6 +1148,6 @@ class Highway(nn.Module):
 
     def extra_repr(self):
         return '{}, {}, H_layer={}, H_activation={}, with_L={}'.format(
-            self._in_features, self._out_features,
+            self._T.in_features, self._T.out_features,
             self._H, self._H_activation, self._with_L
         )
