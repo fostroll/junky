@@ -165,7 +165,7 @@ layers.
 
 ```python
 layer = junky.HighwayNetwork(in_features, out_features,
-                             activation_function=nn.ReLU())
+                             H_layer=None, H_activation=None, with_L = False)
 ```
 *Highway* layer for *Highway Networks* as described in
 [Srivastava et al.](https://arxiv.org/abs/1505.00387) and
