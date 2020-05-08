@@ -171,7 +171,7 @@ layer = junky.HighwayNetwork(in_features, out_features,
 [Srivastava et al.](https://arxiv.org/abs/1505.00387) and
 [Srivastava et al.](https://arxiv.org/abs/1507.06228) articles.
 
-Applies H(x)\*T(x) + L(x)\*(1 - T(x)) transformation, where:
+Applies **H(x)\*T(x) + L(x)\*(1 - T(x))** transformation, where:
 
 **H(x)** - affine trainsform followed by a non-linear activation. The layer
 that we make Highway around;<br/>
@@ -187,10 +187,10 @@ Args:
 
 **out_features**: size of each output sample
 
-**H_layer**: H(x) layer. If ``None`` (default), affine transform is used.
+**H_layer**: **H(x)** layer. If `None` (default), affine transform is used.
 
-**H_activation**: non-linear activation after H(x). If ``None`` (default),
-then, if H_layer is ``None``, too, we apply F.relu; otherwise, activation
+**H_activation**: non-linear activation after **H(x)**. If `None` (default),
+then, if **H_layer** is `None`, too, we apply `F.relu`; otherwise, activation
 function is not used.
 
 **with_L**: apply affine transform to the input before processing with carry
