@@ -6,7 +6,7 @@
 """
 Provides a bunch of tools and utilities to use with PyTorch.
 """
-from collections import Iterable
+from collections.abc import Iterable
 from copy import deepcopy
 import numpy as np
 import re
@@ -1092,44 +1092,63 @@ class CharEmbeddingCNN(nn.Module):
         )
 
 
-class HighwayNetwork(nn.Module):
+class Highway(nn.Module):
     """ 
-    Applies sigm(x) * (f(G(x))) + (1 - sigm(x)) * (Q(x)) transformation,
-    where:
-    .. G and Q - affine transformation
-    .. f - non-linear transformation
-    .. sigm(x) - affine transformation with sigmoid non-linearization
-    .. * - element-wise multiplication
+    Highway layer for Highway Networks as described in
+    https://papers.nips.cc/paper/5850-training-very-deep-networks.pdf
+
+    Applies H(x)*T(x) + L(x)*(1 - T(x)) transformation, where:
+    .. H(x) - affine trainsform followed by a non-linear activation. The layer
+              that we make Highway around;
+    .. T(x) - transform gate: affine transform followed by a sigmoid
+              activation;
+    .. L(x) - affine transform. By default (and in the original paper)
+              L(x) = x (no transforms is used);
+    .. * - element-wise multiplication.
+
+    Args:
+        in_features: size of each input sample
+        out_features: size of each output sample
+        H_layer: H(x) layer. If ``None`` (default), affine transform is used.
+        H_activation: non-linear activation after H(x). If ``None`` (default),
+            then, if H_layer is ``None``, too, we apply F.relu; otherwise,
+            activation function is not used.
+        with_L: apply affine transform to the input before processing with
+            carry gate (1 - T(x)).
     """
+    __constants__ = ['H_layer', 'H_activation', 'in_features', 'out_features',
+                     'with_L']
+
     def __init__(self, in_features, out_features,
-                 activation_function=nn.ReLU()):
+                 H_layer=None, H_activation=None, with_L = False):
         super().__init__()
 
-        self._nonlinear = nn.Linear(in_features, out_features)
-        self._linear = nn.Linear(in_features, out_features)
-        self._gate = nn.Linear(in_features, out_features)
-        
-        nn.init.kaiming_uniform_(self._nonlinear.weight)
-        nn.init.kaiming_uniform_(self._linear.weight)
-        nn.init.kaiming_uniform_(self._gate.weight)
+        self._H = H_layer if H_layer else nn.Linear(in_features, out_features)
+        self._H_activation = H_activation if H_activation or H_layer else \
+                             F.relu
 
-        self._gate_function = nn.Sigmoid()
-        self._activation_function = activation_function
+        self._T = nn.Linear(in_features, out_features)
+        self._T_activation = F.sigmoid
+        nn.init.constant_(self._T.bias, -1)
+
+        self._L = nn.Linear(in_features, out_features) if with_L else None
+        self._with_L = with_L
 
     def forward(self, x):
         """
         :param x: tensor with shape [batch_size, seq_len, emb_size]
         :return: tensor with shape [batch_size, seq_len, emb_size]
         """
+        gate = self._T_activation(self._T(x))
+        nonlinear = self._H(x)
+        if self._H_activation:
+            nonlinear = self._H_activation(nonlinear)
+        linear = self._linear(x) if self._linear else x
 
-        gate = self._gate(x)
-        gate = self._gate_function(gate)
+        return nonlinear * gate + linear * (1 - gate)
 
-        nonlinear = self._nonlinear(x)
-        nonlinear = self._activation_function(nonlinear)
-
-        linear = self._linear(x)
-
-        x = gate * nonlinear + (1 - gate) * linear
-
-        return x
+    def extra_repr(self):
+        return '{}, {}, H_layer={}, H_activation={}, with_L={}'.format(
+            self._in_features, self._out_features,
+            self._H, self._H_activation, self._with_L
+        )
