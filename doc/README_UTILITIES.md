@@ -56,3 +56,8 @@ junky.pad_array_torch(array, padding_value=0, **kwargs)
 Just a wrapper for the `pad_array()` method that returns `torch.Tensor`.
 
 **kwargs**: keyword args for the `torch.tensor()` method.
+
+```python
+junky.enforce_reproducibility(seed=None)
+```
+Re-init random number generators.

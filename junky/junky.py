@@ -625,6 +625,22 @@ def parse_autotrain_log(log_fn, silent=False):
 
     return stat
 
+def enforce_reproducibility(seed=None):
+    """Re-init random number generators.
+    [We stole this method from Stanford C224U assignments]"""
+    if seed:
+        # Sets seed manually for both CPU and CUDA
+        torch.manual_seed(seed)
+        # For atomic operations there is currently 
+        # no simple way to enforce determinism, as
+        # the order of parallel operations is not known.
+        #
+        # CUDNN
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+        # System based
+        np.random.seed(seed)
+
 
 class Masking(nn.Module):
     """
