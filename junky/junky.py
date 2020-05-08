@@ -7,6 +7,7 @@
 Provides a bunch of tools and utilities to use with PyTorch.
 """
 from collections import Iterable
+from copy import deepcopy
 import numpy as np
 import re
 import threading
