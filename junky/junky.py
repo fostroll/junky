@@ -1142,7 +1142,7 @@ class Highway(nn.Module):
         nonlinear = self._H(x)
         if self._H_activation:
             nonlinear = self._H_activation(nonlinear)
-        linear = self._linear(x) if self._linear else x
+        linear = self._L(x) if self._L else x
 
         return nonlinear * gate + linear * (1 - gate)
 
