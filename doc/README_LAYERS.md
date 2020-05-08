@@ -168,8 +168,8 @@ layer = junky.HighwayNetwork(in_features, out_features,
                              activation_function=nn.ReLU())
 ```
 *Highway* layer for *Highway Networks* as described in
-[Srivastavaet al.](https://arxiv.org/abs/1505.00387) and
-[Srivastavaet al.](https://arxiv.org/abs/1507.06228) articles.
+[Srivastava et al.](https://arxiv.org/abs/1505.00387) and
+[Srivastava et al.](https://arxiv.org/abs/1507.06228) articles.
 
 Applies H(x)\*T(x) + L(x)\*(1 - T(x)) transformation, where:
 
