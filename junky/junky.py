@@ -1095,7 +1095,8 @@ class CharEmbeddingCNN(nn.Module):
 class Highway(nn.Module):
     """ 
     Highway layer for Highway Networks as described in
-    https://papers.nips.cc/paper/5850-training-very-deep-networks.pdf
+    https://arxiv.org/abs/1505.00387 and https://arxiv.org/abs/1507.06228
+    articles.
 
     Applies H(x)*T(x) + L(x)*(1 - T(x)) transformation, where:
     .. H(x) - affine trainsform followed by a non-linear activation. The layer
@@ -1107,8 +1108,8 @@ class Highway(nn.Module):
     .. * - element-wise multiplication.
 
     Args:
-        in_features: size of each input sample
-        out_features: size of each output sample
+        in_features: size of each input sample.
+        out_features: size of each output sample.
         H_layer: H(x) layer. If ``None`` (default), affine transform is used.
         H_activation: non-linear activation after H(x). If ``None`` (default),
             then, if H_layer is ``None``, too, we apply F.relu; otherwise,

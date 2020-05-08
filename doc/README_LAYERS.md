@@ -161,19 +161,37 @@ layers.
 - Output: :math:`(N, S, E)` where `N`, `S` are the same shape as the input and
 :math:`E = \text{emb_dim}`.
 
-### HighwayNetwork
+### Highway
 
 ```python
 layer = junky.HighwayNetwork(in_features, out_features,
                              activation_function=nn.ReLU())
 ```
-Applies `sigm(x) * (f(G(x))) + (1 - sigm(x)) * (Q(x))` transformation,
-where:
+*Highway* layer for *Highway Networks* as described in
+[Srivastavaet al.](https://arxiv.org/abs/1505.00387) and
+[Srivastavaet al.](https://arxiv.org/abs/1507.06228) articles.
 
-`G` and `Q` - affine transformation;
+Applies H(x)\*T(x) + L(x)\*(1 - T(x)) transformation, where:
 
-`f` - non-linear transformation;
+**H(x)** - affine trainsform followed by a non-linear activation. The layer
+that we make Highway around;<br/>
+**T(x)** - transform gate: affine transform followed by a sigmoid
+activation;<br/>
+**L(x)** - affine transform. By default (and in the original paper)
+**L(x) = x** (no transforms is used);<br/>
+**\*** - element-wise multiplication.
 
-`sigm(x)` - affine transformation with sigmoid non-linearity;
+Args:
 
-`*` - element-wise multiplication.
+**in_features**: size of each input sample
+
+**out_features**: size of each output sample
+
+**H_layer**: H(x) layer. If ``None`` (default), affine transform is used.
+
+**H_activation**: non-linear activation after H(x). If ``None`` (default),
+then, if H_layer is ``None``, too, we apply F.relu; otherwise, activation
+function is not used.
+
+**with_L**: apply affine transform to the input before processing with carry
+gate **(1 - T(x))**.
