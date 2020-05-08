@@ -373,10 +373,8 @@ def torch_autotrain(
             kwargs = []
             params_ = []
             for pars in params:
-                if not isinstance(pars, dict) and (
-                    len(pars) == 0
-                 or (len(pars) == 2 and isinstance(pars[0], str))
-                ):
+                if not isinstance(pars, dict) and len(pars) == 2 \
+                                              and isinstance(pars[0], str):
                     kwargs.append(pars)
                 else:
                     params_.append(pars)
