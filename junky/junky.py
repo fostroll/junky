@@ -430,7 +430,6 @@ def torch_autotrain(
             print('{', end='')
             last_jdx = len(item) - 1
             if last_jdx < 0:
-                print()
                 print('}', end='')
             else:
                 print()
