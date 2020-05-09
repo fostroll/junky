@@ -568,8 +568,8 @@ def torch_autotrain(
     if args_:
         print()
         print('best_model = make_model({})'.format(args_))
-        print('best_model = best_model.to('{}')'.format(best_model_device))
-        print('best_model.load_state_dict(torch.load('{}'))'
+        print("best_model = best_model.to('{}')".format(best_model_device))
+        print("best_model.load_state_dict(torch.load('{}'))"
                   .format(best_model_file_name))
 
     return best_model, best_model_name, best_model_score, best_model_params, \
