@@ -545,11 +545,11 @@ def torch_autotrain(
                 )
                 best_model.eval()
                 args_ = ', '.join(str(x) for x in make_model_args)
-                if args_:
+                if args_ and (make_model_kwargs or kwargs):
                     args_ += ', '
                 kwargs_ = ', '.join('{}={}'.format(x, y)
                                         for x, y in make_model_kwargs.items())
-                if kwargs_:
+                if kwargs_ and kwargs:
                     kwargs_ += ', '
                 args_ += kwargs_ + ', '.join('{}={}'.format(x, y)
                                                  for x, y in kwargs)
@@ -568,7 +568,7 @@ def torch_autotrain(
     print(')')
     if args_:
         print()
-        print('best_model = make_model{}'.format(args_))
+        print('best_model = make_model({})'.format(args_))
         print('best_model = best_model.to({})'.format(best_model_device))
         print('best_model.load_state_dict(torch.load({}))'
                   .format(best_model_file_name))
