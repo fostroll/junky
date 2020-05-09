@@ -164,34 +164,26 @@ layers.
 ### Highway
 
 ```python
-layer = junky.HighwayNetwork(in_features, out_features,
-                             H_layer=None, H_activation=None, with_L = False)
+layer = junky.Highway(dim, H_layer=None, H_activation=None)
 ```
 *Highway* layer for *Highway Networks* as described in
 [Srivastava et al.](https://arxiv.org/abs/1505.00387) and
 [Srivastava et al.](https://arxiv.org/abs/1507.06228) articles.
 
-Applies **H(x)\*T(x) + L(x)\*(1 - T(x))** transformation, where:
+Applies **H(x)\*T(x) + x\*(1 - T(x))** transformation, where:
 
 **H(x)** - affine trainsform followed by a non-linear activation. The layer
 that we make Highway around;<br/>
 **T(x)** - transform gate: affine transform followed by a sigmoid
 activation;<br/>
-**L(x)** - affine transform. By default (and in the original paper)
-**L(x) = x** (no transforms is used);<br/>
 **\*** - element-wise multiplication.
 
 Args:
 
-**in_features**: size of each input sample
-
-**out_features**: size of each output sample
+**dim**: size of each input and output sample.
 
 **H_layer**: **H(x)** layer. If `None` (default), affine transform is used.
 
 **H_activation**: non-linear activation after **H(x)**. If `None` (default),
 then, if **H_layer** is `None`, too, we apply `F.relu`; otherwise, activation
 function is not used.
-
-**with_L**: apply affine transform to the input before processing with carry
-gate **(1 - T(x))**.

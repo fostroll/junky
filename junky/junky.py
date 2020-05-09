@@ -1096,42 +1096,32 @@ class Highway(nn.Module):
     https://arxiv.org/abs/1505.00387 and https://arxiv.org/abs/1507.06228
     articles.
 
-    Applies H(x)*T(x) + L(x)*(1 - T(x)) transformation, where:
+    Applies H(x)*T(x) + x*(1 - T(x)) transformation, where:
     .. H(x) - affine trainsform followed by a non-linear activation. The layer
               that we make Highway around;
     .. T(x) - transform gate: affine transform followed by a sigmoid
               activation;
-    .. L(x) - affine transform. By default (and in the original paper)
-              L(x) = x (no transforms is used);
     .. * - element-wise multiplication.
 
     Args:
-        in_features: size of each input sample.
-        out_features: size of each output sample.
+        dim: size of each input and output sample.
         H_layer: H(x) layer. If ``None`` (default), affine transform is used.
         H_activation: non-linear activation after H(x). If ``None`` (default),
             then, if H_layer is ``None``, too, we apply F.relu; otherwise,
             activation function is not used.
-        with_L: apply affine transform to the input before processing with
-            carry gate (1 - T(x)).
     """
-    __constants__ = ['H_layer', 'H_activation', 'in_features', 'out_features',
-                     'with_L']
+    __constants__ = ['H_layer', 'H_activation', 'dim']
 
-    def __init__(self, in_features, out_features,
-                 H_layer=None, H_activation=None, with_L = False):
+    def __init__(self, dim, H_layer=None, H_activation=None):
         super().__init__()
 
-        self._H = H_layer if H_layer else nn.Linear(in_features, out_features)
+        self._H = H_layer if H_layer else nn.Linear(features, features)
         self._H_activation = H_activation if H_activation or H_layer else \
                              F.relu
 
-        self._T = nn.Linear(in_features, out_features)
+        self._T = nn.Linear(dim, dim)
         self._T_activation = torch.sigmoid
         nn.init.constant_(self._T.bias, -1)
-
-        self._L = nn.Linear(in_features, out_features) if with_L else None
-        self._with_L = with_L
 
     def forward(self, x):
         """
@@ -1139,15 +1129,13 @@ class Highway(nn.Module):
         :return: tensor with shape [batch_size, seq_len, emb_size]
         """
         gate = self._T_activation(self._T(x))
-        nonlinear = self._H(x)
+        hx = self._H(x)
         if self._H_activation:
-            nonlinear = self._H_activation(nonlinear)
-        linear = self._L(x) if self._L else x
+            hx = self._H_activation(hx)
 
-        return nonlinear * gate + linear * (1 - gate)
+        return hx * gate + x * (1 - gate)
 
     def extra_repr(self):
-        return '{}, {}, H_layer={}, H_activation={}, with_L={}'.format(
-            self._T.in_features, self._T.out_features,
-            self._H, self._H_activation, self._with_L
+        return '{}, H_layer={}, H_activation={}'.format(
+            self._T.dim, self._H, self._H_activation
         )
