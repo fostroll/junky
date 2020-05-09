@@ -533,7 +533,7 @@ def torch_autotrain(
         if model_name == best_model_name:
             best_model_params = kwargs
             if best_model_device:
-                best_model, _, _ = make_model(
+                best_model, _, _ = make_model_method(
                     *deepcopy(make_model_args),
                     **deepcopy(make_model_kwargs),
                     **dict(deepcopy(kwargs))
@@ -1127,7 +1127,7 @@ class Highway(nn.Module):
                              F.relu
 
         self._T = nn.Linear(in_features, out_features)
-        self._T_activation = F.sigmoid
+        self._T_activation = torch.sigmoid
         nn.init.constant_(self._T.bias, -1)
 
         self._L = nn.Linear(in_features, out_features) if with_L else None
