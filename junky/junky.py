@@ -587,7 +587,7 @@ def parse_autotrain_log(log_fn, silent=False):
     scores = {}
     with open(log_fn, 'rt', encoding='utf-8') as f:
         for line in f:
-            match = re.match('([^:\s]+): (\((?:\(.+\))?\))$', line.strip())
+            match = re.match('([^:\s]+): (\((?:\(.+\))?,?\))$', line.strip())
             if match:
                 name, args = match.groups()
                 if name in scores:
