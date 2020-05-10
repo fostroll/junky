@@ -512,7 +512,7 @@ def torch_autotrain(
             if not stats:
                 raise RuntimeError(
                     '\n=== ERROR: All threads terminated abnormally. '
-                    "Something's wrong. Process is stopped ==="
+                    "Something's wrong. Process has been stopped ==="
                 )
             for stat in stats:
                 if stat[2] in fit_kwargs:
