@@ -6,7 +6,6 @@
 """
 Provides a bunch of tools and utilities to use with PyTorch.
 """
-
 import numpy as np
 import pandas as pd
 from sklearn.metrics import confusion_matrix
@@ -82,7 +81,7 @@ def plot_confusion_matrix(y_true, y_pred, n_classes, pad_index=None, ymap=None,
     labels = [i if pad_index is not None and i!=pad_index and pad_index not in y_pred
               else i
               for i in range(0, n_classes) 
-              ]
+             ]
     if ymap is not None:
         labels = [ymap[yi] for yi in labels]
     cm = confusion_matrix(y_true, y_pred)
@@ -107,23 +106,22 @@ def plot_confusion_matrix(y_true, y_pred, n_classes, pad_index=None, ymap=None,
                     annot[i, j] = ''
             else:
                 annot[i, j] = '%.3f%%\n%d' % (p, c)
-                
+
     total_labels = [str(i)+'\n'+str(n[0]) for i, n in zip(labels, cm_sum)]
-    
+
     cm = pd.DataFrame(cm, 
                       index=total_labels if 'x' in show_total else labels, 
                       columns=total_labels if 'y' in show_total else labels)
     cm.index.name = 'Actual'
     cm.columns.name = 'Predicted'
-    
+
     fig, ax = plt.subplots(figsize=figsize)
     sns.heatmap(cm, annot=annot, fmt='', ax=ax)
-    
+
     if save_name:
         plt.savefig(save_name, bbox_inches='tight')
     plt.title(plot_title)
     plt.show()
-
 
 def plot_metrics(metrics=(accuracies, precisions, recalls, f1s), 
                  labels=['accuracy', 'precision', 'recalls', 'f1_score'],
@@ -141,7 +139,7 @@ def plot_metrics(metrics=(accuracies, precisions, recalls, f1s),
                       if `None`, image is not saved to disk.
     """
     plt.figure(figsize=figsize)
-    
+
     for metric in metrics:
         plt.plot([None] + metric)
 
