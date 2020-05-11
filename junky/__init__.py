@@ -8,3 +8,4 @@ Provides a bunch of tools and utilities to use with PyTorch.
 """
 from junky._version import __version__
 from junky.junky import *
+from junky.plotter import *

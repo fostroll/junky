@@ -172,9 +172,9 @@ layer = junky.Highway(dim, H_layer=None, H_activation=None)
 
 Applies **H(x)\*T(x) + x\*(1 - T(x))** transformation, where:
 
-**H(x)** - affine trainsform followed by a non-linear activation. The layer
+**H(x)** - affine trainsformation followed by a non-linear activation. The layer
 that we make Highway around;<br/>
-**T(x)** - transform gate: affine transform followed by a sigmoid
+**T(x)** - transformation gate: affine transformation followed by a sigmoid
 activation;<br/>
 **\*** - element-wise multiplication.
 
@@ -182,7 +182,7 @@ Args:
 
 **dim**: size of each input and output sample.
 
-**H_layer**: **H(x)** layer. If `None` (default), affine transform is used.
+**H_layer**: **H(x)** layer. If `None` (default), affine transformation is used.
 
 **H_activation**: non-linear activation after **H(x)**. If `None` (default),
 then, if **H_layer** is `None`, too, we apply `F.relu`; otherwise, activation
