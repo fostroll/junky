@@ -1308,7 +1308,7 @@ class HighwayNetwork(nn.Module):
                 if self._Us:
                     x = self._Us[i](x, *U_args, **U_kwargs)
                 if self._Hs:
-                    x = self._H[i](x)
+                    x = self._Hs[i](x)
                 if self._H_activation:
                     x = self._H_activation(x)
 
