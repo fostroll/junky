@@ -1268,7 +1268,7 @@ class HighwayNetwork(nn.Module):
         self._do = nn.Dropout(p=dropout) if dropout else None
         self._last_do = nn.Dropout(p=dropout) if last_dropout else None
 
-    def forward(self, x, x_hw=None):
+    def forward(self, x, x_hw=None, *U_args, **U_kwargs):
         """
         :param x: tensor with shape [batch_size, seq_len, emb_size]
         :param x_hw: tensor with shape [batch_size, in_features, emb_size]
@@ -1279,7 +1279,7 @@ class HighwayNetwork(nn.Module):
             x_hw = x
 
         if self._U:
-            x = self._U(x)
+            x = self._U(x, *U_args, **U_kwargs)
         if self._H:
             x = self._H(x)
         if self._H_activation:
@@ -1302,7 +1302,7 @@ class HighwayNetwork(nn.Module):
                     x = self._do(x)
 
                 if self._Us:
-                    x = self._Us[i](x)
+                    x = self._Us[i](x, *U_args, **U_kwargs)
                 if self._Hs:
                     x = self._H[i](x)
                 if self._H_activation:
