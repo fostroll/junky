@@ -1333,9 +1333,9 @@ class HighwayNetwork(nn.Module):
 
     def extra_repr(self):
         return (
-            '{}, {}, U_layer={}, H_activation={}, U_init={}, H_features={}, '
-            "H_activation={}, gate_type='{}', global_highway_input={}, "
-            'num_layers={}, dropout={}, last_dropout={}'
+            '{}, {}, U_layer={}, U_init={}, H_features={}, H_activation={}, '
+            "gate_type='{}', global_highway_input={}, num_layers={}, "
+            'dropout={}, last_dropout={}'
         ).format(self.in_features, self.out_features,
                  None if not self.U_layer else
                  '<callable>' if callable(self.U_layer) else
