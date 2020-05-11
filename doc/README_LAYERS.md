@@ -200,7 +200,7 @@ layer = junky.HighwayNetwork(
 )
 layer(x, x_hw, *U_args, **U_kwargs)
 ```
-*Highway Networks* is described in
+*Highway Network* is described in
 [Srivastava et al.](https://arxiv.org/abs/1505.00387) and
 [Srivastava et al.](https://arxiv.org/abs/1507.06228) and it's formalation is:
 **H(x)\*T(x) + x\*(1 - T(x))**, where:
