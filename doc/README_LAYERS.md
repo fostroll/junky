@@ -187,3 +187,86 @@ Args:
 **H_activation**: non-linear activation after **H(x)**. If `None` (default),
 then, if **H_layer** is `None`, too, we apply `F.relu`; otherwise, activation
 function is not used.
+
+
+### HighwayNetwork
+
+```python
+layer = junky.HighwayNetwork(
+    in_features, out_features=None, U_layer=None, U_init_=None,
+    H_features=None, H_activation=F.relu, gate_type='generic',
+    global_highway_input=False, num_layers=1, dropout=0,
+    last_dropout=0
+)
+layer(x, x_hw, *U_args, **U_kwargs)
+```
+*Highway Networks* is described in
+[Srivastava et al.](https://arxiv.org/abs/1505.00387) and
+[Srivastava et al.](https://arxiv.org/abs/1507.06228) and it's formalation is:
+**H(x)\*T(x) + x\*(1 - T(x))**, where:
+
+**H(x)** - affine trainsformation followed by a non-linear activation;<br/>
+**T(x)** - transformation gate: affine transformation followed by a sigmoid
+activation;<br/>
+**\*** - element-wise multiplication.
+
+There are some variations of it, so we implement more universal architectute:
+**U(x)\*H(x)\*T(x) + x\*C(x)**, where:
+
+**U(x)** - user defined layer that we make *Highway* around; By default,
+**U(x) = I** (identity matrix);
+**C(x)** - carry gate: generally, affine transform followed by a sigmoid
+activation. By default, **C(x) = 1 - T(x)**.
+
+Args:
+
+**in_features**: number of features in input.
+
+**out_features**: number of features in output. If `None` (default),
+**out_features = in_features**.
+
+**U_layer**: layer that implements **U(x)**. Default is `None`. If
+**U_layer** is callable, it will be used to create the layer; elsewise, we'll
+use it as is (if **num_layers** > `1`, we'll copy it). Note that number of
+input features of **U_layer** must be equals to **out_features** if
+**num_layers** > `1`.
+
+**U_init_**: callable to inplace init weights of **U_layer**.
+
+**H_features**: number of input features of H(x). If `None` (default),
+**H_features = in_features**. If `0`, don't use **H(x)**.
+
+**H_activation**: non-linear activation after **H(x)**. If ``None``, then no
+activation function is used. Default is ``F.relu``.
+
+**gate_type**: a type of the transform and carry gates:<br/>
+`'generic'` (default): **C(x) = 1 - T(x)**;<br/>
+`'independent'`: use both independent **C(x)** and **T(x)**;<br/>
+`'T_only'`: don't use carry gate: **C(x) = I**;<br/>
+`'C_only'`: don't use carry gate: **T(x) = I**;<br/>
+`'none'`: **C(x) = T(x) = I**.
+
+**global_highway_input**: if `True`, we treat the input of all the network as
+the highway input of every layer. Thus, we use **T(x)** and **C(x)** only
+once. If **global_highway_input** is `False` (default), every layer receives
+the output of the previous layer as the highway input. So, **T(x)** and
+**C(x)** use different weights matrices in each layer.
+
+**num_layers**: number of highway layers.
+
+**dropout**: if non-zero, introduces a *Dropout* layer on the outputs of each
+layer except the last layer, with dropout probability equal to **dropout**.
+Default: `0`.
+
+**last_dropout**: if non-zero, introduces a Dropout layer on the output of
+last layer with dropout probability equal to **last_dropout**. Default: `0`.
+
+The `.forward()` method receives params as follows:
+
+**x** and **x_hw**: inputs of the network. The first layer of the network
+executes formula: **x = U(x)\*H(x)\*T(x_hw) + x_hw\*C(x_hw)**. Next, if
+**global_highway_input** is `False`, **x_hw = x**. If `True`, then
+**x_hw = x_hw\*C(x_hw)** and it's already won't change on the other layers.
+If **x_hw** is `None`, we adopt **x_hw = x**.
+
+**\*U_args** and **\*\*U_kwargs** are params for **U_layer** if it needs ones.

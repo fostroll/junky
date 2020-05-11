@@ -1165,7 +1165,7 @@ class HighwayNetwork(nn.Module):
     Args:
         in_features: number of features in input.
         out_features: number of features in output. If ``None`` (default),
-            **out_features** = **in_features**
+            **out_features** = **in_features**.
         U_layer: layer that implements U(x). Default is ``None``. If U_layer
             is callable, it will be used to create the layer; elsewise, we'll
             use it as is (if **num_layers** > 1, we'll copy it). Note that
@@ -1181,7 +1181,7 @@ class HighwayNetwork(nn.Module):
             'independent': use both independent C(x) and T(x);
             'T_only': don't use carry gate: C(x) = I;
             'C_only': don't use carry gate: T(x) = I;
-            'none': C(x) = T(x) = I
+            'none': C(x) = T(x) = I.
         global_highway_input: if ``True``, we treat the input of all the
             network as the highway input of every layer. Thus, we use T(x)
             and C(x) only once. If **global_highway_input** is ``False``
