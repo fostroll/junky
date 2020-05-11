@@ -1252,12 +1252,12 @@ class HighwayNetwork(nn.Module):
                     self._Cs = nn.ModuleList()
 
             for i in range(self.num_layers - 1):
-                if self._Us:
+                if self._Us is not None:
                     U = U_layer() if callable(U_layer) else deepcopy(U_layer)
                     if U_init_:
                        U_init_(U)
                     self._Us.append(U)
-                if self._Hs:
+                if self._Hs is not None:
                     self._Hs.append(nn.Linear(out_features, out_features))
                 if not self.global_highway_input:
                     if self.gate_type not in ['C_only', 'none']:
@@ -1333,7 +1333,7 @@ class HighwayNetwork(nn.Module):
 
     def extra_repr(self):
         return (
-            '{}, {}, U_layer={}, U_init={}, H_features={}, H_activation={}, '
+            '{}, {}, U_layer={}, U_init_={}, H_features={}, H_activation={}, '
             "gate_type='{}', global_highway_input={}, num_layers={}, "
             'dropout={}, last_dropout={}'
         ).format(self.in_features, self.out_features,
