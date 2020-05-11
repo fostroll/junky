@@ -123,6 +123,7 @@ def plot_confusion_matrix(y_true, y_pred, n_classes, pad_index=None, ymap=None,
     plt.title(plot_title)
     plt.show()
 
+'''
 def plot_metrics(metrics=(accuracies, precisions, recalls, f1s), 
                  labels=['accuracy', 'precision', 'recalls', 'f1_score'],
                  plot_title='Metrics', figsize=(6,3), save_name=None):
@@ -151,3 +152,4 @@ def plot_metrics(metrics=(accuracies, precisions, recalls, f1s),
     if save_name is not None:
         plt.savefig(save_name, bbox_inches='tight')
     plt.show()
+'''
