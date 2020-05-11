@@ -1182,7 +1182,7 @@ class HighwayNetwork(nn.Module):
             'T_only': don't use carry gate: C(x) = I;
             'C_only': don't use carry gate: T(x) = I;
             'none': C(x) = T(x) = I
-        global_highway_input: if ``True``, we count the input of all the
+        global_highway_input: if ``True``, we treat the input of all the
             network as the highway input of every layer. Thus, we use T(x)
             and C(x) only once. If **global_highway_input** is ``False``
             (default), every layer receives the output of the previous layer
@@ -1215,7 +1215,7 @@ class HighwayNetwork(nn.Module):
         self.in_features = in_features
         self.out_features = out_features
         self.U_layer = U_layer
-        self.U_init = U_init_
+        self.U_init_ = U_init_
         self.H_features = H_features
         self.H_activation = H_activation
         self.gate_type = gate_type
