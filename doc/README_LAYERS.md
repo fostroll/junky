@@ -214,7 +214,7 @@ There are some variations of it, so we implement more universal architectute:
 **U(x)\*H(x)\*T(x) + x\*C(x)**, where:
 
 **U(x)** - user defined layer that we make *Highway* around; By default,
-**U(x) = I** (identity matrix);
+**U(x) = I** (identity matrix);<br/>
 **C(x)** - carry gate: generally, affine transform followed by a sigmoid
 activation. By default, **C(x) = 1 - T(x)**.
 
