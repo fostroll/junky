@@ -9,7 +9,6 @@ Provides a bunch of tools and utilities to use with PyTorch.
 
 import numpy as np
 import pandas as pd
-from itertools import chain
 from sklearn.metrics import confusion_matrix
 
 import matplotlib as mpl
