@@ -1233,10 +1233,10 @@ class HighwayNetwork(nn.Module):
         self._H = nn.Linear(H_features, out_features) if H_features else None
         if self.gate_type not in ['C_only', 'none']:
             self._T = nn.Linear(in_features, out_features)
-            nn.init.constant_(T.bias, -1)
+            nn.init.constant_(self._T.bias, -1)
         if self.gate_type not in ['generic', 'T_only', 'none']:
             self._C = nn.Linear(in_features, out_features)
-            nn.init.constant_(C.bias, 1)
+            nn.init.constant_(self._C.bias, 1)
 
         self._H_activation = H_activation
         self._T_activation = torch.sigmoid
@@ -1261,9 +1261,13 @@ class HighwayNetwork(nn.Module):
                     self._Hs.append(nn.Linear(out_features, out_features))
                 if not self.global_highway_input:
                     if self.gate_type not in ['C_only', 'none']:
-                        self._Ts.append(nn.Linear(out_features, out_features))
+                        T = nn.Linear(in_features, out_features)
+                        nn.init.constant_(T.bias, -1)
+                        self._Ts.append(T)
                     if self.gate_type not in ['generic', 'T_only', 'none']:
-                        self._Cs.append(nn.Linear(out_features, out_features))
+                        C = nn.Linear(in_features, out_features)
+                        nn.init.constant_(C.bias, -1)
+                        self._Ts.append(C)
 
         self._do = nn.Dropout(p=dropout) if dropout else None
         self._last_do = nn.Dropout(p=dropout) if last_dropout else None
