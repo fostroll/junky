@@ -1318,8 +1318,6 @@ class HighwayNetwork(nn.Module):
                     x = self._H_activation(x)
                     if self._H_do:
                         x = self._H_do(x)
-                if self._do:
-                    x = self._do(x)
 
                 if not self.global_highway_input:
                     if self.gate_type == 'generic':
