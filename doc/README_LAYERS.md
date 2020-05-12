@@ -99,6 +99,8 @@ Args:
 
 **emb_dim**: Character embedding dimensionality.
 
+**emb_dropout**: Dropout for embedding layer. Default: 0.0 (no dropout).
+
 **pad_idx**: Indices of padding element in character vocabulary.
 
 **out_type** - defines what to get as a result after the *BiLSTM*. Possible
@@ -129,8 +131,8 @@ restored using the same mask.
 ### CharEmbeddingCNN
 
 ```python
-layer = junky.CharEmbeddingCNN(alphabet_size, emb_layer=None, emb_dim=300,
-                               pad_idx=0, out_type='final_concat')
+layer = junky.CharEmbeddingCNN(alphabet_size, emb_layer=None, emb_dim=300, emb_dropout=0.0,
+							   pad_idx=0, kernels=[3, 4, 5], cnn_kernel_multiplier=1)
 ```
 Produces character embeddings using multiple-filter *CNN*. *Max-over-time
 pooling* and *ReLU* are applied to concatenated convolution layers.
@@ -147,6 +149,9 @@ Args:
 **pad_idx**: Indices of padding element in character vocabulary.
 
 **kernels**: Convoluiton filter sizes for *CNN* layers. 
+
+**cnn_kernel_multiplier**: defines how many filters are created for each 
+kernel size. Default: 1.
     
 Shape:
 
@@ -174,7 +179,7 @@ Applies **H(x)\*T(x) + x\*(1 - T(x))** transformation, where:
 
 **H(x)** - affine trainsformation followed by a non-linear activation. The layer
 that we make Highway around;<br/>
-**T(x)** - transformation gate: affine transformation followed by a sigmoid
+**T(x)** - transform gate: affine transformation followed by a sigmoid
 activation;<br/>
 **\*** - element-wise multiplication.
 
@@ -206,7 +211,7 @@ layer(x, x_hw, *U_args, **U_kwargs)
 **H(x)\*T(x) + x\*(1 - T(x))**, where:
 
 **H(x)** - affine trainsformation followed by a non-linear activation;<br/>
-**T(x)** - transformation gate: affine transformation followed by a sigmoid
+**T(x)** - transform gate: affine transformation followed by a sigmoid
 activation;<br/>
 **\*** - element-wise multiplication.
 

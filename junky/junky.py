@@ -959,8 +959,11 @@ class CharEmbeddingCNN(nn.Module):
         emb_layer: optional pre-trained embeddings, 
             initialized as torch.nn.Embedding.from_pretrained() or elsewise.
         emb_dim: character embedding dimensionality.
+        emb_dropout: dropout for embedding layer. Default: 0.0 (no dropout).
         pad_idx: indices of padding element in character vocabulary.
         kernels: convoluiton filter sizes for CNN layers. 
+        cnn_kernel_multiplier: defines how many filters are created for each 
+            kernel size. Default: 1.
         
     Shape:
         - Input:
@@ -974,10 +977,10 @@ class CharEmbeddingCNN(nn.Module):
         - Output: :math:`(N, S, E)` where `N`, `S` are the same shape as the
             input and :math:` E = \text{emb_dim}`.
     """
-    __constants__ = ['alphabet_size', 'emb_dim', 'kernels', 'pad_idx']
+    __constants__ = ['alphabet_size', 'emb_dim', 'kernels', 'cnn_kernel_multiplier', 'pad_idx']
 
-    def __init__(self, alphabet_size, emb_layer=None, emb_dim=300, pad_idx=0,
-                 kernels=[3, 4, 5]):
+    def __init__(self, alphabet_size, emb_layer=None, emb_dim=300, emb_dropout=0.0,
+                 pad_idx=0, kernels=[3, 4, 5], cnn_kernel_multiplier=1):
         super().__init__()
 
         self.kernels = list(kernels)
@@ -988,12 +991,14 @@ class CharEmbeddingCNN(nn.Module):
         self._emb_l = emb_layer if emb_layer else \
                       nn.Embedding(alphabet_size, emb_dim,
                                    padding_idx=pad_idx)
+                                   
+        self._emb_dropout = nn.Dropout(p=emb_dropout)
 
         self._conv_ls = nn.ModuleList(
             [nn.Conv1d(in_channels=self._emb_l.embedding_dim,
                        out_channels=self._emb_l.embedding_dim,
                        padding=0, kernel_size=kernel)
-                 for kernel in kernels]
+                 for kernel in kernels] * cnn_kernel_multiplier
         )
 
     def forward(self, x, lens):
@@ -1019,6 +1024,7 @@ class CharEmbeddingCNN(nn.Module):
         # прогоняем через слой символьного эмбеддинга (обучаемый):
         # [N * S, C] --> [N * S, C, E]
         x = self._emb_l(x)
+        x = self._emb_dropout(x)
         # сохраняем эту форму тоже
         x_e_shape = x.shape
 
@@ -1119,8 +1125,8 @@ class Highway(nn.Module):
     def __init__(self, dim, H_layer=None, H_activation=None):
         super().__init__()
 
-        self._H = H_layer if H_layer else nn.Linear(features, features)
-        self._H_activation = H_activation if H_activation or H_layer else \
+        self._H = H_layer if H_layer else nn.Linear(dim, dim)
+        self._H_activation = H_activation if H_activation else \
                              F.relu
 
         self._T = nn.Linear(dim, dim)
@@ -1150,8 +1156,8 @@ class HighwayNetwork(nn.Module):
     Highway Network is described in
     https://arxiv.org/abs/1505.00387 and https://arxiv.org/abs/1507.06228 and
     it's formalation is: H(x)*T(x) + x*(1 - T(x)), where:
-    .. H(x) - affine trainsform followed by a non-linear activation;
-    .. T(x) - transform gate: affine transform followed by a sigmoid
+    .. H(x) - affine trainsformation followed by a non-linear activation;
+    .. T(x) - transformation gate: affine transformation followed by a sigmoid
            activation;
     .. * - element-wise multiplication.
 
@@ -1159,7 +1165,7 @@ class HighwayNetwork(nn.Module):
     architectute: U(x)*H(x)*T(x) + x*C(x), where:
     .. U(x) - user defined layer that we make Highway around; By default,
            U(x) = I (identity matrix);
-    .. C(x) - carry gate: generally, affine transform followed by a sigmoid
+    .. C(x) - carry gate: generally, affine transformation followed by a sigmoid
            activation. By default, C(x) = 1 - T(x).
 
     Args:
@@ -1169,7 +1175,7 @@ class HighwayNetwork(nn.Module):
         U_layer: layer that implements U(x). Default is ``None``. If U_layer
             is callable, it will be used to create the layer; elsewise, we'll
             use it as is (if **num_layers** > 1, we'll copy it). Note that
-            number of input features of U_layer must be equals to
+            number of input features of U_layer must be equal to
             **out_features** if **num_layers** > 1.
         U_init_: callable to inplace init weights of **U_layer**.
         U_dropout: if non-zero, introduces a Dropout layer on the outputs of

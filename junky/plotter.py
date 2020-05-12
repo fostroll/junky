@@ -17,7 +17,8 @@ from matplotlib import pyplot as plt
 mpl.style.use('default')
 
 def plot_losses(train_losses, test_losses, accuracies=None, 
-                plot_title='Train/Dev Loss', figsize=(5,3), save_name=None):
+                plot_title='Train/Dev Loss', figsize=(5,3), 
+                legend_labels=['train', 'dev', '1 - acc'], save_name=None):
     """Plots train and dev losses obtained during training.
     The plot image is saved to disk.
     args:
@@ -41,13 +42,13 @@ def plot_losses(train_losses, test_losses, accuracies=None,
     plt.title(plot_title)
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
-    plt.legend(['train', 'dev', '1 - acc'], loc='upper right')
+    plt.legend(legend_labels, loc='upper right')
     plt.grid()
     if save_name is not None:
         plt.savefig(save_name, bbox_inches='tight')
     plt.show()
 
-def plot_confusion_matrix(y_true, y_pred, n_classes, pad_index=None, ymap=None, 
+def plot_confusion_matrix(y_true, y_pred, n_classes, pad_index=None, ymap=None,
                           figsize=(28,10), show_total=['x', 'y'], show_zeros=True,
                           plot_title='Confusion Matrix', save_name=None):
     """
