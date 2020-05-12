@@ -1196,9 +1196,9 @@ class HighwayNetwork(nn.Module):
             matrices in each layer.
         num_layers: number of highway layers.
     """
-    __constants__ = ['H_dim', 'H_activation', 'U_layer', 'U_init', 'dropout',
-                     'gate_type', 'global_highway_input', 'last_dropout',
-                     'out_dim', 'num_layers']
+    __constants__ = ['H_activation', 'H_dropout', 'H_features', 'U_dropout',
+                     'U_init', 'U_layer', 'gate_type', 'global_highway_input',
+                     'last_dropout', 'out_dim', 'num_layers']
 
     def __init__(self, in_features, out_features=None,
                  U_layer=None, U_init_=None, U_dropout=0,
