@@ -1126,7 +1126,7 @@ class Highway(nn.Module):
         super().__init__()
 
         self._H = H_layer if H_layer else nn.Linear(dim, dim)
-        self._H_activation = H_activation if H_activation or H_layer else \
+        self._H_activation = H_activation if H_activation else \
                              F.relu
 
         self._T = nn.Linear(dim, dim)
