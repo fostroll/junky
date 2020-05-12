@@ -1156,8 +1156,8 @@ class HighwayNetwork(nn.Module):
     Highway Network is described in
     https://arxiv.org/abs/1505.00387 and https://arxiv.org/abs/1507.06228 and
     it's formalation is: H(x)*T(x) + x*(1 - T(x)), where:
-    .. H(x) - affine trainsform followed by a non-linear activation;
-    .. T(x) - transform gate: affine transform followed by a sigmoid
+    .. H(x) - affine trainsformation followed by a non-linear activation;
+    .. T(x) - transformation gate: affine transformation followed by a sigmoid
            activation;
     .. * - element-wise multiplication.
 
@@ -1165,7 +1165,7 @@ class HighwayNetwork(nn.Module):
     architectute: U(x)*H(x)*T(x) + x*C(x), where:
     .. U(x) - user defined layer that we make Highway around; By default,
            U(x) = I (identity matrix);
-    .. C(x) - carry gate: generally, affine transform followed by a sigmoid
+    .. C(x) - carry gate: generally, affine transformation followed by a sigmoid
            activation. By default, C(x) = 1 - T(x).
 
     Args:
@@ -1175,7 +1175,7 @@ class HighwayNetwork(nn.Module):
         U_layer: layer that implements U(x). Default is ``None``. If U_layer
             is callable, it will be used to create the layer; elsewise, we'll
             use it as is (if **num_layers** > 1, we'll copy it). Note that
-            number of input features of U_layer must be equals to
+            number of input features of U_layer must be equal to
             **out_features** if **num_layers** > 1.
         U_init_: callable to inplace init weights of **U_layer**.
         U_dropout: if non-zero, introduces a Dropout layer on the outputs of

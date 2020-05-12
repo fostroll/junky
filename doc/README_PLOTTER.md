@@ -9,7 +9,8 @@ The lib contains tools to plot useful statistics on trained *PyTorch* models.
 ```python
 from junky import plotter
 plotter.plot_losses(train_losses, test_losses, accuracies=None, 
-                plot_title='Train/Dev Loss', figsize=(5,3), save_name=None)
+                plot_title='Train/Dev Loss', figsize=(5,3), 
+				legend_labels=['train', 'dev', '1 - acc'], save_name=None)
 ```
 
 Plots train and dev losses obtained during training.
@@ -29,6 +30,8 @@ Here, used to count (1 - accuracy). If `None`, not plotted.
 **plot_title**:     plot title, `str`. Default value - 'Train/Dev Loss'.
 
 **figsize**:        the size of the figure plotted. Default size is `(5,3)`.
+
+**legend_labels**:  Line labels to use on the plot. Default: `['train', 'dev', '1 - acc']`.
 
 **save_name**:      optional, if `None`, plot is not saved. 
 Used as `fname` in `plt.savefig()`. Default file extention is '.png', 
