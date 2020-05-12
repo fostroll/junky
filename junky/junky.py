@@ -1335,9 +1335,6 @@ class HighwayNetwork(nn.Module):
                 if not self.global_highway_input:
                     x_hw = x
 
-        if self._last_do:
-            x = self._last_do(x)
-
         return x
 
     def extra_repr(self):
