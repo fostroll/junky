@@ -99,6 +99,8 @@ Args:
 
 **emb_dim**: Character embedding dimensionality.
 
+**emb_dropout**: Dropout for embedding layer. Default: 0.0 (no dropout).
+
 **pad_idx**: Indices of padding element in character vocabulary.
 
 **out_type** - defines what to get as a result after the *BiLSTM*. Possible
@@ -147,6 +149,9 @@ Args:
 **pad_idx**: Indices of padding element in character vocabulary.
 
 **kernels**: Convoluiton filter sizes for *CNN* layers. 
+
+**cnn_kernel_multiplier**: defines how many filters are created for each 
+kernel size. Default: 1.
     
 Shape:
 
