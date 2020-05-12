@@ -233,11 +233,17 @@ input features of **U_layer** must be equals to **out_features** if
 
 **U_init_**: callable to inplace init weights of **U_layer**.
 
+**U_dropout**: if non-zero, introduces a Dropout layer on the outputs of U(x)
+on each layer, with dropout probability equal to **U_dropout**. Default: 0.
+
 **H_features**: number of input features of H(x). If `None` (default),
 **H_features = in_features**. If `0`, don't use **H(x)**.
 
 **H_activation**: non-linear activation after **H(x)**. If ``None``, then no
 activation function is used. Default is ``F.relu``.
+
+**H_dropout**: if non-zero, introduces a Dropout layer on the outputs of H(x)
+on each layer, with dropout probability equal to **H_dropout**. Default: 0.
 
 **gate_type**: a type of the transform and carry gates:<br/>
 `'generic'` (default): **C(x) = 1 - T(x)**;<br/>
