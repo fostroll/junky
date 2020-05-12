@@ -14,6 +14,8 @@ Provides a bunch of tools and utilities to use with PyTorch.
 
 [Utilities](https://github.com/fostroll/junky/blob/master/doc/README_UTILITIES.md)
 
+[Plotter](https://github.com/fostroll/junky/blob/master/doc/README_PLOTTER.md)
+
 ## Installation
 
 ### pip
