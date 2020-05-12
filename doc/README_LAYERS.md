@@ -215,7 +215,7 @@ There are some variations of it, so we implement more universal architectute:
 
 **U(x)** - user defined layer that we make *Highway* around; By default,
 **U(x) = I** (identity matrix);<br/>
-**C(x)** - carry gate: generally, affine transform followed by a sigmoid
+**C(x)** - carry gate: generally, affine transformation followed by a sigmoid
 activation. By default, **C(x) = 1 - T(x)**.
 
 Args:
@@ -228,7 +228,7 @@ Args:
 **U_layer**: layer that implements **U(x)**. Default is `None`. If
 **U_layer** is callable, it will be used to create the layer; elsewise, we'll
 use it as is (if **num_layers** > `1`, we'll copy it). Note that number of
-input features of **U_layer** must be equals to **out_features** if
+input features of **U_layer** must be equal to **out_features** if
 **num_layers** > `1`.
 
 **U_init_**: callable to inplace init weights of **U_layer**.
@@ -239,7 +239,7 @@ on each layer, with dropout probability equal to **U_dropout**. Default: 0.
 **H_features**: number of input features of H(x). If `None` (default),
 **H_features = in_features**. If `0`, don't use **H(x)**.
 
-**H_activation**: non-linear activation after **H(x)**. If ``None``, then no
+**H_activation**: non-linear activation after **H(x)**. If `None`, then no
 activation function is used. Default is ``F.relu``.
 
 **H_dropout**: if non-zero, introduces a Dropout layer on the outputs of H(x)
