@@ -1272,7 +1272,7 @@ class HighwayNetwork(nn.Module):
                     if self.gate_type not in ['generic', 'T_only', 'none']:
                         C = nn.Linear(in_features, out_features)
                         nn.init.constant_(C.bias, -1)
-                        self._Ts.append(C)
+                        self._Cs.append(C)
 
     def forward(self, x, x_hw, *U_args, **U_kwargs):
         """
