@@ -132,7 +132,7 @@ restored using the same mask.
 
 ```python
 layer = junky.CharEmbeddingCNN(alphabet_size, emb_layer=None, emb_dim=300, emb_dropout=0.0,
-							   pad_idx=0, kernels=[3, 4, 5], cnn_kernel_multiplier=1)
+                               pad_idx=0, kernels=[3, 4, 5], cnn_kernel_multiplier=1)
 ```
 Produces character embeddings using multiple-filter *CNN*. *Max-over-time
 pooling* and *ReLU* are applied to concatenated convolution layers.
