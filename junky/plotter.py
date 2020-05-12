@@ -13,6 +13,7 @@ from sklearn.metrics import confusion_matrix
 import matplotlib as mpl
 import matplotlib.style
 from matplotlib import pyplot as plt
+import seaborn as sns
 
 mpl.style.use('default')
 
