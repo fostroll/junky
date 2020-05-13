@@ -320,3 +320,14 @@ np.sqrt(init_weight_value)`
 
 **batch_first**:        True if input.size(0) == batch_size.
 
+Input:
+
+**x**: input tensor of shape `(N, S, in_features)` or `(S, N, in_features)`, 
+where `N == batch size`. Please specify `batch_first=True`, 
+is input tensor has shape `(N, S, E)`.
+
+**lens**: tensor of sequence lengths without padding.
+
+Output: 
+
+Tensor of shape `(N, S, out_features)`.

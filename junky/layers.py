@@ -785,11 +785,14 @@ class HBiLSTM_layer(nn.Module):
         self.gate_layer = nn.Linear(in_features=self.in_features, out_features=self.hidden_dim*2, bias=True)
         nn.init.constant_(self.gate_layer.bias, -1)
 
-    def forward(self, x, hidden):
+    def forward(self, x, hidden, lens):
         # handle the source input x
         source_x = x
-
+        
+        x = pack_padded_sequence(x, lens, enforce_sorted=False)
         x, hidden = self.bilstm(x, hidden)
+        x, _ = pad_packed_sequence(x)
+        
         normal_fc = torch.transpose(x, 0, 1)
 
         x = x.permute(1, 2, 0)
@@ -877,7 +880,7 @@ class HighwayBiLSTM(nn.Module):
         return (Variable(torch.zeros(2 * num_layers, batch_size, self.hidden_dim)).to(device),
                 Variable(torch.zeros(2 * num_layers, batch_size, self.hidden_dim)).to(device))
 
-    def forward(self, x):
+    def forward(self, x, lens):
         device = next(self.parameters()).device
 
         self.hidden = self.init_hidden(self.num_layers, x.size(0), device)
@@ -886,7 +889,7 @@ class HighwayBiLSTM(nn.Module):
             x = x.transpose(0, 1)     # to (seq_len, batch_size, emb_dim)
 
         for current_layer in self.highway:
-            x, self.hidden = current_layer(x, self.hidden)
+            x, self.hidden = current_layer(x, self.hidden, lens)
 
         x = torch.transpose(x, 0, 1)
         x = torch.tanh(x)
