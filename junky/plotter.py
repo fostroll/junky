@@ -17,6 +17,7 @@ import seaborn as sns
 
 mpl.style.use('default')
 
+
 def plot_losses(train_losses, test_losses, accuracies=None, 
                 plot_title='Train/Dev Loss', figsize=(10,6), 
                 legend_labels=['train', 'dev', '1 - acc'], save_name=None):
