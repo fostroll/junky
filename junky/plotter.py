@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-# junky lib
+# junky lib: plotter
 #
 # Copyright (C) 2020-present by Sergei Ternovykh, Anastasiya Nikiforova
 # License: BSD, see LICENSE for details
 """
-Provides a bunch of tools and utilities to use with PyTorch.
+Provides a bunch of tools to visualize train results.
 """
 import numpy as np
 import pandas as pd
