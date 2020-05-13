@@ -281,3 +281,42 @@ executes formula: **x = U(x)\*H(x)\*T(x_hw) + x_hw\*C(x_hw)**. Next, if
 If **x_hw** is `None`, we adopt **x_hw = x**.
 
 **\*U_args** and **\*\*U_kwargs** are params for **U_layer** if it needs ones.
+
+
+### Highway biLSTM
+
+
+```python
+layer = junky.HighwayBiLSTM(hw_num_layers, lstm_hidden_dim, lstm_num_layers, 
+                 in_features, out_features, lstm_dropout,
+                 init_weight=True, init_weight_value=2.0, batch_first=True
+                )
+)
+layer(x)
+```
+
+Highway biLSTM model implementation, modified from
+from https://github.com/bamtercelboo/pytorch_Highway_Networks/blob/master/models/model_HBiLSTM.py.
+[Original Article](https://arxiv.org/abs/1709.06436).
+
+Params:
+
+**hw_num_layers**:      number of highway biLSTM layers.
+
+**in_features**:        number of features in input.
+
+**out_features**:       number of features in output.
+
+**lstm_hidden_dim**:    hidden dim for LSTM layer.
+
+**lstm_num_layers**:    number of LSTM layers.
+
+**lstm_dropout**:       dropout between 2+ LSTM layers.
+
+**init_weight**:        whether to init bilstm weights as xavier_uniform_
+
+**init_weight_value**:  bilstm weight initialization `gain` will be defined as 
+np.sqrt(init_weight_value)`
+
+**batch_first**:        True if input.size(0) == batch_size.
+

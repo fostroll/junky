@@ -29,7 +29,7 @@ Here, used to count (1 - accuracy). If `None`, not plotted.
 			  
 **plot_title**:     plot title, `str`. Default value - 'Train/Dev Loss'.
 
-**figsize**:        the size of the figure plotted. Default size is `(5,3)`.
+**figsize**:        the size of the figure plotted. Default size is `(10,6)`.
 
 **legend_labels**:  Line labels to use on the plot. Default: `['train', 'dev', '1 - acc']`.
 
@@ -44,7 +44,7 @@ if other extention is needed, please specify extention in save_name as well.
 ```python
 plotter.plot_metrics(metrics=[], 
                  labels=['accuracy', 'precision', 'recalls', 'f1_score'],
-                 plot_title='Metrics', figsize=(6,3), save_name=None)
+                 plot_title='Metrics', figsize=(10,6), save_name=None)
 ```
 
 Plots metrics obtained during training.
