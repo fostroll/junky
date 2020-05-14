@@ -9,7 +9,7 @@ after all other threads have finished their work.
 
 ```python
 import junky
-junky.torch_autotrain(
+junky.autotrain.torch_autotrain(
     make_model_method, train_method, create_loaders_method=None,
     make_model_args=(), make_model_kwargs=None, make_model_fit_params=None,
     train_args=(), train_kwargs=None, devices=torch.device('cpu'),
@@ -121,7 +121,7 @@ corresponds to the best *model*.
 Sometimes, it's necessary to extract results from the ouput of
 `torch_autotrain()`. The method to do so is:
 ```python
-junky.parse_autotrain_log(log_fn, silent=False)
+junky.autotrain.parse_autotrain_log(log_fn, silent=False)
 ```
 Here, **log_fn** is a file name of the `torch_autotrain()` log file.
 

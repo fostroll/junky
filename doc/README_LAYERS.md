@@ -8,9 +8,9 @@ The lib contains several layers to use in *PyTorch* models.
 
 ```python
 import junky
-layer = junky.Masking(input_size, mask=float('-inf'),
-                      indices_to_highlight=-1, highlighting_mask=1,
-                      batch_first=False)
+layer = junky.layers.Masking(input_size, mask=float('-inf'),
+                             indices_to_highlight=-1, highlighting_mask=1,
+                             batch_first=False)
 output = layer(x, lens)
 ```
 Replaces certain elemens of the incoming data **x** to the **mask** given.
@@ -85,8 +85,8 @@ tensor([[[-0.4479, -0.8719, -1.0129, -1.5431],
 ### CharEmbeddingRNN
 
 ```python
-layer = junky.CharEmbeddingRNN(alphabet_size, emb_layer=None, emb_dim=300,
-                               pad_idx=0, out_type='final_concat')
+layer = junky.layers.CharEmbeddingRNN(alphabet_size, emb_layer=None, emb_dim=300,
+                                      pad_idx=0, out_type='final_concat')
 ```
 Produces character embeddings using *Bidirectional LSTM*.
 
@@ -131,8 +131,8 @@ restored using the same mask.
 ### CharEmbeddingCNN
 
 ```python
-layer = junky.CharEmbeddingCNN(alphabet_size, emb_layer=None, emb_dim=300, emb_dropout=0.0,
-                               pad_idx=0, kernels=[3, 4, 5], cnn_kernel_multiplier=1)
+layer = junky.layers.CharEmbeddingCNN(alphabet_size, emb_layer=None, emb_dim=300, emb_dropout=0.0,
+                                      pad_idx=0, kernels=[3, 4, 5], cnn_kernel_multiplier=1)
 ```
 Produces character embeddings using multiple-filter *CNN*. *Max-over-time
 pooling* and *ReLU* are applied to concatenated convolution layers.
@@ -169,7 +169,7 @@ layers.
 ### Highway
 
 ```python
-layer = junky.Highway(dim, H_layer=None, H_activation=None)
+layer = junky.layers.Highway(dim, H_layer=None, H_activation=None)
 ```
 *Highway* layer for *Highway Networks* as described in
 [Srivastava et al.](https://arxiv.org/abs/1505.00387) and
@@ -197,7 +197,7 @@ function is not used.
 ### HighwayNetwork
 
 ```python
-layer = junky.HighwayNetwork(
+layer = junky.layers.HighwayNetwork(
     in_features, out_features=None, U_layer=None, U_init_=None,
     H_features=None, H_activation=F.relu, gate_type='generic',
     global_highway_input=False, num_layers=1, dropout=0,
@@ -287,7 +287,7 @@ If **x_hw** is `None`, we adopt **x_hw = x**.
 
 
 ```python
-layer = junky.HighwayBiLSTM(hw_num_layers, lstm_hidden_dim, lstm_num_layers, 
+layer = junky.layers.HighwayBiLSTM(hw_num_layers, lstm_hidden_dim, lstm_num_layers, 
                  in_features, out_features, lstm_dropout,
                  init_weight=True, init_weight_value=2.0, batch_first=True
                 )
@@ -326,7 +326,7 @@ Input:
 where `N == batch size`. Please specify `batch_first=True`, 
 is input tensor has shape `(N, S, E)`.
 
-**lens**: tensor of sequence lengths without padding.
+**lens**: list of sequence lengths without padding.
 
 Output: 
 
