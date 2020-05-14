@@ -6,7 +6,7 @@ The lib contains some utilities to use with *PyTorch* models.
 
 ```python
 import junky
-junky.utils.get_max_dims(array, str_isarray=False, max_dims=None, dim_no=0)
+junky.get_max_dims(array, str_isarray=False, max_dims=None, dim_no=0)
 ```
 Returns max sizes of nested **array** on all levels of nestedness.
 
@@ -18,7 +18,7 @@ additional dimension.
 **max_dims**, **dim_no**: for internal use only. Leave it as they are.
 
 ```python
-junky.utils.insert_to_ndarray(array, ndarray, shift='left')
+junky.insert_to_ndarray(array, ndarray, shift='left')
 ```
 Inserts a nested **array** with data of any allowed *numpy* type to the
 *numpy* **ndarray**.
@@ -41,7 +41,7 @@ subarray's size and ndarray dimension are not congruent);<br/>
 shift will be 1 position right.
 
 ```python
-junky.utils.pad_array(array, padding_value=0)
+junky.pad_array(array, padding_value=0)
 ```
 Converts nested **array** with data of any allowed *numpy* type to
 `numpy.ndarray` with **padding_value** instead of missing data.
@@ -51,13 +51,13 @@ Converts nested **array** with data of any allowed *numpy* type to
 Returns `numpy.ndarray` with padded **array**.
 
 ```python
-junky.utils.pad_array_torch(array, padding_value=0, **kwargs)
+junky.pad_array_torch(array, padding_value=0, **kwargs)
 ```
 Just a wrapper for the `pad_array()` method that returns `torch.Tensor`.
 
 **kwargs**: keyword args for the `torch.tensor()` method.
 
 ```python
-junky.utils.enforce_reproducibility(seed=None)
+junky.enforce_reproducibility(seed=None)
 ```
 Re-init random number generators.
