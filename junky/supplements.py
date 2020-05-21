@@ -132,7 +132,7 @@ def make_token_dict(sentences, pad_token=None):
         )))
     }
     if pad_token:
-        pad_idx = t2idx[token] = len(t2idx)
+        pad_idx = t2idx[pad_token] = len(t2idx)
     else:
         pad_idx = None
     return t2idx, pad_idx
