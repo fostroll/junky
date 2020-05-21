@@ -158,7 +158,7 @@ def add_mean_vector(vectors, axis=0, shift=0., scale=1.):
     """
     norm = np.linalg.norm(vectors, axis=axis).mean() * scale
     # We want half of values be negative
-    vector = np.expand(
+    vector = np.expand_dims(
         np.random.rand(*(vectors.shape[:axis] + vectors.shape[axis + 1:]))
           .astype(vectors.dtype) - .5 + shift,
         axis
