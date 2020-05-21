@@ -50,14 +50,14 @@ def make_word_embeddings(vocab, vectors=None, unk_token=None, pad_token=None,
         if isinstance(val, keyedvectors.Vocab):
             vocab = {x: y.index for x, y in vocab.items()}
         elif not isinstance(val, int):
-            vocab = True
+            vocab = None
     else:
         val = next(iter(vocab))
         if isinstance(val, int):
             vocab = {y: x for x, y in enumerate(vocab)}
         else:
-            vocab = True
-    assert not vocab, 'ERROR: vocab of the incorrect type'
+            vocab = None
+    assert vocab, 'ERROR: vocab of the incorrect type'
 
     def add_token(vocab, vectors, token):
         if token:
