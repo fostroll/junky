@@ -74,7 +74,7 @@ def make_word_embeddings(vocab, vectors=None, unk_token=None, pad_token=None,
         embeddings=torch.from_numpy(vectors),
         padding_idx=pad_idx,
         freeze=layer_freeze,
-        **layer_emb_kwargs
+        **layer_kwargs
     ) if with_layer else \
     None
     return vocab, vectors, unk_idx, pad_idx, emb_layer
