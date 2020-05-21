@@ -139,3 +139,29 @@ def enforce_reproducibility(seed=None):
         torch.backends.cudnn.benchmark = False
         # System based
         np.random.seed(seed)
+
+def add_mean_vector(vectors, axis=0, shift=0., scale=1.):
+    """Append *vectors* with a vector that has norm equals to mean norm
+    (possibly, scaled) of *vectors*.
+
+    :param vectors: the array of floats.
+    :type vectors: numpy.ndarray
+    :param axis: the axis of *vectors* along which the new vector is appended.
+    :type axis: int
+    :param shift: relative shift of the new vector's mean from 0.
+    :type shift: float
+    :param scale: the coef to increase (or decrease if *scale* < 1) the norm
+        or the new vector.
+    :type scale: float > 0
+    :return: vectors appended
+    :rtype: numpy.ndarray
+    """
+    norm = np.linalg.norm(vectors, axis=axis).mean() * scale
+    # We want half of values be negative
+    vector = np.expand(
+        np.random.rand(*(vectors.shape[:axis] + vectors.shape[axis + 1:]))
+          .astype(vectors.dtype) - .5 + shift,
+        axis
+    )
+    vector *= norm / np.linalg.norm(vector)
+    return np.append(vectors, vector, axis=axis)
