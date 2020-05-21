@@ -157,7 +157,7 @@ def get_conllu_fields(corpus=None, fields=None, word2idx=None, unk_token=None,
     elif callable(corpus):
         corpus = corpus()
 
-    sents = tuple([] for _ in fields)
+    sents = tuple([] for _ in range(len(fields) + 1))
 
     for sent, _ in corpus:
         for i, field in enumerate(zip(*[
