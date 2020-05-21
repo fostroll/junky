@@ -114,7 +114,7 @@ def make_alphabet(sentences, pad_char=None, allowed_chars=None,
 
     return abc, pad_idx
 
-def make_tokens_dict(sentences, pad_token=None):
+def make_token_dict(sentences, pad_token=None):
     """Extract tokens from tokenized *sentences*, remove all duplicates, sort
     the resulting set and map all tokens onto ther indices.
 
@@ -127,7 +127,9 @@ def make_tokens_dict(sentences, pad_token=None):
     :rtype: tuple(dict({char: int}), int)
     """
     t2idx = {
-        x: i for i, x in enumerate(sorted(set(x for x in tokens for x in x)))
+        x: i for i, x in enumerate(sorted(set(
+            x for x in sentences for x in x
+        )))
     }
     if pad_token:
         pad_idx = t2idx[token] = len(t2idx)
