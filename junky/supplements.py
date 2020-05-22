@@ -163,6 +163,9 @@ def get_conllu_fields(corpus=None, fields=None, word2idx=None, unk_token=None,
     :return: splitted corpus
     :rtype: tuple(list([list([str|OrderedDict])]))
     """
+    if not silent:
+        clear_stderr()
+
     if isinstance(corpus, str):
         corpus = Conllu.load(corpus, **({'log_file': None} if silent else{}))
     elif callable(corpus):
@@ -378,8 +381,7 @@ def train(device, loaders, model, criterion, optimizer,
             if isinstance(data, torch.Tensor):
                 data = data.to(device)
             elif isinstance(data, Iterable):
-                for i in range(len(data)):
-                    data[i] = to_device(data[i])
+                data = type(data)(to_device(x) for x in data)
             return data
 
         model.train()
