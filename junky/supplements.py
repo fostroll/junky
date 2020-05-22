@@ -416,14 +416,16 @@ def train(device, loaders, model, criterion, optimizer,
 
         model.eval()
         for batch in test_loader:
+            gold, gold_lens = batch[-2:]
+            [test_golds.extend(y_[:len_])
+                 for y_, len_ in zip(gold.numpy(), gold_lens)]
+
             batch = to_device(batch)
             with torch.no_grad():           
                 pred, gold, gold_lens = model(*batch[:-2]), *batch[-2:]
 
             pred_values, pred_indices = pred.max(2)
 
-            [test_golds.extend(y_[:len_])
-                 for y_, len_ in zip(gold.numpy(), gold_lens)]
             [test_preds.extend(y_[:len_])
                  for y_, len_ in zip(pred_indices.cpu().numpy(), gold_lens)]
 
