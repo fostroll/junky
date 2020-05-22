@@ -6,11 +6,15 @@
 """
 Provides supplement methods to use in PyTorch pipeline.
 """
+from collections.abc import Iterable
 from gensim.models import keyedvectors
 import junky
 import numpy as np
 import torch
 from torch.nn.utils.rnn import pad_sequence
+from torch.utils.data import DataLoader, Dataset
+from tqdm import tqdm
+
 
 def make_word_embeddings(vocab, vectors=None, unk_token=None, pad_token=None,
                          with_layer=True, layer_freeze=True, **layer_kwargs):
@@ -266,7 +270,7 @@ class CharSeqDataset(torch.utils.data.Dataset):
         return x_ch, x_ch_lens, y, y_lens
 
 
-class WordCharSeqDataset(torch.utils.data.Dataset):
+class WordCharSeqDataset(Dataset):
     """
     Dataset for sequence tagging with both word- and char-level inputs.
 
@@ -323,3 +327,158 @@ class WordCharSeqDataset(torch.utils.data.Dataset):
             y = y[:-1]
 
         return x, x_lens, x_ch, x_ch_lens, y, y_lens
+
+
+def train(device, loaders, model, criterion, optimizer,
+          best_model_backup_method, log_prefix, train_dataset, test_dataset,
+          pad_collate=None, epochs=100, bad_epochs=8, batch_size=32,
+          control_metric='accuracy', with_progress=True):
+
+    assert control_metric in ['accuracy', 'f1', 'loss'], \
+           "ERROR: unknown control_metric '{}' ".format(control_metric) \
+         + "(only 'accuracy', 'f1' and 'loss' are available)"
+
+    train_loader = loaders[0] if loaders else \
+                   DataLoader(train_dataset, batch_size=batch_size,
+                              num_workers=0, shuffle=True,
+                              collate_fn=pad_collate if pad_collate else
+                              train_dataset.pad_collate)
+    test_loader = loaders[1] if loaders else \
+                  DataLoader(test_dataset, batch_size=batch_size,
+                             num_workers=0, shuffle=False,
+                             collate_fn=pad_collate if pad_collate else
+                             test_dataset.pad_collate)
+
+    train_losses, test_losses = [], []
+    best_res = float('-inf')
+    best_test_golds, best_test_preds = [], []
+    accuracies = []
+    precisions = []
+    recalls = []
+    f1s = []
+    bad_epochs_ = 0
+
+    if with_progress:
+        clear_stderr()
+    print_indent = ' ' * len(log_prefix)
+    for epoch in range(epochs):
+        train_losses_ = []
+
+        progress_bar = tqdm(total=len(train_loader.dataset),
+                            desc='Epoch {}'.format(epoch + 1)) \
+                           if with_progress else \
+                       None
+
+        def to_device(data):
+            if isinstance(data, torch.Tensor):
+                data = data.to(device)
+            elif isinstance(data, Iterable):
+                for i in range(len(data)):
+                    data[i] = to_device(data[i])
+            return data
+
+        model.train()
+        for batch in train_loader:
+            batch = to_device(batch)
+            optimizer.zero_grad()
+            pred = model(*batch[:-2])
+
+            batch_loss = []
+            for i in range(pred.size(0)):
+                tmp_loss = criterion(pred[i], y[i])
+                batch_loss.append(tmp_loss)
+
+            loss = torch.mean(torch.stack(batch_loss)) 
+            loss.backward()
+            optimizer.step()
+            train_losses_.append(loss.item())
+
+            if with_progress:
+                progress_bar.set_postfix(
+                    train_loss=np.mean(train_losses_[-500:])
+                )
+                progress_bar.update(x.shape[0])
+
+        if with_progress:
+            progress_bar.close()
+
+        mean_train_loss = np.mean(train_losses_)
+        train_losses.append(mean_train_loss)
+
+        test_losses_, test_golds, test_preds = [], [], []
+
+        model.eval()
+        for batch in dev_loader:
+
+            [test_golds.extend(y_[:len_])
+                 for y_, len_ in zip(batch[-2].numpy(), batch[-1])]
+
+            batch = to_device(batch)
+
+            with torch.no_grad():           
+                pred = model(*batch[:-2])
+
+            pred_values, pred_indices = pred.max(2)
+
+            pred_cpu = pred_indices.cpu()
+            [test_preds.extend(y_[:len_])
+                 for y_, len_ in zip(pred_cpu.numpy(), batch[-1])]
+
+            batch_loss = []
+            for i in range(pred.size(0)):
+                loss_ = criterion(pred[i], y[i])
+                batch_loss.append(loss_)
+
+            loss = torch.mean(torch.stack(batch_loss)) 
+            test_losses_.append(loss.item())
+
+        mean_test_loss = np.mean(test_losses_)
+        test_losses.append(mean_test_loss)
+
+        accuracy = accuracy_score(test_golds, test_preds)
+        precision = precision_score(test_golds, test_preds, average='macro')
+        recall = recall_score(test_golds, test_preds, average='macro')
+        f1 = f1_score(test_golds, test_preds, average='macro')
+
+        accuracies.append(accuracy)
+        precisions.append(precision)
+        recalls.append(recall)
+        f1s.append(f1)
+
+        print('{}Epoch {}: \n'.format(log_prefix, epoch + 1)
+            + '{}Losses: train = {:.8f}, test = {:.8f}\n'
+                  .format(print_indent, mean_train_loss, mean_test_loss)
+            + '{}Test: accuracy = {:.8f}\n'.format(print_indent, accuracy)
+            + '{}Test: precision = {:.8f}\n'.format(print_indent, precision)
+            + '{}Test: recall = {:.8f}\n'.format(print_indent, recall)
+            + '{}Test: f1_score = {:.8f}'.format(print_indent, f1))
+
+        res = -mean_test_loss if control_metric == 'loss' else \
+              accuracy if control_metric == 'accuracy' else \
+              f1 if control_metric == 'f1' else \
+              None
+
+        if res > best_res:
+            best_res = res
+            best_test_golds, best_test_preds = test_golds[:], test_preds[:]
+            best_model_backup_method(model, res)
+            bad_epochs_ = 0
+        else:
+            bad_epochs_ += 1
+            print('{}BAD EPOCHS: {}'.format(log_prefix, bad_epochs_))
+            if bad_epochs_ >= bad_epochs:
+                print('{}Maximum bad epochs exceeded. Process has stopped'
+                          .format(log_prefix))
+                break
+
+        sys.stdout.flush()
+
+    return {'train_losses': train_losses,
+            'test_losses': test_losses,
+            'best_res': best_res,
+            'best_test_golds': best_test_golds,
+            'best_test_preds': best_test_preds,
+            'accuracies': accuracies,
+            'precisions': precisions,
+            'recalls': recalls,
+            'f1s': f1s}
