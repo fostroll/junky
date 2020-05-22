@@ -468,7 +468,7 @@ def train(device, loaders, model, criterion, optimizer,
         if scores > best_scores:
             best_scores = scores
             best_test_golds, best_test_preds = test_golds[:], test_preds[:]
-            best_model_backup_method(model, res)
+            best_model_backup_method(model, scores)
             bad_epochs_ = 0
         else:
             bad_epochs_ += 1
