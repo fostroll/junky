@@ -16,6 +16,11 @@ from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 
 
+def clear_stderr():
+    if hasattr(tqdm, '_instances'):
+        for instance in list(tqdm._instances):
+            tqdm._decr_instances(instance)
+
 def make_word_embeddings(vocab, vectors=None, unk_token=None, pad_token=None,
                          with_layer=True, layer_freeze=True, **layer_kwargs):
     """Create or adjust Word to Index dict for embedding layer.
