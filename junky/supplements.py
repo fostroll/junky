@@ -358,7 +358,7 @@ def train(device, loaders, model, criterion, optimizer,
                              test_dataset.pad_collate)
 
     train_losses, test_losses = [], []
-    best_res = float('-inf')
+    best_scores = float('-inf')
     best_test_golds, best_test_preds = [], []
     accuracies = []
     precisions = []
@@ -388,11 +388,11 @@ def train(device, loaders, model, criterion, optimizer,
         for batch in train_loader:
             batch = to_device(batch)
             optimizer.zero_grad()
-            pred = model(*batch[:-2])
+            pred, gold = model(*batch[:-2]), batch[-2]
 
             batch_loss = []
             for i in range(pred.size(0)):
-                tmp_loss = criterion(pred[i], batch[-2][i])
+                tmp_loss = criterion(pred[i], gold[i])
                 batch_loss.append(tmp_loss)
 
             loss = torch.mean(torch.stack(batch_loss)) 
@@ -415,25 +415,21 @@ def train(device, loaders, model, criterion, optimizer,
         test_losses_, test_golds, test_preds = [], [], []
 
         model.eval()
-        for batch in dev_loader:
-
-            [test_golds.extend(y_[:len_])
-                 for y_, len_ in zip(batch[-2].numpy(), batch[-1])]
-
+        for batch in test_loader:
             batch = to_device(batch)
-
             with torch.no_grad():           
-                pred = model(*batch[:-2])
+                pred, gold, gold_lens = model(*batch[:-2]), *batch[-2:]
 
             pred_values, pred_indices = pred.max(2)
 
-            pred_cpu = pred_indices.cpu()
+            [test_golds.extend(y_[:len_])
+                 for y_, len_ in zip(gold.numpy(), gold_lens)]
             [test_preds.extend(y_[:len_])
-                 for y_, len_ in zip(pred_cpu.numpy(), batch[-1])]
+                 for y_, len_ in zip(pred_indices.cpu().numpy(), gold_lens)]
 
             batch_loss = []
             for i in range(pred.size(0)):
-                loss_ = criterion(pred[i], batch[-2][i])
+                loss_ = criterion(pred[i], gold[i])
                 batch_loss.append(loss_)
 
             loss = torch.mean(torch.stack(batch_loss))
@@ -460,13 +456,13 @@ def train(device, loaders, model, criterion, optimizer,
             + '{}Test: recall = {:.8f}\n'.format(print_indent, recall)
             + '{}Test: f1_score = {:.8f}'.format(print_indent, f1))
 
-        res = -mean_test_loss if control_metric == 'loss' else \
-              accuracy if control_metric == 'accuracy' else \
-              f1 if control_metric == 'f1' else \
-              None
+        scores = -mean_test_loss if control_metric == 'loss' else \
+                 accuracy if control_metric == 'accuracy' else \
+                 f1 if control_metric == 'f1' else \
+                 None
 
-        if res > best_res:
-            best_res = res
+        if res > best_scores:
+            best_scores = scores
             best_test_golds, best_test_preds = test_golds[:], test_preds[:]
             best_model_backup_method(model, res)
             bad_epochs_ = 0
@@ -482,7 +478,7 @@ def train(device, loaders, model, criterion, optimizer,
 
     return {'train_losses': train_losses,
             'test_losses': test_losses,
-            'best_res': best_res,
+            'best_scores': best_scores,
             'best_test_golds': best_test_golds,
             'best_test_preds': best_test_preds,
             'accuracies': accuracies,
