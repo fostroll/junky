@@ -76,7 +76,7 @@ def make_word_embeddings(vocab, vectors=None,
             assert token not in vocab, \
                    "ERROR: token '{}' is already in the vocab".format(token)
             idx = vocab[token] = len(vocab)
-            if vectors:
+            if vectors is not None:
                 vectors = junky.add_mean_vector(vectors, scale=.01)
         else:
             idx = None
