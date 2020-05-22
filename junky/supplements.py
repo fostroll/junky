@@ -465,7 +465,7 @@ def train(device, loaders, model, criterion, optimizer,
                  f1 if control_metric == 'f1' else \
                  None
 
-        if res > best_scores:
+        if scores > best_scores:
             best_scores = scores
             best_test_golds, best_test_preds = test_golds[:], test_preds[:]
             best_model_backup_method(model, res)
