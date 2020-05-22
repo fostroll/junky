@@ -392,7 +392,7 @@ def train(device, loaders, model, criterion, optimizer,
 
             batch_loss = []
             for i in range(pred.size(0)):
-                tmp_loss = criterion(pred[i], y[i])
+                tmp_loss = criterion(pred[i], batch[-2][i])
                 batch_loss.append(tmp_loss)
 
             loss = torch.mean(torch.stack(batch_loss)) 
@@ -404,7 +404,7 @@ def train(device, loaders, model, criterion, optimizer,
                 progress_bar.set_postfix(
                     train_loss=np.mean(train_losses_[-500:])
                 )
-                progress_bar.update(x.shape[0])
+                progress_bar.update(batch[0].shape[0])
 
         if with_progress:
             progress_bar.close()
@@ -433,10 +433,10 @@ def train(device, loaders, model, criterion, optimizer,
 
             batch_loss = []
             for i in range(pred.size(0)):
-                loss_ = criterion(pred[i], y[i])
+                loss_ = criterion(pred[i], batch[-2][i])
                 batch_loss.append(loss_)
 
-            loss = torch.mean(torch.stack(batch_loss)) 
+            loss = torch.mean(torch.stack(batch_loss))
             test_losses_.append(loss.item())
 
         mean_test_loss = np.mean(test_losses_)
