@@ -10,7 +10,7 @@ from gensim.models import keyedvectors
 import junky
 import numpy as np
 import torch
-
+from torch.nn.utils.rnn import pad_sequence
 
 def make_word_embeddings(vocab, vectors=None, unk_token=None, pad_token=None,
                          with_layer=True, layer_freeze=True, **layer_kwargs):
