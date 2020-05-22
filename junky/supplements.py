@@ -204,7 +204,7 @@ class WordSeqDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         return self.x_data[idx], self.y_data[idx]
 
-    def pad_collate(batch):
+    def pad_collate(self, batch):
         x_lens = torch.tensor([len(x[0]) for x in batch])
         y_lens = torch.tensor([len(x[1]) for x in batch])
 
@@ -246,7 +246,7 @@ class CharSeqDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         return self.x_ch_data[idx], self.y_data[idx]
 
-    def pad_collate(batch):
+    def pad_collate(self, batch):
         x_ch_lens = [torch.tensor([len(x) for x in x[0]]) for x in batch]
         y_lens = torch.tensor([len(x[1]) for x in batch])
 
@@ -300,7 +300,7 @@ class WordCharSeqDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         return self.x_data[idx], self.x_ch_data[idx], self.y_data[idx]
 
-    def pad_collate(batch):
+    def pad_collate(self, batch):
         x_lens = torch.tensor([len(x[0]) for x in batch])
         x_ch_lens = [torch.tensor([len(x) for x in x[1]]) for x in batch]
         y_lens = torch.tensor([len(x[2]) for x in batch])
