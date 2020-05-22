@@ -24,7 +24,8 @@ def clear_stderr():
         for instance in list(tqdm._instances):
             tqdm._decr_instances(instance)
 
-def make_word_embeddings(vocab, vectors=None, unk_token=None, pad_token=None,
+def make_word_embeddings(vocab, vectors=None,
+                         pad_token=None, extra_tokens=None,
                          with_layer=True, layer_freeze=True, **layer_kwargs):
     """Create or adjust Word to Index dict for embedding layer.
 
@@ -33,10 +34,10 @@ def make_word_embeddings(vocab, vectors=None, unk_token=None, pad_token=None,
                              |dict({word: gensim.models.keyedvectors.Vocab})
     :param vectors: array of word vectors
     :type vectors: numpy.ndarray
-    :param unk_token: add a token for unknown token.
-    :type unk_token: str
     :param pad_token: add a token for padding.
     :type pad_token: str
+    :param extra_tokens: add any tokens for other purposes.
+    :type extra_tokens: list([str])|None
     :param with_layer: if True, torch.nn.Embedding layer will be created from
         *vectors*.
     :param layer_freeze: If True, layer weights does not get updated in the
@@ -44,16 +45,15 @@ def make_word_embeddings(vocab, vectors=None, unk_token=None, pad_token=None,
     :param **layer_kwargs: any other keyword args for
         torch.nn.Embedding.from_pretrained() method.
     :return: Word to Index dict; *vectors* (possibly, updated); the index of
-        the unknown token; the index of the padding token; embedding layer.
-    :rtype: tuple(dict({word: int}), int, int, torch.nn.Embedding)
+        the padding token (it's always the last index, if pad_token is not
+        None); the indices of the extra tokens; embedding layer.
+    :rtype: tuple(dict({word: int}), int, list([int])|None,
+        torch.nn.Embedding)
     """
     assert vectors is None or len(vocab) == vectors.shape[0], \
            'ERROR: vocab and vectors must be of equal size'
     assert vectors is None or vectors.shape[0] != 0, \
            'ERROR: vectors must not be empty'
-    assert vectors is not None or not (unk_token and pad_token), \
-           'ERROR: unk_token and pad_token can be used only if vectors ' \
-           'is not None'
     assert vectors is not None or not with_layer, \
            'ERROR: with_layer can be True only if vectors is not None'
 
@@ -71,16 +71,25 @@ def make_word_embeddings(vocab, vectors=None, unk_token=None, pad_token=None,
             vocab = None
     assert vocab, 'ERROR: vocab of the incorrect type'
 
-    def add_token(vocab, vectors, token):
+    def add_token(vectors, token):
         if token:
+            assert token not in vocab, \
+                   "ERROR: token '{}' is already in the vocab".format(token)
             idx = vocab[token] = len(vocab)
-            vectors = junky.add_mean_vector(vectors, scale=.01)
+            if vectors:
+                vectors = junky.add_mean_vector(vectors, scale=.01)
         else:
             idx = None
         return vectors, idx
 
-    vectors, unk_idx = add_token(vocab, vectors, unk_token)
-    vectors, pad_idx = add_token(vocab, vectors, pad_token)
+    if extra_tokens is not None:
+        extra_idxs = []
+        for t in extra_tokens:
+            vectors, idx = add_token(vectors, t)
+            extra_idxs.append(idx)
+    else:
+        extra_idxs = None
+    vectors, pad_idx = add_token(vectors, pad_token)
 
     emb_layer = torch.nn.Embedding.from_pretrained(
         embeddings=torch.from_numpy(vectors),
@@ -89,25 +98,28 @@ def make_word_embeddings(vocab, vectors=None, unk_token=None, pad_token=None,
         **layer_kwargs
     ) if with_layer else \
     None
-    return vocab, vectors, unk_idx, pad_idx, emb_layer
+    return vocab, vectors, pad_idx, extra_idxs, emb_layer
 
-def make_alphabet(sentences, pad_char=None, allowed_chars=None,
-                  exclude_chars=None):
+def make_alphabet(sentences, pad_char=None, extra_chars=None,
+                  allowed_chars=None, exclude_chars=None):
     """Make alphabet from the given corpus of tokenized *sentences*.
 
     :param sentences: tokenized sentences.
     :type sentences: list([list([str])])
     :param pad_char: add a token for padding.
     :type pad_char: str
+    :param extra_chars: add tokens for other purposes.
+    :type extra_charss: list([str])|None
     :param allowed_chars: if not None, all charactes not from *allowed_chars*
         will be removed.
     :type allowed_chars: None|str|list([str])
     :param exclude_chars: if not None, all charactes from *exclude_chars* will
         be removed.
     :type exclude_chars: None|str|list([str])
-    :return: the alphabet created and the index of the padding character (it's
-        always the last index, if pad_char is not None).
-    :rtype: tuple(dict({char: int}), int)
+    :return: the alphabet created; the index of the padding character (it's
+        always the last index, if pad_char is not None); the indices of the
+        extra characters.
+    :rtype: tuple(dict({char: int}), int, list([int])|None)
     """
     abc = {
         x: i for i, x in enumerate(sorted(set(
@@ -117,16 +129,25 @@ def make_alphabet(sentences, pad_char=None, allowed_chars=None,
                 for x in x for x in x
         )))
     }
-    if pad_char:
-        assert pad_char not in abc, \
-           "ERROR: char '{}' is already in vocabulary".format(pad_char)
-        pad_idx = abc[pad_char] = len(abc)
+
+    def add_char(char):
+        if char:
+            assert char not in abc, \
+                   "ERROR: char '{}' is already in the alphabet".format(char)
+            idx = abc[char] = len(abc)
+        else:
+            idx = None
+        return idx
+
+    if extra_chars is not None:
+        extra_idxs = [add_char(c) for c in extra_chars]
     else:
-        pad_idx = None
+        extra_idxs = None
+    pad_idx = add_char(pad_char)
 
-    return abc, pad_idx
+    return abc, pad_idx, extra_idxs
 
-def make_token_dict(sentences, pad_token=None):
+def make_token_dict(sentences, pad_token=None, extra_tokens=None):
     """Extract tokens from tokenized *sentences*, remove all duplicates, sort
     the resulting set and map all tokens onto ther indices.
 
@@ -134,20 +155,35 @@ def make_token_dict(sentences, pad_token=None):
     :type sentences: list([list([str])])
     :param pad_token: add a token for padding.
     :type pad_char: str
+    :param extra_tokens: add any tokens for other purposes.
+    :type extra_tokens: list([str])|None
     :return: the dict created and the index of the padding token (it's
-        always the last index, if pad_token is not None).
-    :rtype: tuple(dict({char: int}), int)
+        always the last index, if pad_token is not None); the indices of
+        the extra tokens.
+    :rtype: tuple(dict({char: int}), int, list([int])|None)
     """
     t2idx = {
         x: i for i, x in enumerate(sorted(set(
             x for x in sentences for x in x
         )))
     }
-    if pad_token:
-        pad_idx = t2idx[pad_token] = len(t2idx)
+
+    def add_token(token):
+        if token:
+            assert token not in t2idx, \
+                   "ERROR: token '{}' is already in the dict".format(token)
+            idx = t2idx[token] = len(t2idx)
+        else:
+            idx = None
+        return idx
+
+    if extra_tokens is not None:
+        extra_idxs = [add_token(t) for t in extra_tokens]
     else:
-        pad_idx = None
-    return t2idx, pad_idx
+        extra_idxs = None
+    pad_idx = add_token(pad_token)
+
+    return t2idx, pad_idx, extra_idx
 
 def get_conllu_fields(corpus=None, fields=None, word2idx=None, unk_token=None,
                       with_empty=False, silent=False):
