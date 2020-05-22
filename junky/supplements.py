@@ -183,7 +183,7 @@ def make_token_dict(sentences, pad_token=None, extra_tokens=None):
         extra_idxs = None
     pad_idx = add_token(pad_token)
 
-    return t2idx, pad_idx, extra_idx
+    return t2idx, pad_idx, extra_idxs
 
 def get_conllu_fields(corpus=None, fields=None, word2idx=None, unk_token=None,
                       with_empty=False, silent=False):
