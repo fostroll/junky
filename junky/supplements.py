@@ -175,3 +175,151 @@ def get_conllu_fields(corpus=None, fields=None, word2idx=None, unk_token=None,
                 sents[i].append(field)
 
     return sents
+
+
+class WordSeqDataset(torch.utils.data.Dataset):
+    """
+    Dataset for sequence tagging with word-level input.
+
+    Args:
+        x_data: sequences of word indices: list([list([int])]).
+        y_data: sequences of label's indices: list([list([int])]).
+
+    Output:
+        x:list([torch.tensor]), x_lens:torch.tensor,
+        y:list([torch.tensor]), y_lens:torch.tensor
+    """
+    def __init__(self, x_data, y_data, batch_first=False,
+                 x_pad=0, y_pad=0):
+        super().__init__()
+        self.x_data = [torch.tensor(x) for x in x_data]
+        self.y_data = [torch.tensor(y) for y in y_data]
+        self.batch_first = batch_first
+        self.x_pad = x_pad
+        self.y_pad = y_pad
+
+    def __len__(self):
+        return len(self.y_data)
+
+    def __getitem__(self, idx):
+        return self.x_data[idx], self.y_data[idx]
+
+    def pad_collate(batch):
+        x_lens = torch.tensor([len(x[0]) for x in batch])
+        y_lens = torch.tensor([len(x[1]) for x in batch])
+
+        x = pad_sequence([x[0] for x in batch], batch_first=self.batch_first,
+                         padding_value=self.x_pad)
+        y = pad_sequence([y[1] for y in batch], batch_first=self.batch_first,
+                         padding_value=self.y_pad)
+
+        return x, x_lens, y, y_lens
+
+
+class CharSeqDataset(torch.utils.data.Dataset):
+    """
+    Dataset for sequence tagging with char-level input.
+
+    Args:
+        x_ch_data: sequences of sequences of char indices:
+            list([list([list([int])])]).
+        y_data: sequences of label's indices: list([list([int])]).
+
+    Output:
+        x_ch:list([list([torch.tensor])]), x_ch_lens:list([torch.tensor]),
+        y:list([torch.tensor]), y_lens:torch.tensor
+    """
+    def __init__(self, x_ch_data, y_data, batch_first=False,
+                 x_ch_pad=0, y_pad=0):
+        super().__init__()
+        self.x_ch_data = [
+            [torch.tensor(x_ch) for x_ch in sent] for sent in x_ch_data
+        ]
+        self.y_data = [torch.tensor(y) for y in y_data]
+        self.batch_first = batch_first
+        self.x_ch_pad = x_ch_pad
+        self.y_pad = y_pad
+
+    def __len__(self):
+        return len(self.y_data)
+
+    def __getitem__(self, idx):
+        return self.x_ch_data[idx], self.y_data[idx]
+
+    def pad_collate(batch):
+        x_ch_lens = [torch.tensor([len(x) for x in x[0]]) for x in batch]
+        y_lens = torch.tensor([len(x[1]) for x in batch])
+
+        if self.min_len is not None:
+            batch.append(([torch.tensor([self.x_ch_pad])] * self.min_len,
+                          torch.tensor([self.y_pad] * self.min_len)))
+
+        x_ch = junky.pad_array_torch([x[0] for x in batch],
+                                     padding_value=self.x_ch_pad)
+        y = pad_sequence([x[1] for x in batch], batch_first=self.batch_first,
+                         padding_value=self.y_pad)
+
+        if self.min_len is not None:
+            x_ch = x_ch[:-1]
+            y = y[:-1]
+
+        return x_ch, x_ch_lens, y, y_lens
+
+
+class WordCharSeqDataset(torch.utils.data.Dataset):
+    """
+    Dataset for sequence tagging with both word- and char-level inputs.
+
+    Args:
+        x_data: sequences of word indices: list([list([int])]).
+        x_ch_data: sequences of sequences of char indices:
+            list([list([list([int])])]).
+        y_data: sequences of label's indices: list([list([int])]).
+
+    Output:
+        x:list([torch.tensor]), x_lens:torch.tensor,
+        x_ch:list([list([torch.tensor])]), x_ch_lens:list([torch.tensor]),
+        y:list([torch.tensor]), y_lens:torch.tensor
+    """
+    def __init__(self, x_data, x_ch_data, y_data, batch_first=False,
+                 x_pad=0, x_ch_pad=0, y_pad=0, min_len=None):
+        super().__init__()
+        self.x_data = [torch.tensor(x) for x in x_data]
+        self.x_ch_data = [[torch.tensor(x_ch) for x_ch in sent]
+                              for sent in x_ch_data]
+        self.y_data = [torch.tensor(y) for y in y_data]
+        self.batch_first = batch_first
+        self.x_pad = x_pad
+        self.x_ch_pad = x_ch_pad
+        self.y_pad = y_pad
+        self.min_len = min_len
+
+    def __len__(self):
+        return len(self.y_data)
+
+    def __getitem__(self, idx):
+        return self.x_data[idx], self.x_ch_data[idx], self.y_data[idx]
+
+    def pad_collate(batch):
+        x_lens = torch.tensor([len(x[0]) for x in batch])
+        x_ch_lens = [torch.tensor([len(x) for x in x[1]]) for x in batch]
+        y_lens = torch.tensor([len(x[2]) for x in batch])
+
+        if self.min_len is not None:
+            batch.append((torch.tensor([self.x_pad] * self.min_len),
+                          [torch.tensor([self.x_ch_pad])] * self.min_len,
+                          torch.tensor([self.y_pad] * self.min_len)))
+
+        x = pad_sequence([x[0] for x in batch], batch_first=self.batch_first,
+                         padding_value=self.x_pad)
+        x_ch = junky.pad_array_torch([x[1] for x in batch],
+                                     padding_value=self.x_ch_pad)
+        y = pad_sequence([x[2] for x in batch], batch_first=self.batch_first,
+                         padding_value=self.y_pad)
+
+        if self.min_len is not None:
+            x = x[:-1]
+            x_ch = x_ch[:-1]
+            y = y[:-1]
+
+        return x, x_lens, x_ch, x_ch_lens, y, y_lens
