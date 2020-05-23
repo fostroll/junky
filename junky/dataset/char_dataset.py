@@ -7,8 +7,6 @@
 Provides torch.utils.data.Dataset for character-level input.
 """
 from junky import make_alphabet
-import numpy as np
-import sys
 from torch import Tensor, tensor
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import Dataset
@@ -136,20 +134,18 @@ class CharDataset(Dataset):
         """Convert a token or a list of tokens to the corresponding
         index|list of indices. If skip_unk is ``True``, unknown tokens will be
         skipped."""
-        data = self.token_to_ids(tokens, skip_unk=skip_unk) \
+        return self.token_to_ids(tokens, skip_unk=skip_unk) \
                    if isinstance(tokens, str) else \
                [self.token_to_ids(t, skip_unk=skip_unk) for t in tokens]
-        return data
 
     def reconstruct_tokens(self, ids, skip_unk=False, aslist=False):
         """Convert a list of indices or a sequence of lists of indices to the
         corresponding token|sequence of tokens. If skip_unk is ``True``,
         unknown indices will be skipped."""
-        data = self.ids_to_token(ids, skip_unk=skip_unk, aslist=aslist) \
+        return self.ids_to_token(ids, skip_unk=skip_unk, aslist=aslist) \
                    if ids and isinstance(ids[0], int) else \
                [self.ids_to_token(i, skip_unk=skip_unk, aslist=aslist)
                     for i in ids]
-        return data
 
     def transform(self, sentences, skip_unk=False, keep_empty=True,
                   save=True):
@@ -161,7 +157,7 @@ class CharDataset(Dataset):
         If save is ``True``, we'll keep the converted sentences as the Dataset
         source."""
         data = [[
-            tensor(t) for t in s if keep_empty or t
+            tensor(i) for i in s if keep_empty or i
         ] for s in [
             self.transform_tokens(s, skip_unk=skip_unk)
                 for s in sentences

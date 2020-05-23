@@ -7,8 +7,6 @@
 Provides torch.utils.data.Dataset for token-level input.
 """
 from junky import make_token_dict
-import numpy as np
-import sys
 from torch import Tensor, tensor
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import Dataset
@@ -98,10 +96,9 @@ class TokenDataset(Dataset):
         """Convert a token or a list of tokens to the corresponding
         index|list of indices. If skip_unk is ``True``, unknown tokens will be
         skipped."""
-        data = self.token_to_idx(tokens, skip_unk=skip_unk) \
+        return self.token_to_idx(tokens, skip_unk=skip_unk) \
                    if isinstance(tokens, str) else \
                [self.token_to_idx(t, skip_unk=skip_unk) for t in tokens]
-        return data
 
     def reconstruct_tokens(self, ids, skip_unk=False):
         """Convert an index or a list of indices to the corresponding
@@ -122,7 +119,7 @@ class TokenDataset(Dataset):
         If save is ``True``, we'll keep the converted sentences as the Dataset
         source."""
         data = [[
-            tensor(t) for t in s if keep_empty or t
+            tensor(i) for i in s if keep_empty or i
         ] for s in [
             self.transform_tokens(s, skip_unk=skip_unk)
                 for s in sentences

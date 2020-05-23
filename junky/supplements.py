@@ -98,6 +98,7 @@ def make_word_embeddings(vocab, vectors=None,
         **layer_kwargs
     ) if with_layer else \
     None
+
     return vocab, vectors, pad_idx, extra_idxs, emb_layer
 
 def make_alphabet(sentences, pad_char=None, extra_chars=None,
