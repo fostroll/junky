@@ -7,7 +7,7 @@
 Provides torch.utils.data.Dataset for word-level input.
 """
 from junky import get_rand_vector
-from torch import Tensor, tensor
+from torch import tensor
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import Dataset
 
@@ -85,14 +85,15 @@ class WordDataset(Dataset):
         If save is ``True``, we'll keep the converted sentences as the Dataset
         source."""
         data = [[
-            tensor(v) for v in s if keep_empty or v
+            tensor(v) for v in s if keep_empty or v is not None
         ] for s in [
             self.transform_words(s, skip_unk=skip_unk)
                 for s in sentences
         ] if keep_empty or s]
         if save:
             self.data = data
-        return data
+        else:
+            return data
 
     def pad_collate(self, batch):
         """The method to use with torch.utils.data.DataLoader
@@ -100,5 +101,5 @@ class WordDataset(Dataset):
         """
         lens = tensor([len(x[0]) for x in batch])
         x = pad_sequence([x[0] for x in batch], batch_first=self.batch_first,
-                         padding_value=self.pad)
+                         padding_value=tensor(self.pad))
         return x, lens

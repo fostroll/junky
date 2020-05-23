@@ -126,7 +126,8 @@ class TokenDataset(Dataset):
         ] if keep_empty or s]
         if save:
             self.data = data
-        return data
+        else:
+            return data
 
     def reconstruct(self, sentences, skip_unk=False, keep_empty=True):
         """Convert sentences of indices to the sentences of the corresponding
