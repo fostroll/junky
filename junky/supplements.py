@@ -37,7 +37,7 @@ def make_word_embeddings(vocab, vectors=None,
     :param pad_token: add a token for padding.
     :type pad_token: str
     :param extra_tokens: add any tokens for other purposes.
-    :type extra_tokens: list([str])|None
+    :type extra_tokens: list([str])
     :param with_layer: if True, torch.nn.Embedding layer will be created from
         *vectors*.
     :param layer_freeze: If True, layer weights does not get updated in the
@@ -109,16 +109,16 @@ def make_alphabet(sentences, pad_char=None, extra_chars=None,
     :param pad_char: add a token for padding.
     :type pad_char: str
     :param extra_chars: add tokens for other purposes.
-    :type extra_charss: list([str])|None
+    :type extra_chars: list([str])
     :param allowed_chars: if not None, all charactes not from *allowed_chars*
         will be removed.
-    :type allowed_chars: None|str|list([str])
+    :type allowed_chars: str|list([str])
     :param exclude_chars: if not None, all charactes from *exclude_chars* will
         be removed.
-    :type exclude_chars: None|str|list([str])
-    :return: the alphabet created; the index of the padding character (it's
-        always the last index, if pad_char is not None); the indices of the
-        extra characters.
+    :type exclude_chars: str|list([str])
+    :return: the alphabet created; the index of the padding token (it's always
+        the last index, if pad_char is not None); the indices of the extra
+        characters.
     :rtype: tuple(dict({char: int}), int, list([int])|None)
     """
     abc = {
@@ -156,7 +156,7 @@ def make_token_dict(sentences, pad_token=None, extra_tokens=None):
     :param pad_token: add a token for padding.
     :type pad_char: str
     :param extra_tokens: add any tokens for other purposes.
-    :type extra_tokens: list([str])|None
+    :type extra_tokens: list([str])
     :return: the dict created and the index of the padding token (it's
         always the last index, if pad_token is not None); the indices of
         the extra tokens.
@@ -191,11 +191,12 @@ def get_conllu_fields(corpus=None, fields=None, word2idx=None, unk_token=None,
 
     :param corpus: the corpus in CONLL-U or Parsed CONLL-U format.
     :param fields: list of CONLL-U fields but 'FORM' to extract.
-    :type fields: None|list
+    :type fields: list
     :param word2idx: Word to Index dict. If not None, all words not from dict
         will be skipped or replacet to *unk_token*
     :type word2idx: dict({word: int})
-    :param unk_token: replacement for tokens that not present in *word2idx*.
+    :param unk_token: replacement for tokens that are not present in
+        *word2idx*.
     :type unk_token: str
     :param with_empty: don't skip empty sentences.
     :param silent: suppress output.
@@ -235,6 +236,11 @@ class WordSeqDataset(torch.utils.data.Dataset):
     Args:
         x_data: sequences of word indices: list([list([int])]).
         y_data: sequences of label's indices: list([list([int])]).
+        batch_first: If ``True``, then the input and output tensors are
+            provided as `(batch, seq, feature)`. Otherwise (default),
+            `(seq, batch, feature)`.
+        x_pad: index of the padding token for `x_data`.
+        y_pad: index of the padding token for `y_data`.
 
     Output:
         x:list([torch.tensor]), x_lens:torch.tensor,
@@ -275,6 +281,11 @@ class CharSeqDataset(torch.utils.data.Dataset):
         x_ch_data: sequences of sequences of char indices:
             list([list([list([int])])]).
         y_data: sequences of label's indices: list([list([int])]).
+        batch_first: If ``True``, then the input and output tensors are
+            provided as `(batch, seq, feature)`. Otherwise (default),
+            `(seq, batch, feature)`.
+        x_ch_pad: index of the padding token for `x_ch_data`.
+        y_pad: index of the padding token for `y_data`.
 
     Output:
         x_ch:list([list([torch.tensor])]), x_ch_lens:list([torch.tensor]),
@@ -326,6 +337,14 @@ class WordCharSeqDataset(Dataset):
         x_ch_data: sequences of sequences of char indices:
             list([list([list([int])])]).
         y_data: sequences of label's indices: list([list([int])]).
+        batch_first: If ``True``, then the input and output tensors are
+            provided as `(batch, seq, feature)`. Otherwise (default),
+            `(seq, batch, feature)`.
+        x_pad: index of the padding token for `x_data`.
+        x_ch_pad: index of the padding token for `x_ch_data`.
+        y_pad: index of the padding token for `y_data`.
+        min_len: min length of the resulting arrays. If *_data is shorter,
+            they will be appended with *_pad.
 
     Output:
         x:list([torch.tensor]), x_lens:torch.tensor,
