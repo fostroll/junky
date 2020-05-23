@@ -140,7 +140,7 @@ def enforce_reproducibility(seed=None):
         # System based
         np.random.seed(seed)
 
-def get_rand_vector(shape, norm, shift=0.):
+def get_rand_vector(shape, norm, shift=0., dtype=float):
     """Create random vector with the norm given.
 
     :param shape: the shape of the new vector.
@@ -151,7 +151,7 @@ def get_rand_vector(shape, norm, shift=0.):
     :type shift: float
     :rtype: numpy.ndarray
     """
-    vector = np.random.rand(*shape).astype(vectors.dtype) - .5 + shift
+    vector = np.random.rand(*shape).astype(dtype) - .5 + shift
     return vector * norm / np.linalg.norm(vector)
 
 def add_mean_vector(vectors, axis=0, shift=0., scale=1.):
@@ -172,5 +172,5 @@ def add_mean_vector(vectors, axis=0, shift=0., scale=1.):
     """
     norm = np.linalg.norm(vectors.shape[:axis] + vectors.shape[axis + 1:],
                           vectors, axis=axis).mean() * scale
-    vector = np.expand_dims(get_rand_vector(norm, shift))
+    vector = np.expand_dims(get_rand_vector(norm, shift, dtype=vectors.dtype))
     return np.append(vectors, vector, axis=axis)
