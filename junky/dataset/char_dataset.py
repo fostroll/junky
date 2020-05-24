@@ -48,7 +48,7 @@ class CharDataset(Dataset):
         if transform:
             self.transform_and_save(sentences)
         else:
-            self.data = []
+            self.data = ()
 
     def __len__(self):
         return len(self.data)
@@ -163,7 +163,7 @@ class CharDataset(Dataset):
                 for s in sentences
         ] if keep_empty or s]
         if save:
-            self.data = data
+            self.data = data,
         else:
             return data
 

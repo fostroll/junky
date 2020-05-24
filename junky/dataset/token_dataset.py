@@ -39,7 +39,7 @@ class TokenDataset(Dataset):
         if transform:
             self.transform(sentences, save=True)
         else:
-            self.data = []
+            self.data = ()
 
     def __len__(self):
         return len(self.data)
@@ -125,7 +125,7 @@ class TokenDataset(Dataset):
                 for s in sentences
         ] if keep_empty or s]
         if save:
-            self.data = data
+            self.data = data,
         else:
             return data
 

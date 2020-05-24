@@ -52,7 +52,7 @@ class WordDataset(Dataset):
         else:
             elf.pad = None
         self.batch_first = batch_first
-        self.data = []
+        self.data = ()
 
     def __len__(self):
         return len(self.data)
@@ -91,7 +91,7 @@ class WordDataset(Dataset):
                 for s in sentences
         ] if keep_empty or s]
         if save:
-            self.data = data
+            self.data = data,
         else:
             return data
 
