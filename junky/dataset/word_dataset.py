@@ -52,7 +52,7 @@ class WordDataset(Dataset):
         else:
             elf.pad = None
         self.batch_first = batch_first
-        self.data = ()
+        self.data = []
 
     def __len__(self):
         return len(self.data)
@@ -84,14 +84,14 @@ class WordDataset(Dataset):
 
         If save is ``True``, we'll keep the converted sentences as the Dataset
         source."""
-        data = [[
+        data = [([
             tensor(v) for v in s if keep_empty or v is not None
         ] for s in [
             self.transform_words(s, skip_unk=skip_unk)
                 for s in sentences
-        ] if keep_empty or s]
+        ] if keep_empty or s,)]
         if save:
-            self.data = data,
+            self.data = data
         else:
             return data
 

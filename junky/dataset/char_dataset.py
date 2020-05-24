@@ -48,7 +48,7 @@ class CharDataset(Dataset):
         if transform:
             self.transform_and_save(sentences)
         else:
-            self.data = ()
+            self.data = []
 
     def __len__(self):
         return len(self.data)
@@ -156,14 +156,14 @@ class CharDataset(Dataset):
 
         If save is ``True``, we'll keep the converted sentences as the Dataset
         source."""
-        data = [[
+        data = [([
             tensor(i) for i in s if keep_empty or i
         ] for s in [
             self.transform_tokens(s, skip_unk=skip_unk)
                 for s in sentences
-        ] if keep_empty or s]
+        ] if keep_empty or s,)]
         if save:
-            self.data = data,
+            self.data = data
         else:
             return data
 
