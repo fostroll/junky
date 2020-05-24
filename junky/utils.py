@@ -189,7 +189,7 @@ def get_rand_vector(shape, norm, shift=0., dtype=float):
         vector *= norm / np.linalg.norm(vector)
     else:
         vector = np.zeros(shape)
-    return norm
+    return vector
 
 def add_mean_vector(vectors, axis=0, shift=0., scale=1.):
     """Append *vectors* with a vector that has norm equals to mean norm

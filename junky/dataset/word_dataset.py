@@ -30,9 +30,9 @@ class WordDataset(Dataset):
             `(seq, batch, feature)`.
     """
     def __init__(self, emb_model, vec_size, vec_dtype=float,
-                 instr_vec_norm=1e-2, unk_token=None, unk_vec_norm=1e-2,
-                 pad_token=None, pad_vec_norm=0., extra_tokens=None,
-                 extra_vec_norm=1e-2, batch_first=False):
+                 unk_token=None, unk_vec_norm=1e-2,
+                 pad_token=None, pad_vec_norm=0.,
+                 extra_tokens=None, extra_vec_norm=1e-2, batch_first=False):
         super().__init__()
         self.emb_model = emb_model
         self.extra_model = {
