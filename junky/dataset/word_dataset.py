@@ -22,33 +22,32 @@ class WordDataset(Dataset):
         sentences: sequences of words: list([list([str])]).
         unk_token: add a token for words that are not present in the dict:
             str.
+        unk_vec_norm: 
         pad_token: add a token for padding: str.
         extra_tokens: add tokens for any other purposes: list([str]).
-        transform: if ``True``, transform and save `sentences`. The
-            `transform()` method will be invoked with default params.
-        skip_unk, keep_empty: params for the `transform()` method.
         batch_first: if ``True``, then the input and output tensors are
             provided as `(batch, seq, feature)`. Otherwise (default),
             `(seq, batch, feature)`.
     """
     def __init__(self, emb_model, vec_size, vec_dtype=float,
-                 instr_vec_norm=1e-2, unk_token=None, pad_token=None,
-                 extra_tokens=None, batch_first=False):
+                 instr_vec_norm=1e-2, unk_token=None, unk_vec_norm=1e-2,
+                 pad_token=None, pad_vec_norm=0., extra_tokens=None,
+                 extra_vec_norm=1e-2, batch_first=False):
         super().__init__()
         self.extra_model = {}
         self.emb_model = emb_model
         if extra_tokens:
             for token in extra_tokens:
-                self.extra_model[token] = get_rand_vector((vec_size,),
-                                                          instr_vec_norm)
+                self.extra_model[token] = \
+                    tensor(get_rand_vector((vec_size,), extra_vec_norm))
         if unk_token:
             self.unk = self.extra_model[unk_token] = \
-                get_rand_vector((vec_size,), instr_vec_norm)
+                tensor(get_rand_vector((vec_size,), unc_vec_norm))
         else:
             self.unk = None
         if pad_token:
             self.pad = self.extra_model[pad_token] = \
-                get_rand_vector((vec_size,), instr_vec_norm)
+                tensor(get_rand_vector((vec_size,), pad_vec_norm))
         else:
             elf.pad = None
         self.batch_first = batch_first
@@ -63,7 +62,7 @@ class WordDataset(Dataset):
     def word_to_vec(self, word, skip_unk=True):
         """Convert a token to its vector. If the token is not present in the
         model, return vector of unk token or None if it's not defined."""
-        return self.emb_model[word] if word in self.emb_model else \
+        return vector(self.emb_model[word]) if word in self.emb_model else \
                self.unk if not skip_unk and self.unk else \
                None
 
@@ -71,9 +70,9 @@ class WordDataset(Dataset):
         """Convert a token or a list of words to the corresponding
         vector|list of vectors. If skip_unk is ``True``, unknown words will be
         skipped."""
-        return self.word_to_vec(words, skip_unk=skip_unk) \
+        return tensor(self.word_to_vec(words, skip_unk=skip_unk)) \
                    if isinstance(words, str) else \
-               [self.word_to_vec(w, skip_unk=skip_unk) for w in words]
+               tensor(self.word_to_vec(w, skip_unk=skip_unk) for w in words)
 
     def transform(self, sentences, skip_unk=False, keep_empty=False,
                   save=True):
@@ -84,9 +83,9 @@ class WordDataset(Dataset):
 
         If save is ``True``, we'll keep the converted sentences as the Dataset
         source."""
-        data = [(tensor([
+        data = [(tensor(
             v for v in s if keep_empty or v is not None
-        ]),) for s in [
+        ),) for s in [
             self.transform_words(s, skip_unk=skip_unk)
                 for s in sentences
         ] if keep_empty or s]

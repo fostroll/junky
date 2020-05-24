@@ -124,6 +124,38 @@ def pad_array_torch(array, padding_value=0, **kwargs):
     return torch.tensor(pad_array(array, padding_value=padding_value),
                         **kwargs)
 
+def pad_sequences_with_tensor(sequences, batch_first=False,
+                              padding_tensor=0.):
+    """Pad the list of sequences of shape `(seq, features)` with
+    *padding_tensor*.
+
+    :param sequences: the list of sequences of shape `(seq, features)`.
+    :type sequences: list([tensor(seq, features)]]
+    :param batch_first: If ``True``, then the output tensor is provided as
+        `(batch, seq, feature)`. Default: ``False``.
+    :param padding_tensor: scalar or the tensor of the shape of `features` to
+        pad *sequences*.
+    :type padding_tensor: tensor(features)|float
+    :return: padded list converted to tensor.
+    :rtype: tensor(seq, batch, features) if *batch_first* is `True` else
+            tensor(batch, seq, features)
+    """
+    t = sequences[0]
+    device = t.get_device() if t.is_cuda else torch.device('cpu')
+    N, S = len(sequences), max(s.shape[0] for s in sequences)
+    if not isinstance(padding_tensor, Tensor):
+        if isinstance(padding_tensor, Iterable):
+            padding_tensor = tensor(padding_tensor, device=device)
+        else:
+            padding_tensor = t.new_full(t.shape[2:], padding_tensor)
+    #res = padding_tensor.to(device).expand(N, S, *t.shape[2:]).clone()
+    res = padding_tensor.to(device).repeat(N, S, 1)
+
+    for s_i, s in enumerate(sequences):
+        res[s_i, :s.shape[0]] = s
+
+    return res if batch_first else res.transpose(0, 1)
+
 def enforce_reproducibility(seed=None):
     """Re-init random number generators.
     [We stole this method from Stanford C224U assignments]"""
@@ -151,8 +183,12 @@ def get_rand_vector(shape, norm, shift=0., dtype=float):
     :type shift: float
     :rtype: numpy.ndarray
     """
-    vector = np.random.rand(*shape).astype(dtype) - .5 + shift
-    return vector * norm / np.linalg.norm(vector)
+    if norm:
+        vector = np.random.rand(*shape).astype(dtype) - .5 + shift
+        vector *= norm / np.linalg.norm(vector)
+    else:
+        vector = np.zeros(shape)
+    return norm
 
 def add_mean_vector(vectors, axis=0, shift=0., scale=1.):
     """Append *vectors* with a vector that has norm equals to mean norm
