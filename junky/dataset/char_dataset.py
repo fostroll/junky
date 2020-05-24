@@ -37,7 +37,7 @@ class CharDataset(Dataset):
     """
     def __init__(self, sentences, unk_token=None, pad_token=None,
                  extra_tokens=None, allowed_chars=None, exclude_chars=None,
-                 transform=False, skip_unk=False, keep_empty=True,
+                 transform=False, skip_unk=False, keep_empty=False,
                  batch_first=False, min_len=None):
         super().__init__()
         self.batch_first = batch_first
@@ -147,7 +147,7 @@ class CharDataset(Dataset):
                [self.ids_to_token(i, skip_unk=skip_unk, aslist=aslist)
                     for i in ids]
 
-    def transform(self, sentences, skip_unk=False, keep_empty=True,
+    def transform(self, sentences, skip_unk=False, keep_empty=False,
                   save=True):
         """Convert sentences of token to the sequences of the lists of the
         indices corresponding to token's chars and adjust its format for
@@ -168,7 +168,7 @@ class CharDataset(Dataset):
         else:
             return data
 
-    def reconstruct(self, sequences, skip_unk=False, keep_empty=True,
+    def reconstruct(self, sequences, skip_unk=False, keep_empty=False,
                     aslist=False):
         """Convert sequences of the lists of the indices in Dataset format to
         the sentences of the corresponding tokens. If *skip_unk* is ``True``,
@@ -182,7 +182,7 @@ class CharDataset(Dataset):
         ] if keep_empty or s]
 
     def fit_transform(self, sentences, unk_token=None, pad_token=None,
-                      extra_tokens=None, skip_unk=False, keep_empty=True,
+                      extra_tokens=None, skip_unk=False, keep_empty=False,
                       save=True):
         """Just a serial execution `fit()` and `transform()` methods."""
         self.fit(sentences, unk_token=unk_token, pad_token=pad_token,

@@ -7,7 +7,7 @@
 Provides torch.utils.data.Dataset for word-level input.
 """
 from junky import get_rand_vector
-from torch import tensor
+from torch import Tensor, tensor
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import Dataset
 
@@ -75,7 +75,7 @@ class WordDataset(Dataset):
                    if isinstance(words, str) else \
                [self.word_to_vec(w, skip_unk=skip_unk) for w in words]
 
-    def transform(self, sentences, skip_unk=False, keep_empty=True,
+    def transform(self, sentences, skip_unk=False, keep_empty=False,
                   save=True):
         """Convert sentences of words to the sentences of the corresponding
         vectors. If *skip_unk* is ``True``, unknown words will be skipped.
@@ -84,9 +84,9 @@ class WordDataset(Dataset):
 
         If save is ``True``, we'll keep the converted sentences as the Dataset
         source."""
-        data = [([
-            tensor(v) for v in s if keep_empty or v is not None
-        ],) for s in [
+        data = [(tensor([
+            v for v in s if keep_empty or v is not None
+        ]),) for s in [
             self.transform_words(s, skip_unk=skip_unk)
                 for s in sentences
         ] if keep_empty or s]

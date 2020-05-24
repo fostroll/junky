@@ -31,7 +31,7 @@ class TokenDataset(Dataset):
     """
     def __init__(self, sentences, unk_token=None, pad_token=None,
                  extra_tokens=None, transform=False, skip_unk=False,
-                 keep_empty=True, batch_first=False):
+                 keep_empty=False, batch_first=False):
         super().__init__()
         self.batch_first = batch_first
         self.fit(sentences, unk_token=unk_token, pad_token=pad_token,
@@ -109,7 +109,7 @@ class TokenDataset(Dataset):
                [self.idx_to_token(i, skip_unk=skip_unk) for i in ids]
         return data
 
-    def transform(self, sentences, skip_unk=False, keep_empty=True,
+    def transform(self, sentences, skip_unk=False, keep_empty=False,
                   save=True):
         """Convert sentences of token to the sequences of the corresponding
         indices and adjust its format for Dataset. If *skip_unk* is ``True``,
@@ -129,7 +129,7 @@ class TokenDataset(Dataset):
         else:
             return data
 
-    def reconstruct(self, sequences, skip_unk=False, keep_empty=True):
+    def reconstruct(self, sequences, skip_unk=False, keep_empty=False):
         """Convert sequences of indices in Dataset format to the sentences
         of the corresponding tokens. If *skip_unk* is ``True``, unknown
         indices will be skipped. If *keep_empty* is ``False``, we'll remove
@@ -142,7 +142,7 @@ class TokenDataset(Dataset):
         ] if keep_empty or s]
 
     def fit_transform(self, sentences, unk_token=None, pad_token=None,
-                      extra_tokens=None, skip_unk=False, keep_empty=True,
+                      extra_tokens=None, skip_unk=False, keep_empty=False,
                       save=True):
         """Just a serial execution `fit()` and `transform()` methods."""
         self.fit(sentences, unk_token=unk_token, pad_token=pad_token,
