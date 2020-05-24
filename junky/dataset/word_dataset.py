@@ -36,18 +36,18 @@ class WordDataset(Dataset):
         super().__init__()
         self.emb_model = emb_model
         self.extra_model = {
-            t: tensor(get_rand_vector((vec_size,), extra_vec_norm))
+            t: get_rand_vector((vec_size,), extra_vec_norm)
                 for t in extra_tokens
         } if extra_tokens else \
         {}
         if unk_token:
             self.unk = self.extra_model[unk_token] = \
-                tensor(get_rand_vector((vec_size,), unk_vec_norm))
+                get_rand_vector((vec_size,), unk_vec_norm)
         else:
             self.unk = None
         if pad_token:
             self.pad = self.extra_model[pad_token] = \
-                tensor(get_rand_vector((vec_size,), pad_vec_norm))
+                get_rand_vector((vec_size,), pad_vec_norm)
         else:
             elf.pad = None
         self.batch_first = batch_first
@@ -62,7 +62,7 @@ class WordDataset(Dataset):
     def word_to_vec(self, word, skip_unk=True):
         """Convert a token to its vector. If the token is not present in the
         model, return vector of unk token or None if it's not defined."""
-        return tensor(self.emb_model[word]) if word in self.emb_model else \
+        return self.emb_model[word] if word in self.emb_model else \
                self.unk if not skip_unk and self.unk else \
                None
 
