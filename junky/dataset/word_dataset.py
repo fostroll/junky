@@ -34,12 +34,12 @@ class WordDataset(Dataset):
                  pad_token=None, pad_vec_norm=0., extra_tokens=None,
                  extra_vec_norm=1e-2, batch_first=False):
         super().__init__()
-        self.extra_model = {}
         self.emb_model = emb_model
-        if extra_tokens:
-            for token in extra_tokens:
-                self.extra_model[token] = \
-                    tensor(get_rand_vector((vec_size,), extra_vec_norm))
+        self.extra_model = {
+            t: tensor(get_rand_vector((vec_size,), extra_vec_norm))
+                for t in extra_tokens
+        } if extra_tokens else \
+        {}
         if unk_token:
             self.unk = self.extra_model[unk_token] = \
                 tensor(get_rand_vector((vec_size,), unk_vec_norm))
@@ -72,7 +72,7 @@ class WordDataset(Dataset):
         skipped."""
         return tensor(self.word_to_vec(words, skip_unk=skip_unk)) \
                    if isinstance(words, str) else \
-               tensor(self.word_to_vec(w, skip_unk=skip_unk) for w in words)
+               tensor([self.word_to_vec(w, skip_unk=skip_unk) for w in words])
 
     def transform(self, sentences, skip_unk=False, keep_empty=False,
                   save=True):
@@ -83,9 +83,9 @@ class WordDataset(Dataset):
 
         If save is ``True``, we'll keep the converted sentences as the Dataset
         source."""
-        data = [(tensor(
+        data = [(tensor([
             v for v in s if keep_empty or v is not None
-        ),) for s in [
+        ]),) for s in [
             self.transform_words(s, skip_unk=skip_unk)
                 for s in sentences
         ] if keep_empty or s]
