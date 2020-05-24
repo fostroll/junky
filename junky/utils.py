@@ -8,6 +8,7 @@ Provides a bunch of utilities to use with PyTorch.
 """
 import numpy as np
 import torch
+from torch import Tensor, tensor
 
 
 def get_max_dims(array, str_isarray=False, max_dims=None, dim_no=0):
