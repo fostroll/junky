@@ -63,7 +63,8 @@ class WordDataset(Dataset):
     def word_to_vec(self, word, skip_unk=True):
         """Convert a token to its vector. If the token is not present in the
         model, return vector of unk token or None if it's not defined."""
-        return self.emb_model[word] if word in self.emb_model else \
+        return self.extra_model[word] if word in self.extra_model else \
+               self.emb_model[word] if word in self.emb_model else \
                self.unk if not skip_unk and self.unk else \
                None
 
