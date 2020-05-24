@@ -72,7 +72,8 @@ class WordDataset(Dataset):
         skipped."""
         return tensor(self.word_to_vec(words, skip_unk=skip_unk)) \
                    if isinstance(words, str) else \
-               tensor([self.word_to_vec(w, skip_unk=skip_unk) for w in words])
+               tensor([tensor(self.word_to_vec(w, skip_unk=skip_unk))
+                           for w in words])
 
     def transform(self, sentences, skip_unk=False, keep_empty=False,
                   save=True):
