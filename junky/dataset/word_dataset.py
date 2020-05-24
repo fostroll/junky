@@ -6,7 +6,7 @@
 """
 Provides torch.utils.data.Dataset for word-level input.
 """
-from junky import get_rand_vector
+from junky import get_rand_vector, pad_sequences_with_tensor
 from torch import Tensor, tensor
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import Dataset
@@ -99,7 +99,7 @@ class WordDataset(Dataset):
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
         """
         lens = tensor([len(x[0]) for x in batch])
-        x = junky.pad_sequences_with_tensor(
+        x = pad_sequences_with_tensor(
             [x[0] for x in batch], batch_first=True,
             padding_tensor=wd_test.pad
         )
