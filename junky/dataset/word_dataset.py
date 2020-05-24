@@ -42,7 +42,7 @@ class WordDataset(Dataset):
                     tensor(get_rand_vector((vec_size,), extra_vec_norm))
         if unk_token:
             self.unk = self.extra_model[unk_token] = \
-                tensor(get_rand_vector((vec_size,), unc_vec_norm))
+                tensor(get_rand_vector((vec_size,), unk_vec_norm))
         else:
             self.unk = None
         if pad_token:
