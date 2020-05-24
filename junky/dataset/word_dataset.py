@@ -99,7 +99,7 @@ class WordDataset(Dataset):
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
         """
         lens = tensor([len(x[0]) for x in batch])
-        x = pad_sequences_with_tensor(
+        x = junky.pad_sequences_with_tensor(
             [x[0] for x in batch], batch_first=True,
             padding_tensor=wd_test.pad
         )
