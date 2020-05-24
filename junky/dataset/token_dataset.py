@@ -118,27 +118,27 @@ class TokenDataset(Dataset):
 
         If save is ``True``, we'll keep the converted sentences as the Dataset
         source."""
-        data = [(([
+        data = [([
             tensor(i) for i in s if keep_empty or i
-        ] for s in [
+        ],) for s in [
             self.transform_tokens(s, skip_unk=skip_unk)
                 for s in sentences
-        ] if keep_empty or s),)]
+        ] if keep_empty or s]
         if save:
             self.data = data
         else:
             return data
 
-    def reconstruct(self, sentences, skip_unk=False, keep_empty=True):
-        """Convert sentences of indices to the sentences of the corresponding
-        tokens. If *skip_unk* is ``True``, unknown indices will be skipped.
-        If *keep_empty* is ``False``, we'll remove sentences that have no data
-        after converting."""
+    def reconstruct(self, sequences, skip_unk=False, keep_empty=True):
+        """Convert sequences of indices in Dataset format to the sentences
+        of the corresponding tokens. If *skip_unk* is ``True``, unknown
+        indices will be skipped. If *keep_empty* is ``False``, we'll remove
+        sentences that have no data after converting."""
         return [[
             t for t in s if keep_empty or t
         ] for s in [
-            self.reconstruct_tokens(s, skip_unk=skip_unk)
-                for s in sentences
+            self.reconstruct_tokens(s[0], skip_unk=skip_unk)
+                for s in sequences
         ] if keep_empty or s]
 
     def fit_transform(self, sentences, unk_token=None, pad_token=None,
