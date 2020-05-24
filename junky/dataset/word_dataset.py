@@ -98,7 +98,6 @@ class WordDataset(Dataset):
         """The method to use with torch.utils.data.DataLoader
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
         """
-    def pad_collate(batch):
         lens = tensor([len(x[0]) for x in batch])
         x = pad_sequences_with_tensor(
             [x[0] for x in batch], batch_first=True,
