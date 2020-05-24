@@ -48,6 +48,7 @@ class WordDataset(Dataset):
         if pad_token:
             self.pad = self.extra_model[pad_token] = \
                 get_rand_vector((vec_size,), pad_vec_norm)
+            self.pad_tensor = tensor(self.pad)
         else:
             elf.pad = None
         self.batch_first = batch_first
@@ -101,6 +102,6 @@ class WordDataset(Dataset):
         lens = tensor([len(x[0]) for x in batch])
         x = pad_sequences_with_tensor(
             [x[0] for x in batch], batch_first=True,
-            padding_tensor=wd_test.pad
+            padding_tensor=self.pad_tensor
         )
         return x, lens
