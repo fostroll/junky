@@ -220,13 +220,13 @@ class CharDataset(Dataset):
                       token_lens:list([torch.tensor]))
         """
         lens = tensor([len(x) for x in batch])
-        tokens_lens = [tensor([len(x) for x in x]) for x in batch]
+        token_lens = [tensor([len(x) for x in x]) for x in batch]
         if self.min_len is not None:
             batch.append(([tensor([self.pad])] * self.min_len))
         x = pad_array_torch(batch, padding_value=self.pad)
         if self.min_len is not None:
             x = x[:-1]
-        return x, lens, tokens_lens
+        return x, lens, token_lens
 
     def get_loader(self, batch_size=32, shuffle=False, num_workers=0,
                    **kwargs):
