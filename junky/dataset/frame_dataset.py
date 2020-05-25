@@ -49,8 +49,15 @@ class FrameDataset(BaseDataset):
         self.datasets[name] = [dataset, num_pos, collate_kwargs]
 
     def remove(self, name):
-        """Remove *dataset* with specified *name*."""
+        """Remove dataset with specified *name*."""
         del self.datasets[name]
+
+    def get(self, name):
+        """Get dataset with specified *name*.
+
+        :return: dataset, collate_kwargs
+        """
+        return self.datasets[name][0], self.datasets[name][2]
 
     def list(self):
         """Print names of the added datasets in order of addition."""

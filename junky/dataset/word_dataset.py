@@ -31,7 +31,7 @@ class WordDataset(BaseDataset):
             provided as `(batch, seq, feature)`. Otherwise (default),
             `(seq, batch, feature)`.
     """
-    def __init__(self, emb_model, vec_size, vec_dtype=float,
+    def __init__(self, emb_model, vec_size,
                  unk_token=None, unk_vec_norm=1e-2,
                  pad_token=None, pad_vec_norm=0.,
                  extra_tokens=None, extra_vec_norm=1e-2,
@@ -39,6 +39,7 @@ class WordDataset(BaseDataset):
                  batch_first=False):
         super().__init__()
         self.emb_model = emb_model
+        self.vec_size = vec_size
         self.extra_model = {
             t: get_rand_vector((vec_size,), extra_vec_norm)
                 for t in extra_tokens
