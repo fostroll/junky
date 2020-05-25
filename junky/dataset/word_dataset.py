@@ -8,7 +8,7 @@ Provides implementation of torch.utils.data.Dataset for word-level input.
 """
 from junky import get_rand_vector, pad_sequences_with_tensor
 from junky.dataset import BaseDataset
-from torch import Tensor, float32, tensor
+from torch import Tensor, float32, int32, tensor
 from torch.nn.utils.rnn import pad_sequence
 
 
