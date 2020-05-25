@@ -159,7 +159,7 @@ class TokenDataset(Dataset):
         lens = tensor([len(x[idx]) for x in batch])
         x = pad_sequence([x[idx] for x in batch],
                          batch_first=self.batch_first,
-                         padding_value=self.pad))
+                         padding_value=self.pad)
         return x, lens
 
     def pad_collate(self, batch):
