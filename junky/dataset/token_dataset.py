@@ -150,7 +150,7 @@ class TokenDataset(Dataset):
         return self.transform(sentences, skip_unk=skip_unk,
                               keep_empty=keep_empty, save=save)
 
-    def frame_collate(self, batch, idx, with_lens=True):
+    def frame_collate(self, batch, pos, with_lens=True):
         """The method to use with junky.dataset.FrameDataset.
 
         :param pos: position of the data in *batch*.
