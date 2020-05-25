@@ -9,7 +9,7 @@ Provides implementation of torch.utils.data.Dataset for character-level input.
 from junky import make_alphabet
 from torch import Tensor, tensor
 from torch.nn.utils.rnn import pad_sequence
-from torch.utils.data import Dataset
+from torch.utils.data import DataLoader, Dataset
 
 
 class CharDataset(Dataset):
@@ -26,8 +26,7 @@ class CharDataset(Dataset):
             will be removed: str|list([str])
         exclude_chars: if not None, all charactes from *exclude_chars* will
             be removed: str|list([str])
-        transform: if ``True``, transform and save `sentences`. The
-            `transform()` method will be invoked with default params.
+        transform: if ``True``, transform and save `sentences`.
         skip_unk, keep_empty: params for the `transform()` method.
         batch_first: if ``True``, then the input and output tensors are
             provided as `(batch, seq, feature)`. Otherwise (default),
@@ -46,7 +45,8 @@ class CharDataset(Dataset):
                  extra_tokens=extra_tokens, allowed_chars=allowed_chars,
                  exclude_chars=exclude_chars)
         if transform:
-            self.transform_and_save(sentences)
+            self.transform(sentences, skip_unk=skip_unk,
+                           keep_empty=keep_empty, save=True)
         else:
             self.data = []
 
@@ -152,7 +152,7 @@ class CharDataset(Dataset):
         """Convert sentences of token to the sequences of the lists of the
         indices corresponding to token's chars and adjust its format for
         Dataset. If *skip_unk* is ``True``, unknown chars will be skipped.
-        if *keep_empty* is ``False``, we'll remove tokens and sentences that
+        If *keep_empty* is ``False``, we'll remove tokens and sentences that
         have no data after converting.
 
         If save is ``True``, we'll keep the converted sentences as the Dataset

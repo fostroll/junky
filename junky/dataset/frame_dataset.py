@@ -4,14 +4,14 @@
 # Copyright (C) 2020-present by Sergei Ternovykh, Anastasiya Nikiforova
 # License: BSD, see LICENSE for details
 """
-Provides torch.utils.data.Dataset for word-level input.
+A frame for use several torch.utils.data.Dataset together.
 """
 from torch.utils.data import Dataset
 
 
 class FrameDataset(Dataset):
     """
-    torch.utils.data.Dataset for word-level input.
+    A frame for use several torch.utils.data.Dataset together.
 
     Args:
         emb_model: dict or any other object that allow the syntax

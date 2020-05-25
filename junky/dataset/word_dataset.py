@@ -19,12 +19,14 @@ class WordDataset(Dataset):
     Args:
         emb_model: dict or any other object that allow the syntax
             `vector = emb_model[word]` and `if word in emb_model:`
-        sentences: sequences of words: list([list([str])]).
         unk_token: add a token for words that are not present in the dict:
             str.
         unk_vec_norm: 
         pad_token: add a token for padding: str.
         extra_tokens: add tokens for any other purposes: list([str]).
+        sentences: sequences of words: list([list([str])]). If not ``None``,
+            they will be transformed and saved.
+        skip_unk, keep_empty: params for the `transform()` method.
         batch_first: if ``True``, then the input and output tensors are
             provided as `(batch, seq, feature)`. Otherwise (default),
             `(seq, batch, feature)`.
@@ -32,7 +34,9 @@ class WordDataset(Dataset):
     def __init__(self, emb_model, vec_size, vec_dtype=float,
                  unk_token=None, unk_vec_norm=1e-2,
                  pad_token=None, pad_vec_norm=0.,
-                 extra_tokens=None, extra_vec_norm=1e-2, batch_first=False):
+                 extra_tokens=None, extra_vec_norm=1e-2,
+                 sentences=None, skip_unk=False, keep_empty=False,
+                 batch_first=False):
         super().__init__()
         self.emb_model = emb_model
         self.extra_model = {
@@ -52,7 +56,11 @@ class WordDataset(Dataset):
         else:
             elf.pad = None
         self.batch_first = batch_first
-        self.data = []
+        if sentences:
+            self.transform(sentences, skip_unk=skip_unk,
+                           keep_empty=keep_empty, save=True)
+        else:
+            self.data = []
 
     def __len__(self):
         return len(self.data)

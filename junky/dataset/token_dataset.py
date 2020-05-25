@@ -9,7 +9,7 @@ Provides implementation of torch.utils.data.Dataset for token-level input.
 from junky import make_token_dict
 from torch import Tensor, tensor
 from torch.nn.utils.rnn import pad_sequence
-from torch.utils.data import Dataset
+from torch.utils.data import DataLoader, Dataset
 
 
 class TokenDataset(Dataset):
@@ -22,8 +22,7 @@ class TokenDataset(Dataset):
             str.
         pad_token: add a token for padding: str.
         extra_tokens: add tokens for any other purposes: list([str]).
-        transform: if ``True``, transform and save `sentences`. The
-            `transform()` method will be invoked with default params.
+        transform: if ``True``, transform and save `sentences`.
         skip_unk, keep_empty: params for the `transform()` method.
         batch_first: if ``True``, then the input and output tensors are
             provided as `(batch, seq, feature)`. Otherwise (default),
@@ -37,7 +36,8 @@ class TokenDataset(Dataset):
         self.fit(sentences, unk_token=unk_token, pad_token=pad_token,
                  extra_tokens=extra_tokens)
         if transform:
-            self.transform(sentences, save=True)
+            self.transform(sentences, skip_unk=skip_unk,
+                           keep_empty=keep_empty, save=True)
         else:
             self.data = []
 
