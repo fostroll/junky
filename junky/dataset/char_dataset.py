@@ -205,8 +205,8 @@ class CharDataset(BaseDataset):
         if self.min_len is not None:
             batch.append([tensor([self.pad],
                                  dtype=self.int_tensor_dtype)] * self.min_len)
-        x = pad_array_torch([x[pos] for x in batch],
-                            padding_value=self.pad)
+        x = pad_array_torch([x[pos] for x in batch], padding_value=self.pad,
+                            dtype=self.int_tensor_dtype)
         if self.min_len is not None:
             x = x[:-1]
         return (x, *lens) if lens else x
@@ -223,7 +223,8 @@ class CharDataset(BaseDataset):
         if self.min_len is not None:
             batch.append([tensor([self.pad],
                                  dtype=self.int_tensor_dtype)] * self.min_len)
-        x = pad_array_torch(batch, padding_value=self.pad)
+        x = pad_array_torch(batch, padding_value=self.pad,
+                            dtype=self.int_tensor_dtype)
         if self.min_len is not None:
             x = x[:-1]
         return x, lens, token_lens
