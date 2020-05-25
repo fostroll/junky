@@ -27,7 +27,8 @@ class WordDataset(BaseDataset):
         sentences: sequences of words: list([list([str])]). If not ``None``,
             they will be transformed and saved.
         skip_unk, keep_empty: params for the `transform()` method.
-        tensor_dtype: dtype of all internal tensors: torch.dtype
+        float_tensor_dtype: dtype for float tensors: torch.dtype
+        int_tensor_dtype: dtype for int tensors: torch.dtype
         batch_first: if ``True``, then the input and output tensors are
             provided as `(batch, seq, feature)`. Otherwise (default),
             `(seq, batch, feature)`.
@@ -37,11 +38,13 @@ class WordDataset(BaseDataset):
                  pad_token=None, pad_vec_norm=0.,
                  extra_tokens=None, extra_vec_norm=1e-2,
                  sentences=None, skip_unk=False, keep_empty=False,
-                 tensor_dtype=float32, batch_first=False):
+                 float_tensor_dtype=float32, int_tensor_dtype=int32,
+                 batch_first=False):
         super().__init__()
         self.emb_model = emb_model
         self.vec_size = vec_size
-        self.tensor_dtype = tensor_dtype
+        self.float_tensor_dtype = float_tensor_dtype
+        self.int_tensor_dtype = int_tensor_dtype
         self.batch_first = batch_first
         self.extra_model = {
             t: get_rand_vector((vec_size,), extra_vec_norm)
@@ -56,7 +59,7 @@ class WordDataset(BaseDataset):
         if pad_token:
             self.pad = self.extra_model[pad_token] = \
                 get_rand_vector((vec_size,), pad_vec_norm)
-            self.pad_tensor = tensor(self.pad, dtype=tensor_dtype)
+            self.pad_tensor = tensor(self.pad, dtype=float_tensor_dtype)
         else:
             elf.pad = None
         if sentences:
@@ -90,7 +93,7 @@ class WordDataset(BaseDataset):
         `Dataset` source."""
         data = [tensor([
             v for v in s if keep_empty or v is not None
-        ], dtype=self.tensor_dtype) for s in [
+        ], dtype=self.float_tensor_dtype) for s in [
             self.transform_words(s, skip_unk=skip_unk)
                 for s in sentences
         ] if keep_empty or s]
@@ -109,7 +112,7 @@ class WordDataset(BaseDataset):
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
         """
         lens = [tensor([len(x[pos]) for x in batch],
-                       dtype=self.tensor_dtype)] if with_lens else []
+                       dtype=self.int_tensor_dtype)] if with_lens else []
         x = pad_sequences_with_tensor([x[pos] for x in batch],
                                       batch_first=True,
                                       padding_tensor=self.pad_tensor)
@@ -120,7 +123,7 @@ class WordDataset(BaseDataset):
 
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
         """
-        lens = tensor([len(x) for x in batch])
+        lens = tensor([len(x) for x in batch], dtype=self.int_tensor_dtype)
         x = pad_sequences_with_tensor(batch, batch_first=True,
                                       padding_tensor=self.pad_tensor)
         return x, lens
