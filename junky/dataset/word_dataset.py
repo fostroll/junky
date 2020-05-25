@@ -9,12 +9,12 @@ Provides implementation of torch.utils.data.Dataset for word-level input.
 from junky import get_rand_vector, pad_sequences_with_tensor
 from torch import Tensor, tensor
 from torch.nn.utils.rnn import pad_sequence
-from torch.utils.data import Dataset
+from torch.utils.data import DataLoader, Dataset
 
 
 class WordDataset(Dataset):
     """
-    torch.utils.data.Dataset for word-level input.
+    `torch.utils.data.Dataset` for word-level input.
 
     Args:
         emb_model: dict or any other object that allow the syntax
@@ -83,8 +83,8 @@ class WordDataset(Dataset):
         If *keep_empty* is ``False``, we'll remove sentences that have no data
         after converting.
 
-        If save is ``True``, we'll keep the converted sentences as the Dataset
-        source."""
+        If save is ``True``, we'll keep the converted sentences as the
+        `Dataset` source."""
         data = [tensor([
             v for v in s if keep_empty or v is not None
         ]) for s in [
@@ -97,7 +97,8 @@ class WordDataset(Dataset):
             return data
 
     def pad_collate_part(self, batch, idx):
-        """The method to use with junky.dataset.FrameDataset.
+        """The method to use with `junky.dataset.FrameDataset`.
+
         :param idx: index of the data in *batch*.
         :type idx: int
         :rtype: tuple(list([torch.tensor]), ..., lens:torch.tensor)
@@ -109,10 +110,18 @@ class WordDataset(Dataset):
         return x, lens
 
     def pad_collate(self, batch):
-        """The method to use with torch.utils.data.DataLoader
+        """The method to use with `DataLoader`.
+
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
         """
         lens = tensor([len(x) for x in batch])
         x = pad_sequences_with_tensor(batch, batch_first=True,
                                       padding_tensor=self.pad_tensor)
         return x, lens
+
+    def loader(batch_size=32, shuffle=False, num_workers=0, **kwargs):
+        """Get `DataLoader` for this class. All params are the params of
+        `DataLoader`. Only *dataset* and *pad_collate* can't be changed."""
+        return DataLoader(self, batch_size=batch_size,
+                          shuffle=shuffle, num_workers=num_workers,
+                          pad_collate=self.pad_collate, **kwargs)

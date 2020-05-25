@@ -56,3 +56,10 @@ class FrameDataset(Dataset):
                        [res_])
 
         return tuple(res)
+
+    def loader(batch_size=32, shuffle=False, num_workers=0, **kwargs):
+        """Get `DataLoader` for this class. All params are the params of
+        `DataLoader`. Only *dataset* and *pad_collate* can't be changed."""
+        return DataLoader(self, batch_size=batch_size,
+                          shuffle=shuffle, num_workers=num_workers,
+                          pad_collate=self.pad_collate, **kwargs)
