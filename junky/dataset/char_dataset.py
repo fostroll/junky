@@ -190,32 +190,43 @@ class CharDataset(Dataset):
         return self.transform(sentences, skip_unk=skip_unk,
                               keep_empty=keep_empty, save=save)
 
-    def pad_collate_part(self, batch, idx):
+    def frame_pad_collate(self, batch, idx, with_lens=True,
+                          with_token_lens=True):
         """The method to use with junky.dataset.FrameDataset.
+
         :param idx: index of the data in *batch*.
         :type idx: int
-        :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
+        :with_lens: return lentghs of data.
+        :with_token_lens: return lengths of tokens of the data.
+        :return: depends of keyword args.
+        :rtype: tuple(list([torch.tensor]), lens:torch.tensor,
+                      token_lens:list([torch.tensor]))
         """
-        lens = [tensor([len(x) for x in x[idx]]) for x in batch]
+        lens = [tensor([len(x[idx]) for x in batch])] if with_lens else []
+        if with_token_lens:
+            lens.append([tensor([len(x) for x in x[idx]]) for x in batch])
         if self.min_len is not None:
             batch.append(([tensor([self.pad])] * self.min_len))
         x = pad_array_torch([x[idx] for x in batch],
                             padding_value=self.pad)
         if self.min_len is not None:
             x = x[:-1]
-        return x, lens
+        return x, *lens
 
     def pad_collate(self, batch):
         """The method to use with torch.utils.data.DataLoader
-        :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
+
+        :rtype: tuple(list([torch.tensor]), lens:torch.tensor,
+                      token_lens:list([torch.tensor]))
         """
-        lens = [tensor([len(x) for x in x]) for x in batch]
+        lens = tensor([len(x) for x in batch])
+        tokens_lens = [tensor([len(x) for x in x]) for x in batch]
         if self.min_len is not None:
             batch.append(([tensor([self.pad])] * self.min_len))
         x = pad_array_torch(batch, padding_value=self.pad)
         if self.min_len is not None:
             x = x[:-1]
-        return x, lens
+        return x, lens, tokens_lens
 
     def get_loader(self, batch_size=32, shuffle=False, num_workers=0,
                    **kwargs):

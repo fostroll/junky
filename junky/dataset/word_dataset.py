@@ -104,18 +104,20 @@ class WordDataset(Dataset):
         else:
             return data
 
-    def pad_collate_part(self, batch, idx):
+    def frame_pad_collate(self, batch, idx, with_lens=True):
         """The method to use with `junky.dataset.FrameDataset`.
 
         :param idx: index of the data in *batch*.
         :type idx: int
-        :rtype: tuple(list([torch.tensor]), ..., lens:torch.tensor)
+        :with_lens: return lentghs of data.
+        :return: depends of keyword args.
+        :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
         """
-        lens = tensor([len(x[0]) for x in batch])
+        lens = [tensor([len(x[idx]) for x in batch])] if with_lens else []
         x = pad_sequences_with_tensor([x[idx] for x in batch],
                                       batch_first=True,
                                       padding_tensor=self.pad_tensor)
-        return x, lens
+        return x, *lens
 
     def pad_collate(self, batch):
         """The method to use with `DataLoader`.

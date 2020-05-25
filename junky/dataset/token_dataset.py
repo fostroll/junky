@@ -150,20 +150,24 @@ class TokenDataset(Dataset):
         return self.transform(sentences, skip_unk=skip_unk,
                               keep_empty=keep_empty, save=save)
 
-    def pad_collate_part(self, batch, idx):
+    def frame_pad_collate(self, batch, idx, with_lens=True):
         """The method to use with junky.dataset.FrameDataset.
+
         :param idx: index of the data in *batch*.
         :type idx: int
-        :rtype: tuple(list([torch.tensor]), ..., lens:torch.tensor)
+        :with_lens: return lentghs of data.
+        :return: depends of keyword args.
+        :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
         """
-        lens = tensor([len(x[idx]) for x in batch])
+        lens = [tensor([len(x[idx]) for x in batch])] if with_lens else []
         x = pad_sequence([x[idx] for x in batch],
                          batch_first=self.batch_first,
                          padding_value=self.pad)
-        return x, lens
+        return x, *lens
 
     def pad_collate(self, batch):
         """The method to use with torch.utils.data.DataLoader
+
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
         """
         lens = tensor([len(x) for x in batch])
