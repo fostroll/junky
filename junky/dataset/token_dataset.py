@@ -166,7 +166,7 @@ class TokenDataset(Dataset):
         """The method to use with torch.utils.data.DataLoader
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
         """
-        lens = tensor([len(x[0]) for x in batch])
+        lens = tensor([len(x) for x in batch])
         x = pad_sequence(batch, batch_first=self.batch_first,
                          padding_value=self.pad)
         return x, lens
