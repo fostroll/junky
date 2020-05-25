@@ -33,7 +33,7 @@ class TokenDataset(BaseDataset):
                  extra_tokens=None, transform=False, skip_unk=False,
                  keep_empty=False, tensor_dtype=float32, batch_first=False):
         super().__init__()
-        selt.tensor_dtype = tensor_dtype
+        self.tensor_dtype = tensor_dtype
         self.batch_first = batch_first
         self.fit(sentences, unk_token=unk_token, pad_token=pad_token,
                  extra_tokens=extra_tokens)

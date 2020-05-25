@@ -41,7 +41,7 @@ class WordDataset(BaseDataset):
         super().__init__()
         self.emb_model = emb_model
         self.vec_size = vec_size
-        selt.tensor_dtype = tensor_dtype
+        self.tensor_dtype = tensor_dtype
         self.batch_first = batch_first
         self.extra_model = {
             t: get_rand_vector((vec_size,), extra_vec_norm)

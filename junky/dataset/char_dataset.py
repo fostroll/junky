@@ -40,7 +40,7 @@ class CharDataset(BaseDataset):
                  transform=False, skip_unk=False, keep_empty=False,
                  tensor_dtype=float32, batch_first=False, min_len=None):
         super().__init__()
-        selt.tensor_dtype = tensor_dtype
+        self.tensor_dtype = tensor_dtype
         self.batch_first = batch_first
         self.min_len = min_len
         self.fit(sentences, unk_token=unk_token, pad_token=pad_token,
