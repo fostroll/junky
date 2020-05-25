@@ -6,7 +6,7 @@
 """
 Provides implementation of torch.utils.data.Dataset for character-level input.
 """
-from junky import make_alphabet
+from junky import make_alphabet, pad_array_torch
 from torch import Tensor, tensor
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import DataLoader, Dataset
@@ -199,7 +199,7 @@ class CharDataset(Dataset):
         lens = [tensor([len(x) for x in x[idx]]) for x in batch]
         if self.min_len is not None:
             batch.append(([tensor([self.pad])] * self.min_len))
-        x = junky.pad_array_torch([x[idx] for x in batch],
+        x = junky.([x[idx] for x in batch],
                                   padding_value=self.pad)
         if self.min_len is not None:
             x = x[:-1]
