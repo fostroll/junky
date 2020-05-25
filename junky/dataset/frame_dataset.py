@@ -7,16 +7,18 @@
 A frame for use several torch.utils.data.Dataset together.
 """
 from collections import OrderedDict
+from junky.dataset import BaseDataset
 from torch.utils.data import DataLoader, Dataset
 
 
-class FrameDataset(Dataset):
+class FrameDataset(BaseDataset):
     """
     A frame for use several objects of `junky.dataset.*Dataset` conjointly.
     All datasets must have the data of equal length.
     """
     def __init__(self):
         super().__init__()
+        delattr(self, data)
         self.datasets = OrderedDict()
 
     def __len__(self):
@@ -67,11 +69,3 @@ class FrameDataset(Dataset):
             res += res_ if isinstance(res_, tuple) else [res_]
             pos += ds[1]
         return tuple(res)
-
-    def get_loader(self, batch_size=32, shuffle=False, num_workers=0,
-                   **kwargs):
-        """Get `DataLoader` for this class. All params are the params of
-        `DataLoader`. Only *dataset* and *pad_collate* can't be changed."""
-        return DataLoader(self, batch_size=batch_size,
-                          shuffle=shuffle, num_workers=num_workers,
-                          collate_fn=self.collate, **kwargs)

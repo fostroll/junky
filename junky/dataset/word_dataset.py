@@ -7,12 +7,12 @@
 Provides implementation of torch.utils.data.Dataset for word-level input.
 """
 from junky import get_rand_vector, pad_sequences_with_tensor
+from junky.dataset import BaseDataset
 from torch import Tensor, tensor
 from torch.nn.utils.rnn import pad_sequence
-from torch.utils.data import DataLoader, Dataset
 
 
-class WordDataset(Dataset):
+class WordDataset(BaseDataset):
     """
     `torch.utils.data.Dataset` for word-level input.
 
@@ -59,14 +59,6 @@ class WordDataset(Dataset):
         if sentences:
             self.transform(sentences, skip_unk=skip_unk,
                            keep_empty=keep_empty, save=True)
-        else:
-            self.data = []
-
-    def __len__(self):
-        return len(self.data)
-
-    def __getitem__(self, idx):
-        return self.data[idx]
 
     def word_to_vec(self, word, skip_unk=True):
         """Convert a token to its vector. If the token is not present in the
@@ -128,11 +120,3 @@ class WordDataset(Dataset):
         x = pad_sequences_with_tensor(batch, batch_first=True,
                                       padding_tensor=self.pad_tensor)
         return x, lens
-
-    def get_loader(self, batch_size=32, shuffle=False, num_workers=0,
-                   **kwargs):
-        """Get `DataLoader` for this class. All params are the params of
-        `DataLoader`. Only *dataset* and *collate_fn* can't be changed."""
-        return DataLoader(self, batch_size=batch_size,
-                          shuffle=shuffle, num_workers=num_workers,
-                          collate_fn=self.collate, **kwargs)

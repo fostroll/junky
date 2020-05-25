@@ -7,12 +7,12 @@
 Provides implementation of torch.utils.data.Dataset for character-level input.
 """
 from junky import make_alphabet, pad_array_torch
+from junky.dataset import BaseDataset
 from torch import Tensor, tensor
 from torch.nn.utils.rnn import pad_sequence
-from torch.utils.data import DataLoader, Dataset
 
 
-class CharDataset(Dataset):
+class CharDataset(BaseDataset):
     """
     torch.utils.data.Dataset for character-level input.
 
@@ -47,14 +47,6 @@ class CharDataset(Dataset):
         if transform:
             self.transform(sentences, skip_unk=skip_unk,
                            keep_empty=keep_empty, save=True)
-        else:
-            self.data = []
-
-    def __len__(self):
-        return len(self.data)
-
-    def __getitem__(self, idx):
-        return self.data[idx]
 
     def fit(self, sentences, unk_token=None, pad_token=None,
             extra_tokens=None, allowed_chars=None, exclude_chars=None):
@@ -227,11 +219,3 @@ class CharDataset(Dataset):
         if self.min_len is not None:
             x = x[:-1]
         return x, lens, token_lens
-
-    def get_loader(self, batch_size=32, shuffle=False, num_workers=0,
-                   **kwargs):
-        """Get `DataLoader` for this class. All params are the params of
-        `DataLoader`. Only *dataset* and *collate_fn* can't be changed."""
-        return DataLoader(self, batch_size=batch_size,
-                          shuffle=shuffle, num_workers=num_workers,
-                          collate_fn=self.collate, **kwargs)

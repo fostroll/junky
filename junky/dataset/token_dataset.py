@@ -7,12 +7,12 @@
 Provides implementation of torch.utils.data.Dataset for token-level input.
 """
 from junky import make_token_dict
+from junky.dataset import BaseDataset
 from torch import Tensor, tensor
 from torch.nn.utils.rnn import pad_sequence
-from torch.utils.data import DataLoader, Dataset
 
 
-class TokenDataset(Dataset):
+class TokenDataset(BaseDataset):
     """
     torch.utils.data.Dataset for token-level input.
 
@@ -38,14 +38,6 @@ class TokenDataset(Dataset):
         if transform:
             self.transform(sentences, skip_unk=skip_unk,
                            keep_empty=keep_empty, save=True)
-        else:
-            self.data = []
-
-    def __len__(self):
-        return len(self.data)
-
-    def __getitem__(self, idx):
-        return self.data[idx]
 
     def fit(self, sentences, unk_token=None, pad_token=None,
             extra_tokens=None):
@@ -174,11 +166,3 @@ class TokenDataset(Dataset):
         x = pad_sequence(batch, batch_first=self.batch_first,
                          padding_value=self.pad)
         return x, lens
-
-    def get_loader(self, batch_size=32, shuffle=False, num_workers=0,
-                   **kwargs):
-        """Get `DataLoader` for this class. All params are the params of
-        `DataLoader`. Only *dataset* and *collate_fn* can't be changed."""
-        return DataLoader(self, batch_size=batch_size,
-                          shuffle=shuffle, num_workers=num_workers,
-                          collate_fn=self.collate, **kwargs)
