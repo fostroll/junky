@@ -28,6 +28,7 @@ class CharDataset(BaseDataset):
             be removed: str|list([str])
         transform: if ``True``, transform and save `sentences`.
         skip_unk, keep_empty: params for the `transform()` method.
+        tensor_dtype: dtype of all internal tensors: torch.dtype
         batch_first: if ``True``, then the input and output tensors are
             provided as `(batch, seq, feature)`. Otherwise (default),
             `(seq, batch, feature)`.
@@ -37,8 +38,9 @@ class CharDataset(BaseDataset):
     def __init__(self, sentences, unk_token=None, pad_token=None,
                  extra_tokens=None, allowed_chars=None, exclude_chars=None,
                  transform=False, skip_unk=False, keep_empty=False,
-                 batch_first=False, min_len=None):
+                 tensor_dtype=float32, batch_first=False, min_len=None):
         super().__init__()
+        selt.tensor_dtype = tensor_dtype
         self.batch_first = batch_first
         self.min_len = min_len
         self.fit(sentences, unk_token=unk_token, pad_token=pad_token,
@@ -150,7 +152,7 @@ class CharDataset(BaseDataset):
         If save is ``True``, we'll keep the converted sentences as the Dataset
         source."""
         data = [[
-            tensor(i) for i in s if keep_empty or i
+            tensor(i, dtype=self.tensor_dtype) for i in s if keep_empty or i
         ] for s in [
             self.transform_tokens(s, skip_unk=skip_unk)
                 for s in sentences
@@ -194,11 +196,14 @@ class CharDataset(BaseDataset):
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor,
                       token_lens:list([torch.tensor]))
         """
-        lens = [tensor([len(x[pos]) for x in batch])] if with_lens else []
+        lens = [tensor([len(x[pos]) for x in batch],
+                       dtype=self.tensor_dtype)] if with_lens else []
         if with_token_lens:
-            lens.append([tensor([len(x) for x in x[pos]]) for x in batch])
+            lens.append([tensor([len(x) for x in x[pos]],
+                                 dtype=self.tensor_dtype) for x in batch])
         if self.min_len is not None:
-            batch.append(([tensor([self.pad])] * self.min_len))
+            batch.append(([tensor([self.pad],
+                                  dtype=self.tensor_dtype)] * self.min_len))
         x = pad_array_torch([x[pos] for x in batch],
                             padding_value=self.pad)
         if self.min_len is not None:
@@ -211,10 +216,12 @@ class CharDataset(BaseDataset):
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor,
                       token_lens:list([torch.tensor]))
         """
-        lens = tensor([len(x) for x in batch])
-        token_lens = [tensor([len(x) for x in x]) for x in batch]
+        lens = tensor([len(x) for x in batch], dtype=self.tensor_dtype)
+        token_lens = [tensor([len(x) for x in x],
+                             dtype=self.tensor_dtype) for x in batch]
         if self.min_len is not None:
-            batch.append(([tensor([self.pad])] * self.min_len))
+            batch.append(([tensor([self.pad]),
+                                  dtype=self.tensor_dtype] * self.min_len))
         x = pad_array_torch(batch, padding_value=self.pad)
         if self.min_len is not None:
             x = x[:-1]

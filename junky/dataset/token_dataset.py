@@ -8,7 +8,7 @@ Provides implementation of torch.utils.data.Dataset for token-level input.
 """
 from junky import make_token_dict
 from junky.dataset import BaseDataset
-from torch import Tensor, tensor
+from torch import Tensor, float32, tensor
 from torch.nn.utils.rnn import pad_sequence
 
 
@@ -24,14 +24,16 @@ class TokenDataset(BaseDataset):
         extra_tokens: add tokens for any other purposes: list([str]).
         transform: if ``True``, transform and save `sentences`.
         skip_unk, keep_empty: params for the `transform()` method.
+        tensor_dtype: dtype of all internal tensors: torch.dtype
         batch_first: if ``True``, then the input and output tensors are
             provided as `(batch, seq, feature)`. Otherwise (default),
             `(seq, batch, feature)`.
     """
     def __init__(self, sentences, unk_token=None, pad_token=None,
                  extra_tokens=None, transform=False, skip_unk=False,
-                 keep_empty=False, batch_first=False):
+                 keep_empty=False, tensor_dtype=float32, batch_first=False):
         super().__init__()
+        selt.tensor_dtype = tensor_dtype
         self.batch_first = batch_first
         self.fit(sentences, unk_token=unk_token, pad_token=pad_token,
                  extra_tokens=extra_tokens)
@@ -112,7 +114,7 @@ class TokenDataset(BaseDataset):
         source."""
         data = [tensor([
             i for i in s if keep_empty or i
-        ]) for s in [
+        ], dtype=self.tensor_dtype) for s in [
             self.transform_tokens(s, skip_unk=skip_unk)
                 for s in sentences
         ] if keep_empty or s]
@@ -151,7 +153,8 @@ class TokenDataset(BaseDataset):
         :return: depends of keyword args.
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
         """
-        lens = [tensor([len(x[pos]) for x in batch])] if with_lens else []
+        lens = [tensor([len(x[pos]) for x in batch],
+                       dtype=self.tensor_dtype)] if with_lens else []
         x = pad_sequence([x[pos] for x in batch],
                          batch_first=self.batch_first,
                          padding_value=self.pad)
@@ -162,7 +165,7 @@ class TokenDataset(BaseDataset):
 
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
         """
-        lens = tensor([len(x) for x in batch])
+        lens = tensor([len(x) for x in batch], dtype=self.tensor_dtype)
         x = pad_sequence(batch, batch_first=self.batch_first,
                          padding_value=self.pad)
         return x, lens
