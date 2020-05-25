@@ -8,7 +8,7 @@ Provides implementation of torch.utils.data.Dataset for token-level input.
 """
 from junky import make_token_dict
 from junky.dataset import BaseDataset
-from torch import Tensor, int32, tensor
+from torch import Tensor, int64, tensor
 from torch.nn.utils.rnn import pad_sequence
 
 
@@ -31,7 +31,7 @@ class TokenDataset(BaseDataset):
     """
     def __init__(self, sentences, unk_token=None, pad_token=None,
                  extra_tokens=None, transform=False, skip_unk=False,
-                 keep_empty=False, int_tensor_dtype=int32, batch_first=False):
+                 keep_empty=False, int_tensor_dtype=int64, batch_first=False):
         super().__init__()
         self.int_tensor_dtype = int_tensor_dtype
         self.batch_first = batch_first
