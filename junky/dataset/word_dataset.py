@@ -125,4 +125,4 @@ class WordDataset(Dataset):
         `DataLoader`. Only *dataset* and *pad_collate* can't be changed."""
         return DataLoader(self, batch_size=batch_size,
                           shuffle=shuffle, num_workers=num_workers,
-                          pad_collate=self.pad_collate, **kwargs)
+                          collate_fn=self.pad_collate, **kwargs)
