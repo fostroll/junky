@@ -29,7 +29,7 @@ class FrameDataset(Dataset):
     def __getitem__(self, idx):
         """Returns a tuple of outputs of all added datasets in order of
         addition."""
-        return tuple(x for x in fd_test.datasets.values()
+        return tuple(x for x in self.datasets.values()
                        for x in (x[0][idx]
                                      if isinstance(x[0][idx], tuple) else
                                  [x[0][idx]]))
