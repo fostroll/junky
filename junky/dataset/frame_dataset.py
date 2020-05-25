@@ -18,7 +18,7 @@ class FrameDataset(BaseDataset):
     """
     def __init__(self):
         super().__init__()
-        delattr(self, data)
+        delattr(self, 'data')
         self.datasets = OrderedDict()
 
     def __len__(self):
