@@ -33,7 +33,7 @@ class FrameDataset(Dataset):
                        for x in (x[idx] if isinstance(x[idx], tuple) else
                                  [x[idx]]))
 
-    def add(name, dataset, **collate_kwargs):
+    def add(self, name, dataset, **collate_kwargs):
         """Add *dataset* with specified *name*.
 
         :param **collate_kwargs: keyword arguments for the *dataset*'s
@@ -45,9 +45,13 @@ class FrameDataset(Dataset):
         num_pos = len(dataset[0]) if isinstance(dataset[0], tuple) else 1
         self.datasets[name] = [dataset, num_pos, collate_kwargs]
 
-    def remove(name):
+    def remove(self, name):
         """Remove *dataset* with specified *name*."""
         del self.datasets[name]
+
+    def list(self):
+        """Print names of the added datasets in order of addition."""
+        print("'" + "', '".join(self.datasets.keys()) + "'")
 
     def collate(self, batch):
         """The method to use with torch.utils.data.DataLoader. It concatenates
