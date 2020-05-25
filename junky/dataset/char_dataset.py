@@ -199,8 +199,8 @@ class CharDataset(Dataset):
         lens = [tensor([len(x) for x in x[idx]]) for x in batch]
         if self.min_len is not None:
             batch.append(([tensor([self.pad])] * self.min_len))
-        x = junky.([x[idx] for x in batch],
-                                  padding_value=self.pad)
+        x = pad_array_torch([x[idx] for x in batch],
+                            padding_value=self.pad)
         if self.min_len is not None:
             x = x[:-1]
         return x, lens
