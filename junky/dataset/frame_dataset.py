@@ -29,9 +29,10 @@ class FrameDataset(Dataset):
     def __getitem__(self, idx):
         """Returns a tuple of outputs of all added datasets in order of
         addition."""
-        return tuple(x for x in next(iter(self.datasets.values()))[0]
-                       for x in (x[idx] if isinstance(x[idx], tuple) else
-                                 [x[idx]]))
+        return tuple(x for x in fd_test.datasets.values()
+                       for x in (x[0][idx]
+                                     if isinstance(x[0][idx], tuple) else
+                                 [x[0][idx]]))
 
     def add(self, name, dataset, **collate_kwargs):
         """Add *dataset* with specified *name*.
@@ -51,7 +52,7 @@ class FrameDataset(Dataset):
 
     def list(self):
         """Print names of the added datasets in order of addition."""
-        print("'" + "', '".join(self.datasets.keys()) + "'")
+        return tuple(self.datasets.keys())
 
     def collate(self, batch):
         """The method to use with torch.utils.data.DataLoader. It concatenates
