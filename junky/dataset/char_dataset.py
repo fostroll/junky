@@ -8,7 +8,7 @@ Provides implementation of torch.utils.data.Dataset for character-level input.
 """
 from junky import make_alphabet, pad_array_torch
 from junky.dataset import BaseDataset
-from torch import Tensor, tensor
+from torch import Tensor, float32, tensor
 from torch.nn.utils.rnn import pad_sequence
 
 
