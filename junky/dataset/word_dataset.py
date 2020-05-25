@@ -117,7 +117,7 @@ class WordDataset(Dataset):
         x = pad_sequences_with_tensor([x[idx] for x in batch],
                                       batch_first=True,
                                       padding_tensor=self.pad_tensor)
-        return x, *lens
+        return (x, *lens) if lens else x
 
     def pad_collate(self, batch):
         """The method to use with `DataLoader`.

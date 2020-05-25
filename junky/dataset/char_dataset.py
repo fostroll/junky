@@ -211,7 +211,7 @@ class CharDataset(Dataset):
                             padding_value=self.pad)
         if self.min_len is not None:
             x = x[:-1]
-        return x, *lens
+        return (x, *lens) if lens else x
 
     def pad_collate(self, batch):
         """The method to use with torch.utils.data.DataLoader

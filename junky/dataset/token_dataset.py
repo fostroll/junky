@@ -163,7 +163,7 @@ class TokenDataset(Dataset):
         x = pad_sequence([x[idx] for x in batch],
                          batch_first=self.batch_first,
                          padding_value=self.pad)
-        return x, *lens
+        return (x, *lens) if lens else x
 
     def pad_collate(self, batch):
         """The method to use with torch.utils.data.DataLoader
