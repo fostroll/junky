@@ -119,7 +119,8 @@ class WordDataset(Dataset):
                                       padding_tensor=self.pad_tensor)
         return x, lens
 
-    def loader(batch_size=32, shuffle=False, num_workers=0, **kwargs):
+    def get_loader(self, batch_size=32, shuffle=False, num_workers=0,
+                   **kwargs):
         """Get `DataLoader` for this class. All params are the params of
         `DataLoader`. Only *dataset* and *pad_collate* can't be changed."""
         return DataLoader(self, batch_size=batch_size,
