@@ -31,7 +31,7 @@ class CharDataset(Dataset):
         batch_first: if ``True``, then the input and output tensors are
             provided as `(batch, seq, feature)`. Otherwise (default),
             `(seq, batch, feature)`.
-        min_len: if specified, pad_collate will pad sentences in `batch` that
+        min_len: if specified, collate will pad sentences in `batch` that
             are shorter than `min_len`: int.
     """
     def __init__(self, sentences, unk_token=None, pad_token=None,
@@ -190,30 +190,30 @@ class CharDataset(Dataset):
         return self.transform(sentences, skip_unk=skip_unk,
                               keep_empty=keep_empty, save=save)
 
-    def frame_pad_collate(self, batch, idx, with_lens=True,
+    def frame_collate(self, batch, pos, with_lens=True,
                           with_token_lens=True):
         """The method to use with junky.dataset.FrameDataset.
 
-        :param idx: index of the data in *batch*.
-        :type idx: int
+        :param pos: position of the data in *batch*.
+        :type pos: int
         :with_lens: return lentghs of data.
         :with_token_lens: return lengths of tokens of the data.
         :return: depends of keyword args.
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor,
                       token_lens:list([torch.tensor]))
         """
-        lens = [tensor([len(x[idx]) for x in batch])] if with_lens else []
+        lens = [tensor([len(x[pos]) for x in batch])] if with_lens else []
         if with_token_lens:
-            lens.append([tensor([len(x) for x in x[idx]]) for x in batch])
+            lens.append([tensor([len(x) for x in x[pos]]) for x in batch])
         if self.min_len is not None:
             batch.append(([tensor([self.pad])] * self.min_len))
-        x = pad_array_torch([x[idx] for x in batch],
+        x = pad_array_torch([x[pos] for x in batch],
                             padding_value=self.pad)
         if self.min_len is not None:
             x = x[:-1]
         return (x, *lens) if lens else x
 
-    def pad_collate(self, batch):
+    def collate(self, batch):
         """The method to use with torch.utils.data.DataLoader
 
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor,
@@ -231,7 +231,7 @@ class CharDataset(Dataset):
     def get_loader(self, batch_size=32, shuffle=False, num_workers=0,
                    **kwargs):
         """Get `DataLoader` for this class. All params are the params of
-        `DataLoader`. Only *dataset* and *pad_collate* can't be changed."""
+        `DataLoader`. Only *dataset* and *collate_fn* can't be changed."""
         return DataLoader(self, batch_size=batch_size,
                           shuffle=shuffle, num_workers=num_workers,
-                          collate_fn=self.pad_collate, **kwargs)
+                          collate_fn=self.collate, **kwargs)

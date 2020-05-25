@@ -6,55 +6,61 @@
 """
 A frame for use several torch.utils.data.Dataset together.
 """
-from torch.utils.data import Dataset
+from collections import OrderedDict
+from torch.utils.data import DataLoader, Dataset
 
 
 class FrameDataset(Dataset):
     """
-    A frame for use several torch.utils.data.Dataset together.
-
-    Args:
-        emb_model: dict or any other object that allow the syntax
-            `vector = emb_model[word]` and `if word in emb_model:`
-        sentences: sequences of words: list([list([str])]).
-        unk_token: add a token for words that are not present in the dict:
-            str.
-        unk_vec_norm: 
-        pad_token: add a token for padding: str.
-        extra_tokens: add tokens for any other purposes: list([str]).
-        batch_first: if ``True``, then the input and output tensors are
-            provided as `(batch, seq, feature)`. Otherwise (default),
-            `(seq, batch, feature)`.
+    A frame for use several objects of `junky.dataset.*Dataset` conjointly.
+    All datasets must have the data of equal length.
     """
-    def __init__(self, dataset, *datasets):
+    def __init__(self):
         super().__init__()
-        len_ = len(dataset)
-        for ds in datasets:
-            assert len(ds) == len_,
-                   'ERROR: all datasets must have equal length'
-        self.datasets = (dataset,) + datasets
+        self.datasets = OrderedDict()
 
     def __len__(self):
-        return len(self.datasets[0].data)
+        """Returns the lentgh of the first added dataset. Note, that all
+        datasets must be of equal length."""
+        return len(next(iter(self.datasets.values()))[0]) \
+                   if self.datasets else \
+               0
 
     def __getitem__(self, idx):
-        return self.dataset[0].data[idx]
+        """Returns a tuple of outputs of all added datasets in order of
+        addition."""
+        return tuple(x for x in next(iter(self.datasets.values()))[0]
+                       for x in (x[idx] if isinstance(x[idx], tuple) else
+                                 [x[idx]]))
 
-    def pad_collate(self, batch):
-        """The method to use with torch.utils.data.DataLoader
-        :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
+    def add(name, dataset, **collate_kwargs):
+        """Add *dataset* with specified *name*.
+
+        :param **collate_kwargs: keyword arguments for the *dataset*'s
+            `frame_collate()` method.
         """
-        batch_ =  [[] for _ in self.datasets]
-        for x in batch:
-            for y, b in zip(x, batch_):
-                b.append((y,))
+        assert name not in self.datasets, \
+               "ERROR: dataset '{}' was already added".format(name)
+        assert len(dataset) > 0, "ERROR: can't add empty dataset"
+        num_pos = len(dataset[0]) if isinstance(dataset[0], tuple) else 1
+        self.datasets[name] = [dataset, num_pos, collate_kwargs]
 
-        res = []
-        for ds, b in zip(ds, batch_):
-            res_ = ds.pad_collate(b)
-            res.append([r for r in res_] if isinstance(res_, tuple) else
-                       [res_])
+    def remove(name):
+        """Remove *dataset* with specified *name*."""
+        del self.datasets[name]
 
+    def collate(self, batch):
+        """The method to use with torch.utils.data.DataLoader. It concatenates
+        outputs of the added datasets in order of addition. All the dataset
+        must have the method `.frame_collate(batch, pos, **kwargs)`, where
+        *pos* is the first position of the corresponding dataset's data in the
+        batch.
+        """
+        res, pos = [], 0
+        for ds in self.datasets.values():
+            res_ = ds[0].frame_collate(batch, pos, **ds[2])
+            res += res_ if isinstance(res_, tuple) else [res_]
+            pos += ds[1]
         return tuple(res)
 
     def get_loader(self, batch_size=32, shuffle=False, num_workers=0,
@@ -63,4 +69,4 @@ class FrameDataset(Dataset):
         `DataLoader`. Only *dataset* and *pad_collate* can't be changed."""
         return DataLoader(self, batch_size=batch_size,
                           shuffle=shuffle, num_workers=num_workers,
-                          collate_fn=self.pad_collate, **kwargs)
+                          collate_fn=self.collate, **kwargs)

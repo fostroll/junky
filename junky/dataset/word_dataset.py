@@ -104,22 +104,22 @@ class WordDataset(Dataset):
         else:
             return data
 
-    def frame_pad_collate(self, batch, idx, with_lens=True):
+    def frame_collate(self, batch, pos, with_lens=True):
         """The method to use with `junky.dataset.FrameDataset`.
 
-        :param idx: index of the data in *batch*.
-        :type idx: int
+        :param pos: position of the data in *batch*.
+        :type pos: int
         :with_lens: return lentghs of data.
         :return: depends of keyword args.
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
         """
-        lens = [tensor([len(x[idx]) for x in batch])] if with_lens else []
-        x = pad_sequences_with_tensor([x[idx] for x in batch],
+        lens = [tensor([len(x[pos]) for x in batch])] if with_lens else []
+        x = pad_sequences_with_tensor([x[pos] for x in batch],
                                       batch_first=True,
                                       padding_tensor=self.pad_tensor)
         return (x, *lens) if lens else x
 
-    def pad_collate(self, batch):
+    def collate(self, batch):
         """The method to use with `DataLoader`.
 
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
@@ -132,7 +132,7 @@ class WordDataset(Dataset):
     def get_loader(self, batch_size=32, shuffle=False, num_workers=0,
                    **kwargs):
         """Get `DataLoader` for this class. All params are the params of
-        `DataLoader`. Only *dataset* and *pad_collate* can't be changed."""
+        `DataLoader`. Only *dataset* and *collate_fn* can't be changed."""
         return DataLoader(self, batch_size=batch_size,
                           shuffle=shuffle, num_workers=num_workers,
-                          collate_fn=self.pad_collate, **kwargs)
+                          collate_fn=self.collate, **kwargs)
