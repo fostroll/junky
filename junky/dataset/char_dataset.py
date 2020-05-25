@@ -157,9 +157,9 @@ class CharDataset(Dataset):
 
         If save is ``True``, we'll keep the converted sentences as the Dataset
         source."""
-        data = [tensor([
-            i for i in s if keep_empty or i
-        ]) for s in [
+        data = [[
+            tensor(i) for i in s if keep_empty or i
+        ] for s in [
             self.transform_tokens(s, skip_unk=skip_unk)
                 for s in sentences
         ] if keep_empty or s]
