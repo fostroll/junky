@@ -24,7 +24,7 @@ class BaseDataset(Dataset):
     def __getitem__(self, idx):
         return self.data[idx]
 
-    def clone(with_data=True):
+    def clone(self, with_data=True):
         """Clone this object. If *with_data* is ``False``, the `data` attr of
         the new object will be empty.
         """
