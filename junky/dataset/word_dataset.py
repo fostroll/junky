@@ -4,7 +4,7 @@
 # Copyright (C) 2020-present by Sergei Ternovykh, Anastasiya Nikiforova
 # License: BSD, see LICENSE for details
 """
-Provides torch.utils.data.Dataset for word-level input.
+Provides implementation of torch.utils.data.Dataset for word-level input.
 """
 from junky import get_rand_vector, pad_sequences_with_tensor
 from torch import Tensor, tensor
@@ -85,9 +85,9 @@ class WordDataset(Dataset):
 
         If save is ``True``, we'll keep the converted sentences as the Dataset
         source."""
-        data = [(tensor([
+        data = [tensor([
             v for v in s if keep_empty or v is not None
-        ]),) for s in [
+        ]) for s in [
             self.transform_words(s, skip_unk=skip_unk)
                 for s in sentences
         ] if keep_empty or s]
@@ -96,13 +96,23 @@ class WordDataset(Dataset):
         else:
             return data
 
+    def pad_collate_part(self, batch, idx):
+        """The method to use with junky.dataset.FrameDataset.
+        :param idx: index of the data in *batch*.
+        :type idx: int
+        :rtype: tuple(list([torch.tensor]), ..., lens:torch.tensor)
+        """
+        lens = tensor([len(x[0]) for x in batch])
+        x = pad_sequences_with_tensor([x[idx] for x in batch],
+                                      batch_first=True,
+                                      padding_tensor=self.pad_tensor)
+        return x, lens
+
     def pad_collate(self, batch):
         """The method to use with torch.utils.data.DataLoader
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
         """
-        lens = tensor([len(x[0]) for x in batch])
-        x = pad_sequences_with_tensor(
-            [x[0] for x in batch], batch_first=True,
-            padding_tensor=self.pad_tensor
-        )
+        lens = tensor([len(x) for x in batch])
+        x = pad_sequences_with_tensor(batch, batch_first=True,
+                                      padding_tensor=self.pad_tensor)
         return x, lens

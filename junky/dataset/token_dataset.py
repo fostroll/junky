@@ -4,7 +4,7 @@
 # Copyright (C) 2020-present by Sergei Ternovykh, Anastasiya Nikiforova
 # License: BSD, see LICENSE for details
 """
-Provides torch.utils.data.Dataset for token-level input.
+Provides implementation of torch.utils.data.Dataset for token-level input.
 """
 from junky import make_token_dict
 from torch import Tensor, tensor
@@ -118,9 +118,9 @@ class TokenDataset(Dataset):
 
         If save is ``True``, we'll keep the converted sentences as the Dataset
         source."""
-        data = [([
+        data = [[
             tensor(i) for i in s if keep_empty or i
-        ],) for s in [
+        ] for s in [
             self.transform_tokens(s, skip_unk=skip_unk)
                 for s in sentences
         ] if keep_empty or s]
@@ -150,11 +150,23 @@ class TokenDataset(Dataset):
         return self.transform(sentences, skip_unk=skip_unk,
                               keep_empty=keep_empty, save=save)
 
+    def pad_collate_part(self, batch, idx):
+        """The method to use with junky.dataset.FrameDataset.
+        :param idx: index of the data in *batch*.
+        :type idx: int
+        :rtype: tuple(list([torch.tensor]), ..., lens:torch.tensor)
+        """
+        lens = tensor([len(x[idx]) for x in batch])
+        x = pad_sequence([x[idx] for x in batch],
+                         batch_first=self.batch_first,
+                         padding_value=self.pad))
+        return x, lens
+
     def pad_collate(self, batch):
         """The method to use with torch.utils.data.DataLoader
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
         """
         lens = tensor([len(x[0]) for x in batch])
-        x = pad_sequence([x[0] for x in batch], batch_first=self.batch_first,
+        x = pad_sequence(batch, batch_first=self.batch_first,
                          padding_value=self.pad)
         return x, lens
