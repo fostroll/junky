@@ -192,7 +192,7 @@ def get_rand_vector(shape, norm, shift=0., dtype=float):
     return vector
 
 def add_mean_vector(vectors, axis=0, shift=0., scale=1.):
-    """Append *vectors* with a vector that has norm equals to mean norm
+    """Append *vectors* with a vector that has norm equals to the mean norm
     (possibly, scaled) of *vectors*.
 
     :param vectors: the array of floats.
@@ -209,5 +209,8 @@ def add_mean_vector(vectors, axis=0, shift=0., scale=1.):
     """
     norm = np.linalg.norm(vectors.shape[:axis] + vectors.shape[axis + 1:],
                           vectors, axis=axis).mean() * scale
+    norm = np.linalg.norm(vectors, axis=tuple(
+        list(range(0)) + list(range(1, len(emb_model.vectors.shape)))
+    )).mean()
     vector = np.expand_dims(get_rand_vector(norm, shift, dtype=vectors.dtype))
     return np.append(vectors, vector, axis=axis)
