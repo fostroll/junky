@@ -61,7 +61,7 @@ class WordDataset(BaseDataset):
                 get_rand_vector((vec_size,), pad_vec_norm)
             self.pad_tensor = tensor(self.pad, dtype=float_tensor_dtype)
         else:
-            elf.pad = None
+            self.pad = None
         if sentences:
             self.transform(sentences, skip_unk=skip_unk,
                            keep_empty=keep_empty, save=True)
