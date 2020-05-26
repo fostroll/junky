@@ -68,7 +68,7 @@ class TokenDataset(BaseDataset):
         self.unk = extra[-1] if unk_token else None
         self.reconstruct_dict = {y: x for x, y in self.transform_dict.items()}
 
-    def token_to_idx(self, token, skip_unk=True):
+    def token_to_idx(self, token, skip_unk=False):
         """Convert a token to its index. If the token is not present in the
         internal dict, return index of unk token or None if it's not
         defined."""
@@ -77,17 +77,18 @@ class TokenDataset(BaseDataset):
                self.unk if not skip_unk and self.unk is not None else \
                None
 
-    def idx_to_token(self, idx, skip_unk=True):
+    def idx_to_token(self, idx, skip_unk=False, skip_pad=True):
         """Convert an index to the corresponding token. If the index is not
-        present in the internal dict, return unk token or None if it's not
-        defined."""
+        present in the internal dict, return unk token or empty string if it's
+        not defined or *skip_unk* is ``True``. If *skip_pad* is ``True``,
+        padding index will be replaced to empty string, too."""
         if isinstance(idx, Tensor):
             idx = idx.tolist()
-        return self.reconstruct_dict[idx] \
-                   if idx in self.reconstruct_dict else \
-               self.reconstruct_dict[self.unk] \
-                   if not skip_unk and self.unk is not None else \
-               ''
+        return '' if skip_pad and idx == self.pad else (
+            self.reconstruct_dict[idx] if idx in self.reconstruct_dict else
+            '' if skip_unk or self.unk is None else
+            self.reconstruct_dict[self.unk]
+        )
 
     def transform_tokens(self, tokens, skip_unk=False):
         """Convert a token or a list of tokens to the corresponding
@@ -97,13 +98,15 @@ class TokenDataset(BaseDataset):
                    if isinstance(tokens, str) else \
                [self.token_to_idx(t, skip_unk=skip_unk) for t in tokens]
 
-    def reconstruct_tokens(self, ids, skip_unk=False):
+    def reconstruct_tokens(self, ids, skip_unk=False, skip_pad=True):
         """Convert an index or a list of indices to the corresponding
         token|list of tokens. If skip_unk is ``True``, unknown indices will be
-        skipped."""
+        replaced to empty strings. If *skip_pad* is ``True``, padding indices
+        will be replaced to empty strings, too."""
         data = self.idx_to_token(ids, skip_unk=skip_unk) \
                    if isinstance(ids, int) else \
-               [self.idx_to_token(i, skip_unk=skip_unk) for i in ids]
+               [self.idx_to_token(i, skip_unk=skip_unk, skip_pad=skip_pad)
+                    for i in ids]
         return data
 
     def transform(self, sentences, skip_unk=False, keep_empty=False,
@@ -126,15 +129,17 @@ class TokenDataset(BaseDataset):
         else:
             return data
 
-    def reconstruct(self, sequences, skip_unk=False, keep_empty=False):
+    def reconstruct(self, sequences, skip_unk=False, skip_pad=True,
+                    keep_empty=False):
         """Convert sequences of indices in Dataset format to the sentences
         of the corresponding tokens. If *skip_unk* is ``True``, unknown
-        indices will be skipped. If *keep_empty* is ``False``, we'll remove
-        sentences that have no data after converting."""
+        indices will be skipped. If *skip_pad* is ``True``, padding will be
+        removed. If *keep_empty* is ``False``, we'll remove sentences that
+        have no data after converting."""
         return [[
             t for t in s if keep_empty or t
         ] for s in [
-            self.reconstruct_tokens(s, skip_unk=skip_unk)
+            self.reconstruct_tokens(s, skip_unk=skip_unk, skip_pad=skip_pad)
                 for s in sequences
         ] if keep_empty or s]
 

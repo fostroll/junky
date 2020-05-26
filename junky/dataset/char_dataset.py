@@ -94,22 +94,25 @@ class CharDataset(BaseDataset):
                self.unk if not skip_unk and self.unk is not None else \
                None
 
-    def idx_to_char(self, idx, skip_unk=False):
+    def idx_to_char(self, idx, skip_unk=False, skip_pad=True):
         """Convert an index to the corresponding character. If the index is
-        not present in the internal dict, return unk token or None if it's not
-        defined."""
+        not present in the internal dict, return unk token or empty string if
+        it's not defined or *skip_unk* is ``True``. If *skip_pad* is ``True``,
+        padding index will be replaced to empty string, too."""
         if isinstance(idx, Tensor):
             idx = idx.tolist()
-        return self.reconstruct_dict[idx] \
-                   if idx in self.reconstruct_dict else \
-               self.reconstruct_dict[self.unk] \
-                   if not skip_unk and self.unk is not None else \
-               ''
+        return '' if skip_pad and idx == self.pad else (
+            self.reconstruct_dict[idx] if idx in self.reconstruct_dict else
+            '' if skip_unk or self.unk is None else
+            self.reconstruct_dict[self.unk]
+        )
 
     def token_to_ids(self, token, skip_unk=False):
         """Convert a token to the list of indices of its chars. If some
         characters are not present in the internal dict, we'll use the index
-        of unk token for them, or None if it's not defined.
+        of unk token for them, or empty strings if it's not defined. or
+        *skip_unk* is ``True``. If *skip_pad* is ``True``, padding indices
+        will be replaced to empty string, too.
 
         :type token: str|list([char])
         :rtype: list([int])
@@ -118,10 +121,14 @@ class CharDataset(BaseDataset):
             self.char_to_idx(c, skip_unk=skip_unk) for c in token
         ] if not skip_unk or i is not None]
 
-    def ids_to_token(self, ids, skip_unk=False, aslist=False):
+    def ids_to_token(self, ids, skip_unk=False, skip_pad=True, aslist=False):
         """Convert a list of an indices to the list of corresponding
         characters. If some indices are not present in the internal dict,
-        we'll use unk token for them, or None if it's not defined."""
+        we'll use unk token for them, or None if it's not defined.
+
+        :param aslist: if ``True``, we want list of characters instead of
+            token as the result
+        """
         data = [c for c in [
             self.idx_to_char(i, skip_unk=skip_unk) for i in ids
         ] if not skip_unk or c]
@@ -135,13 +142,22 @@ class CharDataset(BaseDataset):
                    if isinstance(tokens, str) else \
                [self.token_to_ids(t, skip_unk=skip_unk) for t in tokens]
 
-    def reconstruct_tokens(self, ids, skip_unk=False, aslist=False):
+    def reconstruct_tokens(self, ids, skip_unk=False, skip_pad=True,
+                           aslist=False):
         """Convert a list of indices or a sequence of lists of indices to the
         corresponding token|sequence of tokens. If skip_unk is ``True``,
-        unknown indices will be skipped."""
-        return self.ids_to_token(ids, skip_unk=skip_unk, aslist=aslist) \
+        unknown indices will be skipped (or replaced to empty strings, if
+        *aslist* is ``True``). If *skip_pad* is ``True``, padding indices
+        also will be removed or replaced to empty strings.
+
+        :param aslist: if ``True``, we want lists of characters instead of
+            tokens as the result
+        """
+        return self.ids_to_token(ids, skip_unk=skip_unk, skip_pad=skip_pad,
+                                 aslist=aslist) \
                    if ids and isinstance(ids[0], int) else \
-               [self.ids_to_token(i, skip_unk=skip_unk, aslist=aslist)
+               [self.ids_to_token(i, skip_unk=skip_unk, skip_pad=skip_pad,
+                                  aslist=aslist)
                     for i in ids]
 
     def transform(self, sentences, skip_unk=False, keep_empty=False,
@@ -166,16 +182,23 @@ class CharDataset(BaseDataset):
         else:
             return data
 
-    def reconstruct(self, sequences, skip_unk=False, keep_empty=False,
-                    aslist=False):
+    def reconstruct(self, sequences, skip_unk=False, skip_pad=True,
+                    keep_empty=False, aslist=False):
         """Convert sequences of the lists of the indices in Dataset format to
         the sentences of the corresponding tokens. If *skip_unk* is ``True``,
-        unknown indices will be skipped. If *keep_empty* is ``False``, we'll
-        remove sentences that have no data after converting."""
+        unknown indices will be skipped. If *skip_pad* is ``True``, padding
+        will be removed. If *keep_empty* is ``False``, we'll remove sentences
+        that have no data after converting.
+
+        :param aslist: if ``True``, we want lists of characters instead of
+            tokens as the result
+        """
         return [[
-            t for t in s if keep_empty or t
+            [c for c in t if keep_empty or c] if aslist else t
+                for t in s if keep_empty or t
         ] for s in [
-            self.reconstruct_tokens(s, skip_unk=skip_unk, aslist=aslist)
+            self.reconstruct_tokens(s, skip_unk=skip_unk, skip_pad=skip_pad,
+                                    aslist=aslist)
                 for s in sequences
         ] if keep_empty or s]
 
