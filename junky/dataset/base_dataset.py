@@ -35,7 +35,7 @@ class BaseDataset(Dataset):
         """Clone this object. If *with_data* is ``False``, the `data` attr of
         the new object will be empty.
         """
-        o = _create_empty()
+        o = self._create_empty()
         for name, val in self.__dict__.items():
             setattr(o, name, val.clone(with_data=with_data)
                                  if isinstance(val, BaseDataset) else
