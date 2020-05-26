@@ -71,7 +71,7 @@ class TokenDataset(BaseDataset):
         defined."""
         return self.transform_dict[token] \
                    if token in self.transform_dict else \
-               self.unk if not skip_unk and self.unk else \
+               self.unk if not skip_unk and self.unk is not None else \
                None
 
     def idx_to_token(self, idx, skip_unk=True):
@@ -83,7 +83,7 @@ class TokenDataset(BaseDataset):
         return self.reconstruct_dict[idx] \
                    if idx in self.reconstruct_dict else \
                self.reconstruct_dict[self.unk] \
-                   if not skip_unk and self.unk else \
+                   if not skip_unk and self.unk is not None else \
                ''
 
     def transform_tokens(self, tokens, skip_unk=False):
@@ -113,7 +113,7 @@ class TokenDataset(BaseDataset):
         If save is ``True``, we'll keep the converted sentences as the Dataset
         source."""
         data = [tensor([
-            i for i in s if keep_empty or i
+            i for i in s if keep_empty or i is not None
         ], dtype=self.int_tensor_dtype) for s in [
             self.transform_tokens(s, skip_unk=skip_unk)
                 for s in sentences

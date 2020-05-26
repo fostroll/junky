@@ -71,7 +71,7 @@ class WordDataset(BaseDataset):
         model, return vector of unk token or None if it's not defined."""
         return self.extra_model[word] if word in self.extra_model else \
                self.emb_model[word] if word in self.emb_model else \
-               self.unk if not skip_unk and self.unk else \
+               self.unk if not skip_unk and self.unk is not None else \
                None
 
     def transform_words(self, words, skip_unk=False):

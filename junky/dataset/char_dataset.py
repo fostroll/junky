@@ -88,7 +88,7 @@ class CharDataset(BaseDataset):
         defined."""
         return self.transform_dict[char] \
                    if char in self.transform_dict else \
-               self.unk if not skip_unk and self.unk else \
+               self.unk if not skip_unk and self.unk is not None else \
                None
 
     def idx_to_char(self, idx, skip_unk=False):
@@ -100,7 +100,7 @@ class CharDataset(BaseDataset):
         return self.reconstruct_dict[idx] \
                    if idx in self.reconstruct_dict else \
                self.reconstruct_dict[self.unk] \
-                   if not skip_unk and self.unk else \
+                   if not skip_unk and self.unk is not None else \
                ''
 
     def token_to_ids(self, token, skip_unk=False):
@@ -153,7 +153,7 @@ class CharDataset(BaseDataset):
         source."""
         data = [[
             tensor(i, dtype=self.int_tensor_dtype)
-                for i in s if keep_empty or i
+                for i in s if keep_empty or i is not None
         ] for s in [
             self.transform_tokens(s, skip_unk=skip_unk)
                 for s in sentences

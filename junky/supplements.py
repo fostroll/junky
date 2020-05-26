@@ -407,12 +407,12 @@ def train(device, loaders, model, criterion, optimizer,
 
     train_loader = loaders[0] if loaders else \
                    DataLoader(train_dataset, batch_size=batch_size,
-                              num_workers=0, shuffle=True,
+                              shuffle=True, num_workers=0,
                               collate_fn=pad_collate if pad_collate else
                               train_dataset.pad_collate)
     test_loader = loaders[1] if loaders else \
                   DataLoader(test_dataset, batch_size=batch_size,
-                             num_workers=0, shuffle=False,
+                             shuffle=False, num_workers=0,
                              collate_fn=pad_collate if pad_collate else
                              test_dataset.pad_collate)
 
