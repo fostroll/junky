@@ -17,7 +17,7 @@ import seaborn as sns
 
 
 def plot_losses(train_losses, test_losses, accuracies=None,
-                plot_title='Train/Dev Loss', figsize=(10, 6),
+                plot_title='Train/Dev Loss', figsize=(7, 4),
                 legend_labels=['train', 'dev', '1 - acc'], save_name=None):
     """Plots train and dev losses obtained during training.
     The plot image is saved to disk.
@@ -132,7 +132,7 @@ def plot_confusion_matrix(y_true, y_pred, n_classes, pad_index=None,
 
 def plot_metrics(metrics=[], 
                  labels=['accuracy', 'precision', 'recalls', 'f1_score'],
-                 plot_title='Metrics', figsize=(10,6), save_name=None):
+                 plot_title='Metrics', figsize=(7, 4), save_name=None):
     """Plots metrics obtained during training. 
     Default: ['accuracy', 'precision', 'recalls', 'f1_score'].
     The plot image is saved to disk.

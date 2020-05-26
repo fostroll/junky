@@ -131,7 +131,7 @@ class TokenDataset(BaseDataset):
         return [[
             t for t in s if keep_empty or t
         ] for s in [
-            self.reconstruct_tokens(s[0], skip_unk=skip_unk)
+            self.reconstruct_tokens(s, skip_unk=skip_unk)
                 for s in sequences
         ] if keep_empty or s]
 

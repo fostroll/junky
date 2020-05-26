@@ -28,10 +28,10 @@ class BaseDataset(Dataset):
         """Clone this object. If *with_data* is ``False``, the `data` attr of
         the new object will be empty.
         """
-        o = self.__class__([])
+        o = self.__class__([]) if hasattr(self, 'data') else self.__class__()
         for name, val in self.__dict__.items():
-            setattr(o, name, o.clone(with_data=with_data)
-                                 if isinstance(val, self.__class__) else
+            setattr(o, name, val.clone(with_data=with_data)
+                                 if isinstance(val, BaseDataset) else
                              deepcopy(val)
                                  if name != 'data' or with_data else
                              [])
