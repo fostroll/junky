@@ -7,7 +7,6 @@
 Provides base functionality for junky.dataset.*Dataset classes.
 """
 from copy import deepcopy
-import inspect
 from torch.utils.data import DataLoader, Dataset
 
 

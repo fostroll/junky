@@ -6,6 +6,7 @@
 """
 Provides implementation of torch.utils.data.Dataset for word-level input.
 """
+from copy import deepcopy
 from junky import get_rand_vector, pad_sequences_with_tensor
 from junky.dataset import BaseDataset
 from torch import Tensor, float32, int64, tensor
