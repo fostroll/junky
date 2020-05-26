@@ -7,6 +7,7 @@
 Provides base functionality for junky.dataset.*Dataset classes.
 """
 from copy import deepcopy
+import inspect
 from torch.utils.data import DataLoader, Dataset
 
 
@@ -24,11 +25,17 @@ class BaseDataset(Dataset):
     def __getitem__(self, idx):
         return self.data[idx]
 
+    def _create_empty(self):
+        """Create empty instance of the current class. Is invoked by
+        `.clone()`. You must override this method if constructor of your class
+        has positional args."""
+        return self.__class__()
+
     def clone(self, with_data=True):
         """Clone this object. If *with_data* is ``False``, the `data` attr of
         the new object will be empty.
         """
-        o = self.__class__([]) if hasattr(self, 'data') else self.__class__()
+        o = _create_empty()
         for name, val in self.__dict__.items():
             setattr(o, name, val.clone(with_data=with_data)
                                  if isinstance(val, BaseDataset) else
@@ -47,7 +54,7 @@ class BaseDataset(Dataset):
 
     def collate(self, batch):
         """The stub method to use with `DataLoader`."""
-        return x
+        return batch
 
     def get_loader(self, batch_size=32, shuffle=False, num_workers=0,
                    **kwargs):

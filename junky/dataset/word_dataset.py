@@ -66,6 +66,23 @@ class WordDataset(BaseDataset):
             self.transform(sentences, skip_unk=skip_unk,
                            keep_empty=keep_empty, save=True)
 
+    def _create_empty(self):
+        return self.__class__(self.emb_model, self.vec_size)
+
+    def clone(self, with_data=True):
+        """Clone this object. If *with_data* is ``False``, the `data` attr of
+        the new object will be empty. NB: emb_model is always copied by link.
+        """
+        o = _create_empty()
+        for name, val in self.__dict__.items():
+            if name != 'emb_model':
+                setattr(o, name, val.clone(with_data=with_data)
+                                     if isinstance(val, BaseDataset) else
+                                 deepcopy(val)
+                                     if (name != 'data' or with_data) else
+                                 [])
+        return o
+
     def word_to_vec(self, word, skip_unk=True):
         """Convert a token to its vector. If the token is not present in the
         model, return vector of unk token or None if it's not defined."""

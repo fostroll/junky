@@ -63,6 +63,19 @@ class FrameDataset(BaseDataset):
         """Print names of the added datasets in order of addition."""
         return tuple(self.datasets.keys())
 
+    def transform(self, sentences, skip_unk=False, keep_empty=False,
+                  save=True):
+        """Invoke `.transform(sentences, skip_unk, keep_empty, save)` method
+        for all nested `Dataset` objects.
+
+        If save is ``False``, we'll return the stacked result of objects'
+        return."""
+        data = tuple(x[0].transform(sents, skip_unk=skip_unk,
+                                    keep_empty=keep_empty, save=save)
+                         for x in self.datasets.values())
+        if not save:
+            return tuple(data)
+
     def collate(self, batch):
         """The method to use with torch.utils.data.DataLoader. It concatenates
         outputs of the added datasets in order of addition. All the dataset
@@ -71,8 +84,8 @@ class FrameDataset(BaseDataset):
         batch.
         """
         res, pos = [], 0
-        for ds in self.datasets.values():
-            res_ = ds[0].frame_collate(batch, pos, **ds[2])
+        for ds, num_pos, kwargs in self.datasets.values():
+            res_ = ds.frame_collate(batch, pos, **kwargs)
             res += res_ if isinstance(res_, tuple) else [res_]
-            pos += ds[1]
+            pos += num_pos
         return tuple(res)
