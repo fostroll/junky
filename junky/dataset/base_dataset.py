@@ -64,21 +64,21 @@ class BaseDataset(Dataset):
         with open(file_path, 'rb') as f:
             return pickle.load(f)
 
-    @staticmethod
-    def _to(o, *args, **kwargs):
+    @classmethod
+    def _to(cls, o, *args, **kwargs):
         if isinstance(o, Tensor):
             o = o.to(*args, **kwargs)
         elif isinstance(o, Module):
             o.to(*args, **kwargs)
         elif isinstance(o, list):
             for i in range(len(o)):
-                o[i] = BaseDataset._to(o[i], *args, **kwargs)
+                o[i] = cls._to(o[i], *args, **kwargs)
         return o
 
     def to(self, *args, **kwargs):
         """Invoke the `.to()` method for all object of `torch.Tensor` or 
         `torch.nn.Module` type."""
-        self.data = self._to(self.data)
+        self.data = self._to(self.data, *args, **kwargs)
 
     def _frame_collate(self, batch, pos):
         """The stub method to use with `junky.dataset.FrameDataset`.

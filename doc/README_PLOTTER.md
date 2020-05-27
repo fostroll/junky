@@ -7,10 +7,10 @@ The lib contains tools to plot useful statistics on trained *PyTorch* models.
 #### Plot Losses
 
 ```python
-from junky import plotter
-plotter.plot_losses(train_losses, test_losses, accuracies=None, 
-                plot_title='Train/Dev Loss', figsize=(5,3), 
-				legend_labels=['train', 'dev', '1 - acc'], save_name=None)
+import junky
+junky.plot_losses(train_losses, test_losses, accuracies=None, 
+                  plot_title='Train/Dev Loss', figsize=(7, 4), 
+                  legend_labels=['train', 'dev', '1 - acc'], save_name=None)
 ```
 
 Plots train and dev losses obtained during training.
@@ -26,7 +26,7 @@ Params:
 
 **accuracies**:     optional, list of floats, accuracies throughout epochs.
 Here, used to count (1 - accuracy). If `None`, not plotted.
-			  
+
 **plot_title**:     plot title, `str`. Default value - 'Train/Dev Loss'.
 
 **figsize**:        the size of the figure plotted. Default size is `(10,6)`.
@@ -38,24 +38,21 @@ Used as `fname` in `plt.savefig()`. Default file extention is '.png',
 if other extention is needed, please specify extention in save_name as well. 
 *Example*: ``save_name='plot.pdf'``
 
-
 #### Plot Metrics
 
 ```python
-plotter.plot_metrics(metrics=[], 
-                 labels=['accuracy', 'precision', 'recalls', 'f1_score'],
-                 plot_title='Metrics', figsize=(10,6), save_name=None)
+junky.plot_metrics(metrics=[], 
+                   labels=['accuracy', 'precision', 'recalls', 'f1_score'],
+                   plot_title='Metrics', figsize=(7, 4), save_name=None)
 ```
-
-Plots metrics obtained during training.
-The plot image is saved to disk.
+Plots metrics obtained during training. The plot image is saved to disk.
 
 Custom metrics can also be plotted - specify them in `metrics` and assign them `labels`.
 
 Params:
 
 **metrics**:        tuple or list of metrics, where each metric is 
-a list of floats, ``len(metric)==num_epochs``
+a list of floats, `len(metric)==num_epochs`
 
 **labels**:         list of str, labels for metrics plotted.
 
@@ -66,15 +63,14 @@ a list of floats, ``len(metric)==num_epochs``
 **save_name**:      `str`: filename of figure file to save. 
 If `None`, image is not saved to disk.
 
-
 #### Plot Confusion Matrix
 
 ```python
-plotter.plot_confusion_matrix(y_true, y_pred, n_classes, pad_index=None, ymap=None, 
-                          figsize=(28,10), show_total=['x', 'y'], show_zeros=True,
-                          plot_title='Confusion Matrix', save_name=None)
+junky.plot_confusion_matrix(y_true, y_pred, n_classes,
+                            pad_index=None, ymap=None, figsize=(20, 10),
+                            show_total=['x', 'y'], show_zeros=True,
+                            plot_title='Confusion Matrix', save_name=None)
 ```
-
 Generate matrix plot of confusion matrix with pretty annotations.
 The plot image is saved to disk.
 
@@ -89,10 +85,9 @@ as (range(n_classes)). If padding class was also used during train, and
 `pad_index!=len(tag2index)`, i.e. is not the last element in tag2index, 
 add +1 to n_classes, so that `pad_index` will be ignored if not present in `y_pred`. 
 
-                    
 **pad_index**:     if not None and not present in y_pred, pad_index will not be 
-included in the plot.   
-               
+included in the plot.
+
 **ymap**:          dict: index -> tag, length == nclass. if not `None`, 
 map the labels & ys to s. if `None`, range(1, n_classes+1) is used for labels.
 

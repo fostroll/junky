@@ -50,10 +50,10 @@ def plot_losses(train_losses, test_losses, accuracies=None,
         plt.savefig(save_name, bbox_inches='tight')
     plt.show()
 
-def plot_confusion_matrix(y_true, y_pred, n_classes, pad_index=None,
-                          ymap=None, figsize=(20, 10), show_total=['x', 'y'],
-                          show_zeros=True, plot_title='Confusion Matrix',
-                          save_name=None):
+def plot_confusion_matrix(y_true, y_pred, n_classes,
+                          pad_index=None, ymap=None, figsize=(20, 10),
+                          show_total=['x', 'y'], show_zeros=True,
+                          plot_title='Confusion Matrix', save_name=None):
     """
     Generate matrix plot of confusion matrix with pretty annotations.
     The plot image is saved to disk.
