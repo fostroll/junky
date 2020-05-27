@@ -7,7 +7,8 @@
 Provides implementation of torch.utils.data.Dataset for token-level input.
 """
 from junky import make_token_dict
-from junky.dataset import BaseDataset
+from junky.dataset.base_dataset import BaseDataset
+from junky import CPU
 from torch import Tensor, int64, tensor
 from torch.nn.utils.rnn import pad_sequence
 
@@ -161,7 +162,8 @@ class TokenDataset(BaseDataset):
         :return: depends on keyword args.
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
         """
-        lens = [tensor([len(x[pos]) for x in batch],
+        device = batch[pos].get_device() if batch[pos].is_cuda else CPU
+        lens = [tensor([len(x[pos]) for x in batch], device=device,
                        dtype=self.int_tensor_dtype)] if with_lens else []
         x = pad_sequence([x[pos] for x in batch],
                          batch_first=self.batch_first,
@@ -173,7 +175,9 @@ class TokenDataset(BaseDataset):
 
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
         """
-        lens = tensor([len(x) for x in batch], dtype=self.int_tensor_dtype)
+        device = batch[0].get_device() if batch[0].is_cuda else CPU
+        lens = tensor([len(x) for x in batch], device=device,
+                      dtype=self.int_tensor_dtype)
         x = pad_sequence(batch, batch_first=self.batch_first,
                          padding_value=self.pad)
         return x, lens

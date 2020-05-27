@@ -7,7 +7,8 @@
 Provides implementation of torch.utils.data.Dataset for character-level input.
 """
 from junky import make_alphabet, pad_array_torch
-from junky.dataset import BaseDataset
+from junky.dataset.base_dataset import BaseDataset
+from junky import CPU
 from torch import Tensor, int64, tensor
 from torch.nn.utils.rnn import pad_sequence
 
@@ -223,7 +224,8 @@ class CharDataset(BaseDataset):
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor,
                       token_lens:list([torch.tensor]))
         """
-        lens = [tensor([len(x[pos]) for x in batch],
+        device = batch[pos].get_device() if batch[pos].is_cuda else CPU
+        lens = [tensor([len(x[pos]) for x in batch], device=device,
                        dtype=self.int_tensor_dtype)] if with_lens else []
         if with_token_lens:
             lens.append([tensor([len(x) for x in x[pos]],
@@ -243,7 +245,9 @@ class CharDataset(BaseDataset):
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor,
                       token_lens:list([torch.tensor]))
         """
-        lens = tensor([len(x) for x in batch], dtype=self.int_tensor_dtype)
+        device = batch[0].get_device() if batch[0].is_cuda else CPU
+        lens = tensor([len(x) for x in batch], device=device,
+                      dtype=self.int_tensor_dtype)
         token_lens = [tensor([len(x) for x in x],
                              dtype=self.int_tensor_dtype) for x in batch]
         if self.min_len is not None:

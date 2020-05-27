@@ -7,7 +7,7 @@
 A frame for use several torch.utils.data.Dataset together.
 """
 from collections import OrderedDict
-from junky.dataset import BaseDataset
+from junky.dataset.base_dataset import BaseDataset
 from torch.utils.data import DataLoader, Dataset
 
 

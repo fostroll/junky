@@ -10,6 +10,8 @@ import numpy as np
 import torch
 from torch import Tensor, tensor
 
+CPU = torch.device('cpu')
+
 
 def get_max_dims(array, str_isarray=False, max_dims=None, dim_no=0):
     """Returns max sizes of nested *array* on the all levels of nestedness.
@@ -122,8 +124,7 @@ def pad_array_torch(array, padding_value=0, **kwargs):
     :param kwargs: keyword args for the ``torch.tensor()`` method.
     :rtype: torch.Tensor
     """
-    return torch.tensor(pad_array(array, padding_value=padding_value),
-                        **kwargs)
+    return tensor(pad_array(array, padding_value=padding_value), **kwargs)
 
 def pad_sequences_with_tensor(sequences, batch_first=False,
                               padding_tensor=0.):
@@ -142,7 +143,7 @@ def pad_sequences_with_tensor(sequences, batch_first=False,
             tensor(batch, seq, features)
     """
     t = sequences[0]
-    device = t.get_device() if t.is_cuda else torch.device('cpu')
+    device = t.get_device() if t.is_cuda else CPU
     N, S = len(sequences), max(s.shape[0] for s in sequences)
     if not isinstance(padding_tensor, Tensor):
         if isinstance(padding_tensor, Iterable):

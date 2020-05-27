@@ -6,8 +6,6 @@
 """
 Provides implementagions of torch.utils.data.Dataset for different purposes.
 """
-from junky.dataset.base_dataset import *
-
 from junky.dataset.char_dataset import *
 from junky.dataset.token_dataset import *
 from junky.dataset.word_dataset import *
