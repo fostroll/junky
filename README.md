@@ -12,6 +12,8 @@ Provides a bunch of tools and utilities to use with PyTorch.
 
 [Layers](https://github.com/fostroll/junky/blob/master/doc/README_LAYERS.md)
 
+[Datasets](https://github.com/fostroll/junky/blob/master/doc/README_DATASETS.md)
+
 [Utilities](https://github.com/fostroll/junky/blob/master/doc/README_UTILITIES.md)
 
 [Plotter](https://github.com/fostroll/junky/blob/master/doc/README_PLOTTER.md)

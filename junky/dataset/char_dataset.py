@@ -51,9 +51,6 @@ class CharDataset(BaseDataset):
             self.transform(sentences, skip_unk=skip_unk,
                            keep_empty=keep_empty, save=True)
 
-    def _create_empty(self):
-        return self.__class__([])
-
     def fit(self, sentences, unk_token=None, pad_token=None,
             extra_tokens=None, allowed_chars=None, exclude_chars=None):
         """Recreate the internal dict.
