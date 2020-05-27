@@ -20,34 +20,32 @@ class WordDataset(BaseDataset):
 
     Args:
         emb_model: dict or any other object that allow the syntax
-            `vector = emb_model[word]` and `if word in emb_model:`
-        unk_token: add a token for words that are not present in the dict:
-            str.
-        unk_vec_norm: 
+            `vector = emb_model[word]` and `if word in emb_model:`.
+        vec_size: the length of the word's vector.
+        unk_token: add a token for words that are not present in the internal
+            dict: str.
+        unk_vec_norm: the norm of the vector for *unk_token*: float.
         pad_token: add a token for padding: str.
+        pad_vec_norm: the norm of the vector for *pad_token*: float.
         extra_tokens: add tokens for any other purposes: list([str]).
+        extra_vec_norm: the norm of the vectors for *extra_tokens*: float.
         sentences: sequences of words: list([list([str])]). If not ``None``,
             they will be transformed and saved.
-        skip_unk, keep_empty: params for the `transform()` method.
-        float_tensor_dtype: dtype for float tensors: torch.dtype
-        int_tensor_dtype: dtype for int tensors: torch.dtype
-        batch_first: if ``True``, then the input and output tensors are
-            provided as `(batch, seq, feature)`. Otherwise (default),
-            `(seq, batch, feature)`.
+        skip_unk, keep_empty: params for the `.transform()` method.
+        float_tensor_dtype: dtype for float tensors: torch.dtype.
+        int_tensor_dtype: dtype for int tensors: torch.dtype.
     """
     def __init__(self, emb_model, vec_size,
-                 unk_token=None, unk_vec_norm=1e-2,
+                 unk_token=None, unk_vec_norm=1.,
                  pad_token=None, pad_vec_norm=0.,
-                 extra_tokens=None, extra_vec_norm=1e-2,
+                 extra_tokens=None, extra_vec_norm=1.,
                  sentences=None, skip_unk=False, keep_empty=False,
-                 float_tensor_dtype=float32, int_tensor_dtype=int64,
-                 batch_first=False):
+                 float_tensor_dtype=float32, int_tensor_dtype=int64):
         super().__init__()
         self.emb_model = emb_model
         self.vec_size = vec_size
         self.float_tensor_dtype = float_tensor_dtype
         self.int_tensor_dtype = int_tensor_dtype
-        self.batch_first = batch_first
         self.extra_model = {
             t: get_rand_vector((vec_size,), extra_vec_norm)
                 for t in extra_tokens
@@ -81,8 +79,8 @@ class WordDataset(BaseDataset):
 
     @classmethod
     def load(cls, file_path, emb_model):
-        """Load object from *file_path*. You should specify *emb_model* that
-        you used during object's creation."""
+        """Creates object from *file_path*. You should specify *emb_model*
+        that you used during object's creation."""
         o = super(cls, cls).load(file_path)
         o.emb_model = emb_model
         return o
@@ -96,7 +94,7 @@ class WordDataset(BaseDataset):
                None
 
     def transform_words(self, words, skip_unk=False):
-        """Convert a token or a list of words to the corresponding
+        """Convert a word or a list of words to the corresponding
         vector|list of vectors. If skip_unk is ``True``, unknown words will be
         skipped."""
         return self.word_to_vec(words, skip_unk=skip_unk) \
@@ -105,10 +103,10 @@ class WordDataset(BaseDataset):
 
     def transform(self, sentences, skip_unk=False, keep_empty=False,
                   save=True):
-        """Convert sentences of words to the sentences of the corresponding
-        vectors. If *skip_unk* is ``True``, unknown words will be skipped.
-        If *keep_empty* is ``False``, we'll remove sentences that have no data
-        after converting.
+        """Convert sentences of words to the sequences of the corresponding
+        vectors and adjust their format for Dataset. If *skip_unk* is
+        ``True``, unknown words will be skipped. If *keep_empty* is ``False``,
+        we'll remove sentences that have no data after converting.
 
         If save is ``True``, we'll keep the converted sentences as the
         `Dataset` source."""
@@ -136,7 +134,6 @@ class WordDataset(BaseDataset):
         lens = [tensor([len(x[pos]) for x in batch], device=device,
                        dtype=self.int_tensor_dtype)] if with_lens else []
         x = pad_sequences_with_tensor([x[pos] for x in batch],
-                                      batch_first=True,
                                       padding_tensor=self.pad_tensor)
         return (x, *lens) if lens else x
 
@@ -148,6 +145,5 @@ class WordDataset(BaseDataset):
         device = batch[0].get_device() if batch[0].is_cuda else CPU
         lens = tensor([len(x) for x in batch], device=device,
                       dtype=self.int_tensor_dtype)
-        x = pad_sequences_with_tensor(batch, batch_first=True,
-                                      padding_tensor=self.pad_tensor)
+        x = pad_sequences_with_tensor(batch, padding_tensor=self.pad_tensor)
         return x, lens

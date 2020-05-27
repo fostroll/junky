@@ -19,30 +19,26 @@ class CharDataset(BaseDataset):
 
     Args:
         sentences: sequences of tokens: list([list([str])]).
-        unk_token: add a token for tokens that are not present in the dict:
-            str.
+        unk_token: add a token for characters that are not present in the
+            internal dict: str.
         pad_token: add a token for padding: str.
         extra_tokens: add tokens for any other purposes: list([str]).
         allowed_chars: if not None, all charactes not from *allowed_chars*
-            will be removed: str|list([str])
+            will be removed: str|list([str]).
         exclude_chars: if not None, all charactes from *exclude_chars* will
-            be removed: str|list([str])
+            be removed: str|list([str]).
         transform: if ``True``, transform and save `sentences`.
-        skip_unk, keep_empty: params for the `transform()` method.
-        int_tensor_dtype: dtype for int tensors: torch.dtype
-        batch_first: if ``True``, then the input and output tensors are
-            provided as `(batch, seq, feature)`. Otherwise (default),
-            `(seq, batch, feature)`.
-        min_len: if specified, collate will pad sentences in `batch` that
+        skip_unk, keep_empty: params for the `.transform()` method.
+        int_tensor_dtype: dtype for int tensors: torch.dtype.
+        min_len: if specified, `._collate()` will pad sentences in batch that
             are shorter than `min_len`: int.
     """
     def __init__(self, sentences, unk_token=None, pad_token=None,
                  extra_tokens=None, allowed_chars=None, exclude_chars=None,
                  transform=False, skip_unk=False, keep_empty=False,
-                 int_tensor_dtype=int64, batch_first=False, min_len=None):
+                 int_tensor_dtype=int64, min_len=None):
         super().__init__()
         self.int_tensor_dtype = int_tensor_dtype
-        self.batch_first = batch_first
         self.min_len = min_len
         self.fit(sentences, unk_token=unk_token, pad_token=pad_token,
                  extra_tokens=extra_tokens, allowed_chars=allowed_chars,
@@ -86,7 +82,7 @@ class CharDataset(BaseDataset):
     def char_to_idx(self, char, skip_unk=False):
         """Convert a character to its index. If the character is not present
         in the internal dict, return index of unk token or None if it's not
-        defined."""
+        defined or *skip_unk* is `True`."""
         return self.transform_dict[char] \
                    if char in self.transform_dict else \
                self.unk if not skip_unk and self.unk is not None else \
@@ -106,11 +102,11 @@ class CharDataset(BaseDataset):
         )
 
     def token_to_ids(self, token, skip_unk=False):
-        """Convert a token to the list of indices of its chars. If some
-        characters are not present in the internal dict, we'll use the index
-        of unk token for them, or empty strings if it's not defined. or
-        *skip_unk* is ``True``. If *skip_pad* is ``True``, padding indices
-        will be replaced to empty string, too.
+        """Convert a token or a `list` of characters to the list of indices of
+        its chars. If some characters are not present in the internal dict,
+        we'll use the index of unk token for them, or empty strings if it's
+        not defined or *skip_unk* is ``True``. If *skip_pad* is ``True``,
+        padding indices will be replaced to empty string, too.
 
         :type token: str|list([char])
         :rtype: list([int])
@@ -120,12 +116,12 @@ class CharDataset(BaseDataset):
         ] if not skip_unk or i is not None]
 
     def ids_to_token(self, ids, skip_unk=False, skip_pad=True, aslist=False):
-        """Convert a list of an indices to the list of corresponding
+        """Convert a list of indices to the corresponding token or a list of
         characters. If some indices are not present in the internal dict,
         we'll use unk token for them, or None if it's not defined.
 
         :param aslist: if ``True``, we want list of characters instead of
-            token as the result
+            token as the result.
         """
         data = [c for c in [
             self.idx_to_char(i, skip_unk=skip_unk) for i in ids
@@ -133,9 +129,9 @@ class CharDataset(BaseDataset):
         return data if aslist else ''.join(data)
 
     def transform_tokens(self, tokens, skip_unk=False):
-        """Convert a token or a list of tokens to the corresponding
-        index|list of indices. If skip_unk is ``True``, unknown tokens will be
-        skipped."""
+        """Convert a token or a sequence of tokens to the corresponding list
+        or a sequence of lists of indices. If skip_unk is ``True``, unknown
+        tokens will be skipped."""
         return self.token_to_ids(tokens, skip_unk=skip_unk) \
                    if isinstance(tokens, str) else \
                [self.token_to_ids(t, skip_unk=skip_unk) for t in tokens]
@@ -149,7 +145,7 @@ class CharDataset(BaseDataset):
         also will be removed or replaced to empty strings.
 
         :param aslist: if ``True``, we want lists of characters instead of
-            tokens as the result
+            tokens in the result.
         """
         return self.ids_to_token(ids, skip_unk=skip_unk, skip_pad=skip_pad,
                                  aslist=aslist) \
@@ -161,7 +157,7 @@ class CharDataset(BaseDataset):
     def transform(self, sentences, skip_unk=False, keep_empty=False,
                   save=True):
         """Convert sentences of token to the sequences of the lists of the
-        indices corresponding to token's chars and adjust its format for
+        indices corresponding to token's chars and adjust their format for
         Dataset. If *skip_unk* is ``True``, unknown chars will be skipped.
         If *keep_empty* is ``False``, we'll remove tokens and sentences that
         have no data after converting.
@@ -189,7 +185,7 @@ class CharDataset(BaseDataset):
         that have no data after converting.
 
         :param aslist: if ``True``, we want lists of characters instead of
-            tokens as the result
+            tokens in the result.
         """
         return [[
             [c for c in t if keep_empty or c] if aslist else t

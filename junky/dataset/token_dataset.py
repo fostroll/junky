@@ -19,23 +19,19 @@ class TokenDataset(BaseDataset):
 
     Args:
         sentences: sequences of tokens: list([list([str])]).
-        unk_token: add a token for tokens that are not present in the dict:
-            str.
+        unk_token: add a token for tokens that are not present in the
+            internal dict: str.
         pad_token: add a token for padding: str.
         extra_tokens: add tokens for any other purposes: list([str]).
         transform: if ``True``, transform and save `sentences`.
-        skip_unk, keep_empty: params for the `transform()` method.
-        int_tensor_dtype: dtype for int tensors: torch.dtype
-        batch_first: if ``True``, then the input and output tensors are
-            provided as `(batch, seq, feature)`. Otherwise (default),
-            `(seq, batch, feature)`.
+        skip_unk, keep_empty: params for the `.transform()` method.
+        int_tensor_dtype: dtype for int tensors: torch.dtype.
     """
     def __init__(self, sentences, unk_token=None, pad_token=None,
                  extra_tokens=None, transform=False, skip_unk=False,
-                 keep_empty=False, int_tensor_dtype=int64, batch_first=False):
+                 keep_empty=False, int_tensor_dtype=int64):
         super().__init__()
         self.int_tensor_dtype = int_tensor_dtype
-        self.batch_first = batch_first
         self.fit(sentences, unk_token=unk_token, pad_token=pad_token,
                  extra_tokens=extra_tokens)
         if transform:
@@ -90,17 +86,17 @@ class TokenDataset(BaseDataset):
 
     def transform_tokens(self, tokens, skip_unk=False):
         """Convert a token or a list of tokens to the corresponding
-        index|list of indices. If skip_unk is ``True``, unknown tokens will be
-        skipped."""
+        index|list of indices. If *skip_unk* is ``True``, unknown tokens will
+        be skipped."""
         return self.token_to_idx(tokens, skip_unk=skip_unk) \
                    if isinstance(tokens, str) else \
                [self.token_to_idx(t, skip_unk=skip_unk) for t in tokens]
 
     def reconstruct_tokens(self, ids, skip_unk=False, skip_pad=True):
         """Convert an index or a list of indices to the corresponding
-        token|list of tokens. If skip_unk is ``True``, unknown indices will be
-        replaced to empty strings. If *skip_pad* is ``True``, padding indices
-        will be replaced to empty strings, too."""
+        token|list of tokens. If *skip_unk* is ``True``, unknown indices will
+        be replaced to empty strings. If *skip_pad* is ``True``, padding
+        indices will be replaced to empty strings, too."""
         data = self.idx_to_token(ids, skip_unk=skip_unk) \
                    if isinstance(ids, int) else \
                [self.idx_to_token(i, skip_unk=skip_unk, skip_pad=skip_pad)
@@ -110,9 +106,9 @@ class TokenDataset(BaseDataset):
     def transform(self, sentences, skip_unk=False, keep_empty=False,
                   save=True):
         """Convert sentences of token to the sequences of the corresponding
-        indices and adjust its format for Dataset. If *skip_unk* is ``True``,
-        unknown tokens will be skipped. If *keep_empty* is ``False``, we'll
-        remove sentences that have no data after converting.
+        indices and adjust their format for Dataset. If *skip_unk* is
+        ``True``, unknown tokens will be skipped. If *keep_empty* is
+        ``False``, we'll remove sentences that have no data after converting.
 
         If save is ``True``, we'll keep the converted sentences as the Dataset
         source."""
@@ -162,8 +158,7 @@ class TokenDataset(BaseDataset):
         device = batch[0][pos].get_device() if batch[0][pos].is_cuda else CPU
         lens = [tensor([len(x[pos]) for x in batch], device=device,
                        dtype=self.int_tensor_dtype)] if with_lens else []
-        x = pad_sequence([x[pos] for x in batch],
-                         batch_first=self.batch_first,
+        x = pad_sequence([x[pos] for x in batch], batch_first=True,
                          padding_value=self.pad)
         return (x, *lens) if lens else x
 
@@ -175,6 +170,5 @@ class TokenDataset(BaseDataset):
         device = batch[0].get_device() if batch[0].is_cuda else CPU
         lens = tensor([len(x) for x in batch], device=device,
                       dtype=self.int_tensor_dtype)
-        x = pad_sequence(batch, batch_first=self.batch_first,
-                         padding_value=self.pad)
+        x = pad_sequence(batch, batch_first=True, padding_value=self.pad)
         return x, lens

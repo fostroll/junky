@@ -14,7 +14,7 @@ from torch.utils.data import DataLoader, Dataset
 class FrameDataset(BaseDataset):
     """
     A frame for use several objects of `junky.dataset.*Dataset` conjointly.
-    All datasets must have the data of equal length.
+    All the datasets must have the data of equal length.
     """
     def __init__(self):
         super().__init__()
@@ -46,11 +46,13 @@ class FrameDataset(BaseDataset):
         for name, d in data:
             dataset[name][0]._push_data()
 
+    # TODO: How to prevent emb_model clone and save in WordDataset???
+
     def add(self, name, dataset, **collate_kwargs):
-        """Add *dataset* with specified *name*.
+        """Add *dataset* with a specified *name*.
 
         :param **collate_kwargs: keyword arguments for the *dataset*'s
-            `frame_collate()` method.
+            `._frame_collate()` method.
         """
         assert name not in self.datasets, \
                "ERROR: dataset '{}' was already added".format(name)
@@ -59,18 +61,18 @@ class FrameDataset(BaseDataset):
         self.datasets[name] = [dataset, num_pos, collate_kwargs]
 
     def remove(self, name):
-        """Remove dataset with specified *name*."""
+        """Remove dataset with a specified *name*."""
         del self.datasets[name]
 
     def get(self, name):
-        """Get dataset with specified *name*.
+        """Get dataset with a specified *name*.
 
         :return: dataset, collate_kwargs
         """
         return self.datasets[name][0], self.datasets[name][2]
 
     def list(self):
-        """Print names of the added datasets in order of addition."""
+        """Get names of the added datasets in order of addition."""
         return tuple(self.datasets.keys())
 
     def to(self, *args, **kwargs):
@@ -80,11 +82,11 @@ class FrameDataset(BaseDataset):
 
     def transform(self, sentences, skip_unk=False, keep_empty=False,
                   save=True):
-        """Invoke `.transform(sentences, skip_unk, keep_empty, save)` method
-        for all nested `Dataset` objects.
+        """Invoke `.transform(sentences, skip_unk, keep_empty, save)` methods
+        for all added `Dataset` objects.
 
-        If save is ``False``, we'll return the stacked result of objects'
-        return."""
+        If *save* is ``False``, we'll return the stacked result of objects'
+        returns."""
         data = tuple(x[0].transform(sentences, skip_unk=skip_unk,
                                     keep_empty=keep_empty, save=save)
                          for x in self.datasets.values())
