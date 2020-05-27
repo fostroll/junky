@@ -72,7 +72,9 @@ class WordDataset(BaseDataset):
         self.emb_model = {}
         o = super()._clone_or_save(with_data=with_data, file_path=file_path)
         print('OOO', o)
+        print('o' if o else 'l')
         if o:
+            print('!!!!!!!!!')
             o.emb_model = emb_model
         return o if o else emb_model
 
