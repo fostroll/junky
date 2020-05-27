@@ -70,14 +70,12 @@ class WordDataset(BaseDataset):
     def _clone_or_save(self, with_data=True, file_path=None):
         emb_model = self.emb_model
         self.emb_model = {}
-        o = super()._clone_or_save(with_data=with_data, file_path=file_path)
-        print('OOO', o)
-        print('o' if o else 'l')
-        return o
-        if o:
-            print('!!!!!!!!!')
-            o.emb_model = emb_model
-        return o if o else emb_model
+        res = super()._clone_or_save(with_data=with_data, file_path=file_path)
+        if res is None:
+            res = emb_model
+        else:
+            res.emb_model = emb_model
+        return res
 
     @staticmethod
     def load(file_path, emb_model):
