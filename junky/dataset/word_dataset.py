@@ -82,10 +82,9 @@ class WordDataset(BaseDataset):
     def load(file_path, emb_model):
         """Load object from *file_path*. You should specify *emb_model* that
         you used during object's creation."""
-        with open(file_path, 'rb') as f:
-            o = pickle.load(f)
-            o.emb_model = emb_model
-            return o
+        o = super().load(f)
+        o.emb_model = emb_model
+        return o
 
     def word_to_vec(self, word, skip_unk=True):
         """Convert a token to its vector. If the token is not present in the
