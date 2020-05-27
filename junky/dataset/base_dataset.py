@@ -51,12 +51,12 @@ class BaseDataset(Dataset):
     def clone(self, with_data=True):
         """Clone this object. If *with_data* is ``False``, the `data` attr of
         the new object will be empty."""
-        self._clone_or_save(with_data=with_data)
+        return self._clone_or_save(with_data=with_data)
 
     def save(self, file_path, with_data=True):
         """Save this object to *file_path*. If *with_data* is ``False``, the
         `data` attr of the new object will be empty."""
-        self._clone_or_save(with_data=with_data, file_path=file_path)
+        return self._clone_or_save(with_data=with_data, file_path=file_path)
 
     @staticmethod
     def load(file_path):

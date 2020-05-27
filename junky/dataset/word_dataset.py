@@ -70,18 +70,10 @@ class WordDataset(BaseDataset):
     def _clone_or_save(self, with_data=True, file_path=None):
         emb_model = self.emb_model
         self.emb_model = {}
-        o = super()._clone_or_save(with_data=True, file_path=None)
+        o = super()._clone_or_save(with_data=with_data, file_path=file_path)
         if o:
             o.emb_model = emb_model
-        return o
-
-    def save(self, file_path, with_data=True):
-        """Save this object to *file_path*. If *with_data* is ``False``, the
-        `data` attr of the new object will be empty. NB: `emb_model` is not
-        saved. The method returns it for you could save it separately if you
-        need it."""
-        super().save(file_path, with_data=with_data)
-        return self.emb_model
+        return o if o else emb_model
 
     @staticmethod
     def load(file_path, emb_model):
