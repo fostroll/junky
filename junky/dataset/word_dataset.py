@@ -131,7 +131,9 @@ class WordDataset(BaseDataset):
         :return: depends on keyword args.
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
         """
-        lens = [tensor([len(x[pos]) for x in batch],
+        device = batch[pos].get_device() if batch[pos].is_cuda else \
+                 torch.device('cpu')
+        lens = [tensor([len(x[pos]) for x in batch], device=device,
                        dtype=self.int_tensor_dtype)] if with_lens else []
         x = pad_sequences_with_tensor([x[pos] for x in batch],
                                       batch_first=True,
@@ -143,7 +145,10 @@ class WordDataset(BaseDataset):
 
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
         """
-        lens = tensor([len(x) for x in batch], dtype=self.int_tensor_dtype)
+        device = batch[0].get_device() if batch[0].is_cuda else \
+                 torch.device('cpu')
+        lens = tensor([len(x) for x in batch], device=device,
+                      dtype=self.int_tensor_dtype)
         x = pad_sequences_with_tensor(batch, batch_first=True,
                                       padding_tensor=self.pad_tensor)
         return x, lens
