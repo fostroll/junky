@@ -73,6 +73,11 @@ class FrameDataset(BaseDataset):
         """Print names of the added datasets in order of addition."""
         return tuple(self.datasets.keys())
 
+    def to(self, *args, **kwargs):
+        """Invoke the `.to()` method for all object of `torch.Tensor` or 
+        `torch.nn.Module` type."""
+        [x[0].to(*args, **kwargs) for x in self.datasets.values()]
+
     def transform(self, sentences, skip_unk=False, keep_empty=False,
                   save=True):
         """Invoke `.transform(sentences, skip_unk, keep_empty, save)` method

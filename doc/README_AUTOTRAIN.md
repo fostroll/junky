@@ -60,7 +60,7 @@ be broken.
 **make_model_kwargs**: keyword args (of `dict` type) for
 **make_model_method**. Will be passed as is.
 
-**make_model_fit_params**: a list of combinations of varying
+**make_model_fit_params**: a `list` of combinations of varying
 **make_model_method**'s ***fit_kwargs*** among which we want to find the best.
 The type of **make_model_fit_params**: iterable of iterables; nestedness is
 unlimited. Examples:<br/>
