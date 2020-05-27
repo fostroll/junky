@@ -75,22 +75,22 @@ class WordDataset(BaseDataset):
             o.emb_model = emb_model
         return o
 
-    def _create_empty(self):
-        return self.__class__(self.emb_model, self.vec_size)
+    def save(self, file_path, with_data=True):
+        """Save this object to *file_path*. If *with_data* is ``False``, the
+        `data` attr of the new object will be empty. NB: `emb_model` is not
+        saved. The method returns it for you could save it separately if you
+        need it."""
+        super().save(file_path, with_data=with_data)
+        return self.emb_model
 
-    def clone(self, with_data=True):
-        """Clone this object. If *with_data* is ``False``, the `data` attr of
-        the new object will be empty. NB: emb_model is always copied by link.
-        """
-        o = self._create_empty()
-        for name, val in self.__dict__.items():
-            if name != 'emb_model':
-                setattr(o, name, val.clone(with_data=with_data)
-                                     if isinstance(val, BaseDataset) else
-                                 deepcopy(val)
-                                     if (name != 'data' or with_data) else
-                                 [])
-        return o
+    @staticmethod
+    def load(file_path, emb_model):
+        """Load object from *file_path*. You should specify *emb_model* that
+        you used during object's creation."""
+        with open(file_path, 'rb') as f:
+            o = pickle.load(f)
+            o.emb_model = emb_model
+            return o
 
     def word_to_vec(self, word, skip_unk=True):
         """Convert a token to its vector. If the token is not present in the
