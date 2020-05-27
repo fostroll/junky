@@ -36,6 +36,7 @@ class BaseDataset(Dataset):
         self.data = data
 
     def _clone_or_save(self, with_data=True, file_path=None):
+        print('wd', with_data, 'fp', file_path)
         data, o = None, None
         if hasattr(self, 'data') and not with_data:
             data = self._pull_data()
@@ -43,9 +44,11 @@ class BaseDataset(Dataset):
             with open(file_path, 'wb') as f:
                 pickle.dump(self, f, 2)
         else:
+            print('deepcopy')
             o = deepcopy(self)
         if data:
             self._push_data(data)
+        print('parent o', o)
         return o
 
     def clone(self, with_data=True):
