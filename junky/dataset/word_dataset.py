@@ -82,7 +82,7 @@ class WordDataset(BaseDataset):
     def load(cls, file_path, emb_model):
         """Load object from *file_path*. You should specify *emb_model* that
         you used during object's creation."""
-        o = super(cls, cls).load(f)
+        o = super(cls, cls).load(file_path)
         o.emb_model = emb_model
         return o
 
@@ -122,13 +122,13 @@ class WordDataset(BaseDataset):
         else:
             return data
 
-    def frame_collate(self, batch, pos, with_lens=True):
+    def _frame_collate(self, batch, pos, with_lens=True):
         """The method to use with `junky.dataset.FrameDataset`.
 
         :param pos: position of the data in *batch*.
         :type pos: int
         :with_lens: return lentghs of data.
-        :return: depends of keyword args.
+        :return: depends on keyword args.
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
         """
         lens = [tensor([len(x[pos]) for x in batch],
@@ -138,7 +138,7 @@ class WordDataset(BaseDataset):
                                       padding_tensor=self.pad_tensor)
         return (x, *lens) if lens else x
 
-    def collate(self, batch):
+    def _collate(self, batch):
         """The method to use with `DataLoader`.
 
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor)

@@ -211,7 +211,7 @@ class CharDataset(BaseDataset):
         return self.transform(sentences, skip_unk=skip_unk,
                               keep_empty=keep_empty, save=save)
 
-    def frame_collate(self, batch, pos, with_lens=True,
+    def _frame_collate(self, batch, pos, with_lens=True,
                           with_token_lens=True):
         """The method to use with junky.dataset.FrameDataset.
 
@@ -219,7 +219,7 @@ class CharDataset(BaseDataset):
         :type pos: int
         :with_lens: return lentghs of data.
         :with_token_lens: return lengths of tokens of the data.
-        :return: depends of keyword args.
+        :return: depends on keyword args.
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor,
                       token_lens:list([torch.tensor]))
         """
@@ -237,7 +237,7 @@ class CharDataset(BaseDataset):
             x = x[:-1]
         return (x, *lens) if lens else x
 
-    def collate(self, batch):
+    def _collate(self, batch):
         """The method to use with torch.utils.data.DataLoader
 
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor,

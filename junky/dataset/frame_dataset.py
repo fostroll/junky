@@ -86,16 +86,24 @@ class FrameDataset(BaseDataset):
         if not save:
             return tuple(data)
 
-    def collate(self, batch):
+    def _frame_collate(self, batch, pos):
+        """The method to use with junky.dataset.FrameDataset.
+
+        :param pos: position of the data in *batch*.
+        :type pos: int
+        """
+        res = []
+        for ds, num_pos, kwargs in self.datasets.values():
+            res_ = ds._frame_collate(batch, pos, **kwargs)
+            res += res_ if isinstance(res_, tuple) else [res_]
+            pos += num_pos
+        return tuple(res)
+
+    def _collate(self, batch):
         """The method to use with torch.utils.data.DataLoader. It concatenates
         outputs of the added datasets in order of addition. All the dataset
         must have the method `.frame_collate(batch, pos, **kwargs)`, where
         *pos* is the first position of the corresponding dataset's data in the
         batch.
         """
-        res, pos = [], 0
-        for ds, num_pos, kwargs in self.datasets.values():
-            res_ = ds.frame_collate(batch, pos, **kwargs)
-            res += res_ if isinstance(res_, tuple) else [res_]
-            pos += num_pos
-        return tuple(res)
+        return self._frame_collate(batch, 0)

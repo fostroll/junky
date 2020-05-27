@@ -152,13 +152,13 @@ class TokenDataset(BaseDataset):
         return self.transform(sentences, skip_unk=skip_unk,
                               keep_empty=keep_empty, save=save)
 
-    def frame_collate(self, batch, pos, with_lens=True):
+    def _frame_collate(self, batch, pos, with_lens=True):
         """The method to use with junky.dataset.FrameDataset.
 
         :param pos: position of the data in *batch*.
         :type pos: int
         :with_lens: return lentghs of data.
-        :return: depends of keyword args.
+        :return: depends on keyword args.
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
         """
         lens = [tensor([len(x[pos]) for x in batch],
@@ -168,7 +168,7 @@ class TokenDataset(BaseDataset):
                          padding_value=self.pad)
         return (x, *lens) if lens else x
 
-    def collate(self, batch):
+    def _collate(self, batch):
         """The method to use with torch.utils.data.DataLoader
 
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor)

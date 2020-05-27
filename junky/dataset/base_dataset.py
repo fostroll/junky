@@ -80,7 +80,7 @@ class BaseDataset(Dataset):
         `torch.nn.Module` type."""
         self.data = self._to(self.data)
 
-    def frame_collate(self, batch, pos):
+    def _frame_collate(self, batch, pos):
         """The stub method to use with `junky.dataset.FrameDataset`.
 
         :param pos: position of the data in *batch*.
@@ -88,7 +88,7 @@ class BaseDataset(Dataset):
         """
         return [x[pos] for x in batch]
 
-    def collate(self, batch):
+    def _collate(self, batch):
         """The stub method to use with `DataLoader`."""
         return batch
 
@@ -98,4 +98,4 @@ class BaseDataset(Dataset):
         `DataLoader`. Only *dataset* and *collate_fn* can't be changed."""
         return DataLoader(self, batch_size=batch_size,
                           shuffle=shuffle, num_workers=num_workers,
-                          collate_fn=self.collate, **kwargs)
+                          collate_fn=self._collate, **kwargs)
