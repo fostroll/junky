@@ -71,6 +71,7 @@ class WordDataset(BaseDataset):
         emb_model = self.emb_model
         self.emb_model = {}
         res = super()._clone_or_save(with_data=with_data, file_path=file_path)
+        self.emb_model = emb_model
         if res is None:
             res = emb_model
         else:
