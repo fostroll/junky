@@ -224,17 +224,22 @@ class CharDataset(BaseDataset):
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor,
                       token_lens:list([torch.tensor]))
         """
-        device = batch[pos].get_device() if batch[pos].is_cuda else CPU
+        device = CPU
+        for x in batch[pos]:
+            if x:
+                if batch[pos][0].is_cuda:
+                    device = x.get_device()
+                break
         lens = [tensor([len(x[pos]) for x in batch], device=device,
                        dtype=self.int_tensor_dtype)] if with_lens else []
         if with_token_lens:
-            lens.append([tensor([len(x) for x in x[pos]],
+            lens.append([tensor([len(x) for x in x[pos]], device=device,
                                  dtype=self.int_tensor_dtype) for x in batch])
         if self.min_len is not None:
-            batch.append([tensor([self.pad],
+            batch.append([tensor([self.pad], device=device,
                                  dtype=self.int_tensor_dtype)] * self.min_len)
         x = pad_array_torch([x[pos] for x in batch], padding_value=self.pad,
-                            dtype=self.int_tensor_dtype)
+                            device=device, dtype=self.int_tensor_dtype)
         if self.min_len is not None:
             x = x[:-1]
         return (x, *lens) if lens else x
@@ -245,16 +250,21 @@ class CharDataset(BaseDataset):
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor,
                       token_lens:list([torch.tensor]))
         """
-        device = batch[0].get_device() if batch[0].is_cuda else CPU
+        device = CPU
+        for x in batch[0]:
+            if x:
+                if batch[0][0].is_cuda:
+                    device = x.get_device()
+                break
         lens = tensor([len(x) for x in batch], device=device,
                       dtype=self.int_tensor_dtype)
-        token_lens = [tensor([len(x) for x in x],
+        token_lens = [tensor([len(x) for x in x], device=device,
                              dtype=self.int_tensor_dtype) for x in batch]
         if self.min_len is not None:
-            batch.append([tensor([self.pad],
+            batch.append([tensor([self.pad], device=device,
                                  dtype=self.int_tensor_dtype)] * self.min_len)
         x = pad_array_torch(batch, padding_value=self.pad,
-                            dtype=self.int_tensor_dtype)
+                            device=device, dtype=self.int_tensor_dtype)
         if self.min_len is not None:
             x = x[:-1]
         return x, lens, token_lens
