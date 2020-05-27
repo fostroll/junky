@@ -225,10 +225,11 @@ class CharDataset(BaseDataset):
                       token_lens:list([torch.tensor]))
         """
         device = CPU
-        for x in batch[pos]:
-            if x:
-                if batch[pos][0].is_cuda:
-                    device = x.get_device()
+        for x in batch:
+            x_ = x[pos]
+            if x_:
+                if x_[0].is_cuda:
+                    device = x_[0].get_device()
                 break
         lens = [tensor([len(x[pos]) for x in batch], device=device,
                        dtype=self.int_tensor_dtype)] if with_lens else []
@@ -251,10 +252,10 @@ class CharDataset(BaseDataset):
                       token_lens:list([torch.tensor]))
         """
         device = CPU
-        for x in batch[0]:
+        for x in batch:
             if x:
-                if batch[0][0].is_cuda:
-                    device = x.get_device()
+                if x[0].is_cuda:
+                    device = x[0].get_device()
                 break
         lens = tensor([len(x) for x in batch], device=device,
                       dtype=self.int_tensor_dtype)

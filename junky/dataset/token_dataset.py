@@ -162,7 +162,7 @@ class TokenDataset(BaseDataset):
         :return: depends on keyword args.
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
         """
-        device = batch[pos].get_device() if batch[pos].is_cuda else CPU
+        device = batch[0][pos].get_device() if batch[0][pos].is_cuda else CPU
         lens = [tensor([len(x[pos]) for x in batch], device=device,
                        dtype=self.int_tensor_dtype)] if with_lens else []
         x = pad_sequence([x[pos] for x in batch],
