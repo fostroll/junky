@@ -7,6 +7,9 @@
 Provides base functionality for junky.dataset.*Dataset classes.
 """
 from copy import deepcopy
+import pickle
+from torch import Tensor
+from torch.nn import Module
 from torch.utils.data import DataLoader, Dataset
 
 
@@ -24,24 +27,58 @@ class BaseDataset(Dataset):
     def __getitem__(self, idx):
         return self.data[idx]
 
-    def _create_empty(self):
-        """Create empty instance of the current class. Is invoked by
-        `.clone()`. You must override this method if constructor of your class
-        has positional args."""
-        return self.__class__()
+    def _pull_data(self):
+        data = self.data
+        self.data = []
+        return data
+
+    def _push_data(self, data):
+        self.data = data
+
+    def _clone_or_save(self, with_data=True, file_path=None):
+        data, o = None, None
+        if hasattr(self, 'data') and not with_data:
+            data = self._pull_data
+        if file_path:
+            with open(file_path, 'wb') as f:
+                pickle.dump(self, f, 2)
+        else:
+            o = deepcopy(self)
+        if data:
+            self._push_data(data)
+        return o
 
     def clone(self, with_data=True):
         """Clone this object. If *with_data* is ``False``, the `data` attr of
-        the new object will be empty.
-        """
-        o = self._create_empty()
-        for name, val in self.__dict__.items():
-            setattr(o, name, val.clone(with_data=with_data)
-                                 if isinstance(val, BaseDataset) else
-                             deepcopy(val)
-                                 if name != 'data' or with_data else
-                             [])
+        the new object will be empty."""
+        self._clone_or_save(with_data=with_data)
+
+    def save(self, file_path, with_data=True):
+        """Save this object to *file_path*. If *with_data* is ``False``, the
+        `data` attr of the new object will be empty."""
+        self._clone_or_save(with_data=with_data, file_path=file_path)
+
+    @staticmethod
+    def load(file_path):
+        """Load object from *file_path*."""
+        with open(file_path, 'rb') as f:
+            return pickle.load(f)
+
+    @staticmethod
+    def _to(o, *args, **kwargs):
+        if isinstance(o, Tensor):
+            o = o.to(*args, **kwargs)
+        elif isinstance(o, Module):
+            o.to(*args, **kwargs)
+        elif isinstance(o, list):
+            for i in range(len(o)):
+                o[i] = BaseDataset._to(o[i], *args, **kwargs)
         return o
+
+    def to(self, *args, **kwargs):
+        """Invoke the `.to()` method for all object of `torch.Tensor` or 
+        `torch.nn.Module` type."""
+        self.data = self._to(self.data)
 
     def frame_collate(self, batch, pos):
         """The stub method to use with `junky.dataset.FrameDataset`.

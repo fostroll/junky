@@ -36,6 +36,16 @@ class FrameDataset(BaseDataset):
                                      if isinstance(x[0][idx], tuple) else
                                  [x[0][idx]]))
 
+    def _pull_data(self):
+        data = {}
+        for name, ds in self.datasets.values():
+            data[name] = ds[0]._pull_data()
+        return data
+
+    def _push_data(self, data):
+        for name, d in data:
+            dataset[name][0]._push_data()
+
     def add(self, name, dataset, **collate_kwargs):
         """Add *dataset* with specified *name*.
 
@@ -70,7 +80,7 @@ class FrameDataset(BaseDataset):
 
         If save is ``False``, we'll return the stacked result of objects'
         return."""
-        data = tuple(x[0].transform(sents, skip_unk=skip_unk,
+        data = tuple(x[0].transform(sentences, skip_unk=skip_unk,
                                     keep_empty=keep_empty, save=save)
                          for x in self.datasets.values())
         if not save:

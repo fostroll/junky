@@ -51,7 +51,7 @@ def plot_losses(train_losses, test_losses, accuracies=None,
     plt.show()
 
 def plot_confusion_matrix(y_true, y_pred, n_classes, pad_index=None,
-                          ymap=None, figsize=(28, 10), show_total=['x', 'y'],
+                          ymap=None, figsize=(20, 10), show_total=['x', 'y'],
                           show_zeros=True, plot_title='Confusion Matrix',
                           save_name=None):
     """
@@ -103,16 +103,16 @@ def plot_confusion_matrix(y_true, y_pred, n_classes, pad_index=None,
             if i == j:
                 if 'diag' in show_total:
                     s = cm_sum[i]
-                    annot[i, j] = '%.3f%%\n%d/%d' % (p, c, s)
+                    annot[i, j] = '%.2f%%\n%d/%d' % (p, c, s)
                 else:
-                    annot[i, j] = '%.3f%%\n%d' % (p, c)
+                    annot[i, j] = '%.2f%%\n%d' % (p, c)
             elif c == 0:
                 if show_zeros:
                     annot[i, j] = '0'
                 else:
                     annot[i, j] = ''
             else:
-                annot[i, j] = '%.3f%%\n%d' % (p, c)
+                annot[i, j] = '%.2f%%\n%d' % (p, c)
 
     total_labels = [str(i)+'\n'+str(n[0]) for i, n in zip(labels, cm_sum)]
 

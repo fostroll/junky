@@ -67,6 +67,14 @@ class WordDataset(BaseDataset):
             self.transform(sentences, skip_unk=skip_unk,
                            keep_empty=keep_empty, save=True)
 
+    def _clone_or_save(self, with_data=True, file_path=None):
+        emb_model = self.emb_model
+        self.emb_model = {}
+        o = super()._clone_or_save(with_data=True, file_path=None)
+        if o:
+            o.emb_model = emb_model
+        return o
+
     def _create_empty(self):
         return self.__class__(self.emb_model, self.vec_size)
 
