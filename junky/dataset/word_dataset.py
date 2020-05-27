@@ -78,11 +78,11 @@ class WordDataset(BaseDataset):
             res.emb_model = emb_model
         return res
 
-    @staticmethod
-    def load(file_path, emb_model):
+    @classmethod
+    def load(cls, file_path, emb_model):
         """Load object from *file_path*. You should specify *emb_model* that
         you used during object's creation."""
-        o = super().load(f)
+        o = super(cls, cls).load(f)
         o.emb_model = emb_model
         return o
 
