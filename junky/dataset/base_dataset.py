@@ -35,18 +35,29 @@ class BaseDataset(Dataset):
     def _push_data(self, data):
         self.data = data
 
+    def _pull_external(self):
+        return None
+
+    def _push_external(self, x):
+        pass
+
     def _clone_or_save(self, with_data=True, file_path=None):
         data, o = None, None
         if hasattr(self, 'data') and not with_data:
             data = self._pull_data()
+        external = self._pull_external()
         if file_path:
             with open(file_path, 'wb') as f:
                 pickle.dump(self, f, 2)
         else:
             o = deepcopy(self)
+        if external is not None:
+            self._push_external(external)
+            if o:
+                o._push_external(external)
         if data:
             self._push_data(data)
-        return o
+        return o if o else external
 
     def clone(self, with_data=True):
         """Clone this object. If *with_data* is ``False``, the `data` attr of
@@ -59,10 +70,15 @@ class BaseDataset(Dataset):
         return self._clone_or_save(with_data=with_data, file_path=file_path)
 
     @staticmethod
-    def load(file_path):
-        """Load object from *file_path*."""
+    def load(file_path, external=None):
+        """Load object from *file_path*. You should pass the *external* object
+        that you received as result of the `.save()` method call for this
+        object."""
         with open(file_path, 'rb') as f:
-            return pickle.load(f)
+            o = pickle.load(f)
+        if external is not None:
+            o._push_external(external)
+        return o
 
     @classmethod
     def _to(cls, o, *args, **kwargs):

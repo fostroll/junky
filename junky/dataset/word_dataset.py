@@ -66,24 +66,13 @@ class WordDataset(BaseDataset):
             self.transform(sentences, skip_unk=skip_unk,
                            keep_empty=keep_empty, save=True)
 
-    def _clone_or_save(self, with_data=True, file_path=None):
-        emb_model = self.emb_model
+    def _pull_external(self):
+        x = self.emb_model
         self.emb_model = {}
-        res = super()._clone_or_save(with_data=with_data, file_path=file_path)
-        self.emb_model = emb_model
-        if res is None:
-            res = emb_model
-        else:
-            res.emb_model = emb_model
-        return res
+        return x
 
-    @classmethod
-    def load(cls, file_path, emb_model):
-        """Creates object from *file_path*. You should specify *emb_model*
-        that you used during object's creation."""
-        o = super(cls, cls).load(file_path)
-        o.emb_model = emb_model
-        return o
+    def _push_external(self, x):
+        self.emb_model = x
 
     def word_to_vec(self, word, skip_unk=True):
         """Convert a token to its vector. If the token is not present in the
