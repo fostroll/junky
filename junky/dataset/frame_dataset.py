@@ -44,17 +44,17 @@ class FrameDataset(BaseDataset):
 
     def _push_data(self, data):
         for name, d in data:
-            dataset[name][0]._push_data(d)
+            self.datasets[name][0]._push_data(d)
 
     def _pull_xtrn(self):
         xtrn = {}
         for name, ds in self.datasets.values():
-            data[name] = ds[0]._pull_xtrn()
-        return data
+            xtrn[name] = ds[0]._pull_xtrn()
+        return xtrn
 
     def _push_xtrn(self, xtrn):
         for name, x in xtrn:
-            dataset[name][0]._push_data(x)
+            self.datasets[name][0]._push_xtrn(x)
 
     def add(self, name, dataset, **collate_kwargs):
         """Add *dataset* with a specified *name*.
