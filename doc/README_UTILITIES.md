@@ -6,7 +6,8 @@ The lib contains some utilities to use with *PyTorch* models.
 
 ```python
 import junky
-junky.get_max_dims(array, str_isarray=False, max_dims=None, dim_no=0)
+max_dims = junky.get_max_dims(array, str_isarray=False, max_dims=None,
+                              dim_no=0)
 ```
 Returns max sizes of nested **array** on all levels of nestedness.
 
@@ -41,7 +42,7 @@ subarray's size and ndarray dimension are not congruent);<br/>
 shift will be 1 position right.
 
 ```python
-junky.pad_array(array, padding_value=0)
+array = junky.pad_array(array, padding_value=0)
 ```
 Converts nested **array** with data of any allowed *numpy* type to
 `numpy.ndarray` with **padding_value** instead of missing data.
@@ -51,13 +52,65 @@ Converts nested **array** with data of any allowed *numpy* type to
 Returns `numpy.ndarray` with padded **array**.
 
 ```python
-junky.pad_array_torch(array, padding_value=0, **kwargs)
+array = junky.pad_array_torch(array, padding_value=0, **kwargs)
 ```
 Just a wrapper for the `pad_array()` method that returns `torch.Tensor`.
 
 **kwargs**: keyword args for the `torch.tensor()` method.
 
 ```python
+padded_seq = junky.pad_sequences_with_tensor(sequences, padding_tensor=0.)
+```
+Pad the `seq` dimension of **sequences** of shape `(batch, seq, features)`
+with **padding_tensor**.
+
+Params:
+
+**sequences** (`list([torch.Tensor(seq, features)]`): the `list` of sequences
+of shape `(seq, features)`.
+
+**padding_tensor** (`torch.Tensor(features)`|`float`|`int`): scalar or
+`torch.Tensor` of the shape of `features` to pad **sequences**.
+
+Returns padded `list` converted to `torch.Tensor(batch, seq, features)`.
+
+```python
 junky.enforce_reproducibility(seed=None)
 ```
 Re-init random number generators.
+
+```python
+vec = junky.get_rand_vector(shape, norm, shift=0., dtype=float)
+```
+Creates random `numpy.ndarray` with the **shape**, **norm** and **dtype**
+given.
+
+Params:
+
+**shape** (`tuple`|`list`): the shape of the new vector.
+
+**norm** (`float`): the norm of the new vector.
+
+**shift** (`float`): relative shift of the new vector's mean from `0`.
+
+**dtype** (`numpy.dtype`): type of the new vector's.
+
+```python
+junky.add_mean_vector(vectors, axis=0, shift=0., scale=1.)
+```
+Append **vectors** with a vector that has norm equals to the mean norm
+(possibly, scaled) of **vectors**.
+
+Params:
+
+**vectors** (`numpy.ndarray`): the array of floats.
+
+**axis** (`int`|`tuple(int)`): the axis of **vectors** along which the new
+vector is appended.
+
+**shift** (`float`): relative shift of the new vector's mean from `0`.
+
+**scale** (`float` > `0`): the coef to increase (or decrease if **scale** <
+`1`) the norm of the new vector.
+
+Returns **vectors** appended (`numpy.ndarray`)

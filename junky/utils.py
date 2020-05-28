@@ -131,12 +131,12 @@ def pad_sequences_with_tensor(sequences, padding_tensor=0.):
     `(batch, seq, features)` with *padding_tensor*.
 
     :param sequences: the list of sequences of shape `(seq, features)`.
-    :type sequences: list([tensor(seq, features)]]
-    :param padding_tensor: scalar or the tensor of the shape of `features` to
-        pad *sequences*.
-    :type padding_tensor: tensor(features)|float
-    :return: padded list converted to tensor.
-    :rtype: tensor(batch, seq, features)
+    :type sequences: list([torch.Tensor(seq, features)]]
+    :param padding_tensor: scalar or torch.Tensor of the shape of `features`
+        to pad *sequences*.
+    :type padding_tensor: torch.Tensor(features)|float|int
+    :return: padded list converted to torch.Tensor.
+    :rtype: torch.Tensor(batch, seq, features)
     """
     t = sequences[0]
     device = t.get_device() if t.is_cuda else CPU
@@ -170,7 +170,7 @@ def enforce_reproducibility(seed=None):
         # System based
         np.random.seed(seed)
 
-def get_rand_vector(shape, norm, shift=0., dtype=float):
+def get_rand_vector(shape, norm, shift=0., dtype=np.float64):
     """Create random vector with the norm given.
 
     :param shape: the shape of the new vector.
@@ -195,7 +195,7 @@ def add_mean_vector(vectors, axis=0, shift=0., scale=1.):
     :param vectors: the array of floats.
     :type vectors: numpy.ndarray
     :param axis: the axis of *vectors* along which the new vector is appended.
-    :type axis: int
+    :type axis: int|tuple(int)
     :param shift: relative shift of the new vector's mean from 0.
     :type shift: float
     :param scale: the coef to increase (or decrease if *scale* < 1) the norm
