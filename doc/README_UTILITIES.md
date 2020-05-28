@@ -113,4 +113,4 @@ vector is appended.
 **scale** (`float` > `0`): the coef to increase (or decrease if **scale** <
 `1`) the norm of the new vector.
 
-Returns **vectors** appended (`numpy.ndarray`)
+Returns **vectors** appended.
