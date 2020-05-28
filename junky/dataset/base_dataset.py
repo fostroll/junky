@@ -28,12 +28,15 @@ class BaseDataset(Dataset):
         return self.data[idx]
 
     def _pull_data(self):
-        data = self.data
-        self.data = []
+        data = None
+        if hasattr(self, 'data'):
+            data = self.data
+            self.data = []
         return data
 
     def _push_data(self, data):
-        self.data = data
+        if hasattr(self, 'data'):
+            self.data = data
 
     def _pull_xtrn(self):
         return None
@@ -43,7 +46,7 @@ class BaseDataset(Dataset):
 
     def _clone_or_save(self, with_data=True, file_path=None):
         data, o = None, None
-        if hasattr(self, 'data') and not with_data:
+        if not with_data:
             data = self._pull_data()
         xtrn = self._pull_xtrn()
         if file_path:
