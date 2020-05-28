@@ -169,9 +169,19 @@ Creates `torch.utils.data.DataLoader` for this object. All params are the
 params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
 
 **NB:** If you set **num_workers** != `0` don't move the **ds** source to
-*CUDA*. The `torch` multiprocessing implementation can't bear it. Better, create
-several instances of `DataLoader` for **ds** (each with `workers=0`) and use
-them in parallel.
+*CUDA*. The `torch` multiprocessing implementation can't bear it. Better,
+create several instances of `DataLoader` for **ds** (each with `workers=0`)
+and use them in parallel.
+
+The created `DataLoader` will return batches of the format (*\<`list` of
+indices of tokens>*, *\<length of the sentence>*). If you use `TokenDataset`
+as part of `FrameDataset`, you can set the param **with_lens** to `False` to
+omit the lengths from the batches:
+
+```python
+# fds - object of junky.dataset.FrameDataset
+fds.add('y', ds, with_lens=False)
+```
 
 ### CharDataset
 
@@ -382,8 +392,22 @@ params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
 
 **NB:** If you set **num_workers** != `0` don't move the **ds** source to
 *CUDA*. The `torch` multiprocessing implementation can't bear it. Better,
-create several instances of `DataLoader` for **ds** (each with `workers=0`) and
-use them in parallel.
+create several instances of `DataLoader` for **ds** (each with `workers=0`)
+and use them in parallel.
+
+The created `DataLoader` will return batches of the format (*\<`list` of
+`list` of indices of tokens' characters>, *\<length of the sentence>*,
+*\<`list` of lengths of tokens>*). If you use `CharDataset` as part of
+`FrameDataset`, you can set the param **with_lens** to `False` to omit the
+lengths from the batches:
+
+```python
+# fds - object of junky.dataset.FrameDataset
+fds.add('x_ch', ds, with_lens=False)
+```
+
+If you don't need the lengths of tokens, you can set to `False` the param
+**with_token_lens**.
 
 ### WordDataset
 
@@ -519,9 +543,19 @@ Creates `torch.utils.data.DataLoader` for this object. All params are the
 params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
 
 **NB:** If you set **num_workers** != `0` don't move the **ds** source to
-*CUDA*. The `torch` multiprocessing implementation can't bear it. Better, create
-several instances of `DataLoader` for **ds** (each with `workers=0`) and use
-them in parallel.
+*CUDA*. The `torch` multiprocessing implementation can't bear it. Better,
+create several instances of `DataLoader` for **ds** (each with `workers=0`)
+and use them in parallel.
+
+The created `DataLoader` will return batches of the format (*<`list` of words'
+vectors>, *\<length of the sentence>*). If you use `WordDataset` as part of
+`FrameDataset`, you can set the param **with_lens** to `False` to omit the
+lengths from the batches:
+
+```python
+# fds - object of junky.dataset.FrameDataset
+fds.add('x', ds, with_lens=False)
+```
 
 ### FrameDataset
 
@@ -549,7 +583,8 @@ ds.add(name, dataset, **collate_kwargs)
 Adds **dataset** with a specified **name**.
 
 Param **collate_kwargs** is a keyword arguments for the **dataset**'s
-`._frame_collate()` method.
+`._frame_collate()` method. Refer `help(dataset._frame_collate)` to learn
+what params the **dataset** has.
 
 ```python
 ds.remove(name)
@@ -615,8 +650,8 @@ params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
 
 **NB:** If you set **num_workers** != `0` don't move the **ds** source to
 *CUDA*. The `torch` multiprocessing implementation can't bear it. Better,
-create several instances of `DataLoader` for **ds** (each with `workers=0`) and
-use them in parallel.
+create several instances of `DataLoader` for **ds** (each with `workers=0`)
+and use them in parallel.
 
 ### Examples
 
@@ -635,60 +670,64 @@ Firstly, we create 3 datasets: for words' vectors, for chars' indices and for
 labels' indices.
 
 ```python
-xs_train = WordDataset(emb_model=emb_model,
-                       vec_size=emb_model.vector_size,
-                       unk_token='<UNK>', pad_token='<PAD>',
-                       sentences=train)
-xs_dev = xs_train.clone(with_data=False)
-xs_dev.transform(dev)
-xs_test = xs_train.clone(with_data=False)
-xs_test.transform(test)
+x_train = WordDataset(emb_model=emb_model,
+                      vec_size=emb_model.vector_size,
+                      unk_token='<UNK>', pad_token='<PAD>',
+                      sentences=train)
+x_dev = x_train.clone(with_data=False)
+x_dev.transform(dev)
+x_test = x_train.clone(with_data=False)
+x_test.transform(test)
 ```
+
 ```python
-xs_ch_train = CharDataset(train + dev + test,
-                          unk_token='<UNK>', pad_token='<PAD>')
-xs_ch_train.transform(train)
-xs_ch_dev = xs_ch_train.clone(with_data=False)
-xs_ch_dev.transform(dev)
-xs_ch_test = xs_ch_train.clone(with_data=False)
-xs_ch_test.transform(test)
+x_ch_train = CharDataset(train + dev + test,
+                         unk_token='<UNK>', pad_token='<PAD>')
+x_ch_train.transform(train)
+x_ch_dev = x_ch_train.clone(with_data=False)
+x_ch_dev.transform(dev)
+x_ch_test = x_ch_train.clone(with_data=False)
+x_ch_test.transform(test)
 ```
+
 ```python
-ys_train = TokenDataset(train_labels, pad_token='<PAD>',
-                        transform=True, keep_empty=False)
-ys_dev = ys_train.clone(with_data=False)
-ys_dev.transform(dev_labels)
-ys_test = ys_train.clone(with_data=False)
-ys_test.transform(test_labels)
+y_train = TokenDataset(train_labels, pad_token='<PAD>',
+                       transform=True, keep_empty=False)
+y_dev = y_train.clone(with_data=False)
+y_dev.transform(dev_labels)
+y_test = y_train.clone(with_data=False)
+y_test.transform(test_labels)
 ```
 
 Then, we create combining `Dataset` objects that conjoin output of those
 created `Dataset` objects as we demanded.
 
 ```python
-fds_train = FrameDataset()
-fds_train.add('x', xs_train)
+ds_train = FrameDataset()
+ds_train.add('x', x_train)
 # we don't need one more *lens* field from char dataset:
-fds_train.add('x_ch', xs_ch_train, with_lens=False)
+ds_train.add('x_ch', x_ch_train, with_lens=False)
 # again, we don't need one more *lens* field from token dataset:
-fds_train.add('y', ys_train, with_lens=False)
+ds_train.add('y', y_train, with_lens=False)
 ```
 
 ```python
-fds_dev = FrameDataset()
-fds_dev.add('x', xs_dev)
-fds_dev.add('x_ch', xs_ch_dev, with_lens=False)
-fds_dev.add('y', ys_dev)
-```
-```python
-fds_test = FrameDataset()
-fds_test.add('x', xs_test)
-fds_test.add('x_ch', xs_ch_test, with_lens=False)
-fds_test.add('y', ys_test)
+ds_dev = FrameDataset()
+ds_dev.add('x', x_dev)
+ds_dev.add('x_ch', x_ch_dev, with_lens=False)
+ds_dev.add('y', y_dev, with_lens=False)
 ```
 
 ```python
-fdl_train = fds_train.create_loader(shuffle=True)
-fdl_dev = fds_dev.create_loader()
-fdl_test = fds_test.create_loader()
+ds_test = FrameDataset()
+ds_test.add('x', x_test)
+ds_test.add('x_ch', x_ch_test, with_lens=False)
+ds_test.add('y', y_test, with_lens=False)
+```
+
+Create loaders:
+```python
+loader_train = ds_train.create_loader(shuffle=True)
+loader_dev = ds_dev.create_loader()
+loader_test = ds_test.create_loader()
 ```
