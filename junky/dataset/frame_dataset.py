@@ -43,7 +43,7 @@ class FrameDataset(BaseDataset):
         return data
 
     def _push_data(self, data):
-        for name, d in data:
+        for name, d in data.items():
             self.datasets[name][0]._push_data(d)
 
     def _pull_xtrn(self):
