@@ -53,11 +53,11 @@ class BaseDataset(Dataset):
             o = deepcopy(self)
         if external is not None:
             self._push_external(external)
-            if o:
+            if o is not None:
                 o._push_external(external)
         if data:
             self._push_data(data)
-        return o if o else external
+        return o if o is not None else external
 
     def clone(self, with_data=True):
         """Clone this object. If *with_data* is ``False``, the `data` attr of
