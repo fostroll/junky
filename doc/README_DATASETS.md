@@ -643,7 +643,8 @@ xs_dev = xs_train.clone(with_data=False)
 xs_dev.transform(dev)
 xs_test = xs_train.clone(with_data=False)
 xs_test.transform(test)
-``` ```python
+```
+```python
 xs_ch_train = CharDataset(train + dev + test,
                           unk_token='<UNK>', pad_token='<PAD>')
 xs_ch_train.transform(train)
@@ -651,7 +652,8 @@ xs_ch_dev = xs_ch_train.clone(with_data=False)
 xs_ch_dev.transform(dev)
 xs_ch_test = xs_ch_train.clone(with_data=False)
 xs_ch_test.transform(test)
-``` ```python
+```
+```python
 ys_train = TokenDataset(train_labels, pad_token='<PAD>',
                         transform=True, keep_empty=False)
 ys_dev = ys_train.clone(with_data=False)
