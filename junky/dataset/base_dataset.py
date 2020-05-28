@@ -35,29 +35,29 @@ class BaseDataset(Dataset):
     def _push_data(self, data):
         self.data = data
 
-    def _pull_external(self):
+    def _pull_xtrn(self):
         return None
 
-    def _push_external(self, x):
+    def _push_xtrn(self, xtrn):
         pass
 
     def _clone_or_save(self, with_data=True, file_path=None):
         data, o = None, None
         if hasattr(self, 'data') and not with_data:
             data = self._pull_data()
-        external = self._pull_external()
+        xtrn = self._pull_xtrn()
         if file_path:
             with open(file_path, 'wb') as f:
                 pickle.dump(self, f, 2)
         else:
             o = deepcopy(self)
-        if external is not None:
-            self._push_external(external)
+        if xtrn is not None:
+            self._push_xtrn(xtrn)
             if o is not None:
-                o._push_external(external)
+                o._push_xtrn(xtrn)
         if data:
             self._push_data(data)
-        return o if o is not None else external
+        return o if o is not None else xtrn
 
     def clone(self, with_data=True):
         """Clone this object. If *with_data* is ``False``, the `data` attr of
@@ -70,14 +70,14 @@ class BaseDataset(Dataset):
         return self._clone_or_save(with_data=with_data, file_path=file_path)
 
     @staticmethod
-    def load(file_path, external=None):
-        """Load object from *file_path*. You should pass the *external* object
+    def load(file_path, xtrn=None):
+        """Load object from *file_path*. You should pass the *xtrn* object
         that you received as result of the `.save()` method call for this
         object."""
         with open(file_path, 'rb') as f:
             o = pickle.load(f)
-        if external is not None:
-            o._push_external(external)
+        if xtrn is not None:
+            o._push_xtrn(xtrn)
         return o
 
     @classmethod

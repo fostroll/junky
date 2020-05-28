@@ -44,9 +44,17 @@ class FrameDataset(BaseDataset):
 
     def _push_data(self, data):
         for name, d in data:
-            dataset[name][0]._push_data()
+            dataset[name][0]._push_data(d)
 
-    # TODO: How to prevent emb_model clone and save in WordDataset???
+    def _pull_xtrn(self):
+        xtrn = {}
+        for name, ds in self.datasets.values():
+            data[name] = ds[0]._pull_xtrn()
+        return data
+
+    def _push_xtrn(self, xtrn):
+        for name, x in xtrn:
+            dataset[name][0]._push_data(x)
 
     def add(self, name, dataset, **collate_kwargs):
         """Add *dataset* with a specified *name*.

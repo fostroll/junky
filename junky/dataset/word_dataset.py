@@ -66,13 +66,13 @@ class WordDataset(BaseDataset):
             self.transform(sentences, skip_unk=skip_unk,
                            keep_empty=keep_empty, save=True)
 
-    def _pull_external(self):
-        x = self.emb_model
+    def _pull_xtrn(self):
+        xtrn = self.emb_model
         self.emb_model = {}
-        return x
+        return xtrn
 
-    def _push_external(self, x):
-        self.emb_model = x
+    def _push_xtrn(self, xtrn):
+        self.emb_model = xtrn
 
     def word_to_vec(self, word, skip_unk=True):
         """Convert a token to its vector. If the token is not present in the
