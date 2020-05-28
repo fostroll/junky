@@ -662,8 +662,8 @@ ys_test = ys_train.clone(with_data=False)
 ys_test.transform(test_labels)
 ```
 
-Then, we create combining `Dataset` that conjoin output of those created
-`Dataset` objects as we demanded.
+Then, we create combining `Dataset` objects that conjoin output of those
+created `Dataset` objects as we demanded.
 
 ```python
 fds_train = FrameDataset()
@@ -672,10 +672,15 @@ fds_train.add('x', xs_train)
 fds_train.add('x_ch', xs_ch_train, with_lens=False)
 # again, we don't need one more *lens* field from token dataset:
 fds_train.add('y', ys_train, with_lens=False)
+```
+
+```python
 fds_dev = FrameDataset()
 fds_dev.add('x', xs_dev)
 fds_dev.add('x_ch', xs_ch_dev, with_lens=False)
 fds_dev.add('y', ys_dev)
+```
+```python
 fds_test = FrameDataset()
 fds_test.add('x', xs_test)
 fds_test.add('x_ch', xs_ch_test, with_lens=False)
