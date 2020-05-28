@@ -387,7 +387,7 @@ use them in parallel.
 
 ### WordDataset
 
-Maps tokenized sentences to sequences of their tokens' vectors.
+Maps tokenized sentences to sequences of their words' vectors.
 
 ```python
 from junky.dataset import WordDataset
@@ -526,7 +526,7 @@ them in parallel.
 ### FrameDataset
 
 A frame for use several objects of `junky.dataset.*Dataset` conjointly. All
-the `Datasets` must have the data of equal length.
+the `Dataset` objects must have the data of equal length.
 
 ```python
 from junky.dataset import FrameDataset
@@ -536,8 +536,8 @@ ds = FrameDataset()
 #### Attributes
 
 `ds.datasets` (`dict({str: [junky.dataset.BaseDataset, int, kwargs]})`): the
-list of `Datasets`. Format: {name: [`Dataset`, <number of data columns>,
-<collate kwargs>]}
+list of `Dataset` objects. Format: {name: [`Dataset`,
+<number of data columns>, <collate kwargs>]}
 
 Generally, you don't need to change any attribute directly.
 
@@ -565,12 +565,12 @@ Returns `tuple(dataset, collate_kwargs)` for the `Dataset` with a specified
 ```python
 ds_list = ds.list()
 ```
-Returns names of the added `Datasets` in order of addition.
+Returns names of the added `Dataset` objects in order of addition.
 
 ```python
 transform(sentences, skip_unk=False, keep_empty=False, save=True)
 ```
-Invoke `.transform(sentences, skip_unk, keep_empty, save)` methods for all
+Invokes `.transform(sentences, skip_unk, keep_empty, save)` methods for all
 added `Dataset` objects.
 
 If **save** is `False`, we'll return the stacked result of objects' returns.
@@ -579,25 +579,33 @@ If **save** is `False`, we'll return the stacked result of objects' returns.
 o = ds.clone(with_data=True)
 ```
 Makes a deep copy of the `FrameDataset` object. The **with_data** param is
-defined if the nested datasets will be cloned with their data sources or
-without.
+defined if the nested `Dataset` objects will be cloned with their data sources
+or without.
+
+**NB:** Some nested `Dataset` objects may contain objects that are copied by
+link (e.g., `emb_model` of `WordDataset`).
 
 ```python
-ds.save(file_path, with_data=True)
+xtrn = ds.save(file_path, with_data=True)
 ```
 Saves the `FrameDataset` object to **file_path**.  The **with_data** param is
-defined if the nested datasets will be saved with their data sources or
-without.
+defined if the nested `Dataset` objects will be saved with their data sources
+or without.
+
+Returns a `tuple` of all objects that nested `Dataset` objects don't allow to
+save (e.g., `emb_model` in `WordDataset`). If you want to save them, too, you
+have to do it by their own methods.
 
 ```python
-ds = FrameDataset.load(file_path):
+ds = FrameDataset.load(file_path, xtrn):
 ```
-Load the `FrameDataset` object from **file_path**.
+Load the `FrameDataset` object from **file_path**. Also, you need to pass to
+the method the **xtrn** object that you received from the `.save()` method.
 
 ```python
 ds.to(*args, **kwargs):
 ```
-Invokes `.to(*args, **kwargs)` methods of all nested datasets.
+Invokes `.to(*args, **kwargs)` methods of all nested `Dataset` objects .
 
 ```python
 ds.create_loader(self, batch_size=32, shuffle=False, num_workers=0, **kwargs)
@@ -610,4 +618,70 @@ params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
 create several instances of `DataLoader` for **ds** (each with `workers=0`) and
 use them in parallel.
 
+### Examples
 
+Let us suppose that we have sets of data for training (**train** and
+**train_labels**), validation (**dev**, **dev_labels**) and testing
+(**test**, **test_labels**). Each set is a `list` of already tokenized
+sentences and a `list` of sequences of the corresponding labels. We want a
+`DataLoader` that will return batches for each set.
+
+Format of the element of the each batch is: (\<`list` of words' vectors>, 
+\<length of the sentence>, \<`list` of `list` of indices of words'
+characters>, \<`list` of lengths of words>, \<`list` of indices of words'
+labels>.
+
+Firstly, we create 3 datasets: for words' vectors, for chars' indices and for
+labels' indices.
+
+```python
+xs_train = WordDataset(emb_model=emb_model,
+                       vec_size=emb_model.vector_size,
+                       unk_token='<UNK>', pad_token='<PAD>',
+                       sentences=train)
+xs_dev = xs_train.clone(with_data=False)
+xs_dev.transform(dev)
+xs_test = xs_train.clone(with_data=False)
+xs_test.transform(test)
+``````python
+xs_ch_train = CharDataset(train + dev + test,
+                          unk_token='<UNK>', pad_token='<PAD>')
+xs_ch_train.transform(train)
+xs_ch_dev = xs_ch_train.clone(with_data=False)
+xs_ch_dev.transform(dev)
+xs_ch_test = xs_ch_train.clone(with_data=False)
+xs_ch_test.transform(test)
+``````python
+ys_train = TokenDataset(train_labels, pad_token='<PAD>',
+                        transform=True, keep_empty=False)
+ys_dev = ys_train.clone(with_data=False)
+ys_dev.transform(dev_labels)
+ys_test = ys_train.clone(with_data=False)
+ys_test.transform(test_labels)
+```
+
+Then, we create combining `Dataset` that conjoin output of those created
+`Dataset` objects as we demanded.
+
+```python
+fds_train = FrameDataset()
+fds_train.add('x', xs_train)
+# we don't need one more *lens* field from char dataset:
+fds_train.add('x_ch', xs_ch_train, with_lens=False)
+# again, we don't need one more *lens* field from token dataset:
+fds_train.add('y', ys_train, with_lens=False)
+fds_dev = FrameDataset()
+fds_dev.add('x', xs_dev)
+fds_dev.add('x_ch', xs_ch_dev, with_lens=False)
+fds_dev.add('y', ys_dev)
+fds_test = FrameDataset()
+fds_test.add('x', xs_test)
+fds_test.add('x_ch', xs_ch_test, with_lens=False)
+fds_test.add('y', ys_test)
+```
+
+```python
+fdl_train = fds_train.create_loader(shuffle=True)
+fdl_dev = fds_dev.create_loader()
+fdl_test = fds_test.create_loader()
+```
