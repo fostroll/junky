@@ -53,7 +53,7 @@ class FrameDataset(BaseDataset):
         return xtrn
 
     def _push_xtrn(self, xtrn):
-        for name, x in xtrn:
+        for name, x in xtrn.items():
             self.datasets[name][0]._push_xtrn(x)
 
     def add(self, name, dataset, **collate_kwargs):
