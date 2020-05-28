@@ -38,7 +38,7 @@ class FrameDataset(BaseDataset):
 
     def _pull_data(self):
         data = {}
-        for name, ds in self.datasets.values():
+        for name, ds in self.datasets.items():
             data[name] = ds[0]._pull_data()
         return data
 
@@ -48,7 +48,7 @@ class FrameDataset(BaseDataset):
 
     def _pull_xtrn(self):
         xtrn = {}
-        for name, ds in self.datasets.values():
+        for name, ds in self.datasets.items():
             xtrn[name] = ds[0]._pull_xtrn()
         return xtrn
 
