@@ -6,9 +6,8 @@
 """
 Provides implementation of torch.utils.data.Dataset for token-level input.
 """
-from junky import make_token_dict
+from junky import CPU, make_token_dict
 from junky.dataset.base_dataset import BaseDataset
-from junky import CPU
 from torch import Tensor, int64, tensor
 from torch.nn.utils.rnn import pad_sequence
 

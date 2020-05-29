@@ -6,9 +6,8 @@
 """
 Provides implementation of torch.utils.data.Dataset for character-level input.
 """
-from junky import make_alphabet, pad_array_torch
+from junky import CPU, make_alphabet, pad_array_torch
 from junky.dataset.base_dataset import BaseDataset
-from junky import CPU
 from torch import Tensor, int64, tensor
 from torch.nn.utils.rnn import pad_sequence
 
