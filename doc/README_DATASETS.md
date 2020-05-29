@@ -102,7 +102,8 @@ replaced to empty strings. If **skip_pad** is `True` (default), indices of
 **&lt;PAD&gt;** will be replaced to empty strings, too.
 
 ```python
-ds.transform(sentences, skip_unk=False, keep_empty=False, save=True)
+ds.transform(sentences, skip_unk=False, keep_empty=False, save=True,
+             append=False)
 ```
 Converts tokenized **sentences** to the sequences of the corresponding indices
 and adjust their format for `torch.utils.data.Dataset`. If **skip_unk** is
@@ -111,6 +112,10 @@ and adjust their format for `torch.utils.data.Dataset`. If **skip_unk** is
 
 If **save** is `True` (default), we'll keep the converted **sentences** as the
 `Dataset` source.
+
+If **append** is `True`, we'll append the converted sentences to the existing
+`Dataset` source. Elsewise (default), the existing `Dataset` source will be
+replaced. The param is used only if `save=True`.
 
 If **save** is `False`, the method returns the result of the transformation.
 Elsewise, `None` is returned.
@@ -319,7 +324,8 @@ If **aslist** is `True`, we want list of characters instead of tokens in the
 result.
 
 ```python
-ds.transform(sentences, skip_unk=False, keep_empty=False, save=True)
+ds.transform(sentences, skip_unk=False, keep_empty=False, save=True,
+             append=False)
 ```
 Converts tokenized **sentences** to the sequences of the lists of the indices
 corresponding to token's chars and adjust their format for
@@ -329,6 +335,10 @@ sequences that have no data after converting.
 
 If **save** is `True` (default), we'll keep the converted **sentences** as the
 `Dataset` source.
+
+If **append** is `True`, we'll append the converted sentences to the existing
+`Dataset` source. Elsewise (default), the existing `Dataset` source will be
+replaced. The param is used only if `save=True`.
 
 If **save** is `False`, the method returns the result of the transformation.
 Elsewise, `None` is returned.
@@ -494,7 +504,8 @@ Converts a word or a `list` of words to the corresponding vector|`list` of
 vectors. If **skip_unk** is `True`, unknown words will be skipped.
 
 ```python
-ds.transform(sentences, skip_unk=False, keep_empty=False, save=True)
+ds.transform(sentences, skip_unk=False, keep_empty=False, save=True,
+             append=False)
 ```
 Converts tokenized **sentences** to the sequences of the corresponding vectors
 and adjust their format for `torch.utils.data.Dataset`. If **skip_unk** is
@@ -503,6 +514,10 @@ and adjust their format for `torch.utils.data.Dataset`. If **skip_unk** is
 
 If **save** is `True` (default), we'll keep the converted **sentences** as the
 `Dataset` source.
+
+If **append** is `True`, we'll append the converted sentences to the existing
+`Dataset` source. Elsewise (default), the existing `Dataset` source will be
+replaced. The param is used only if `save=True`.
 
 If **save** is `False`, the method returns the result of the transformation.
 Elsewise, `None` is returned.
@@ -600,13 +615,14 @@ Returns `tuple(dataset, collate_kwargs)` for the `Dataset` with a specified
 ```python
 ds_list = ds.list()
 ```
-Returns names of the added `Dataset` objects in order of addition.
+Returns names of the nested `Dataset` objects in order of their addition.
 
 ```python
-transform(sentences, skip_unk=False, keep_empty=False, save=True)
+ds.transform(sentences, skip_unk=False, keep_empty=False, save=True,
+             append=False)
 ```
-Invokes `.transform(sentences, skip_unk, keep_empty, save)` methods for all
-added `Dataset` objects.
+Invokes `.transform(sentences, skip_unk, keep_empty, save, append)` methods
+for all nested `Dataset` objects.
 
 If **save** is `False`, we'll return the stacked result of objects' returns.
 

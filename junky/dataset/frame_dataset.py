@@ -80,7 +80,7 @@ class FrameDataset(BaseDataset):
         return self.datasets[name][0], self.datasets[name][2]
 
     def list(self):
-        """Get names of the added datasets in order of addition."""
+        """Get names of the nested datasets in order of their addition."""
         return tuple(self.datasets.keys())
 
     def to(self, *args, **kwargs):
@@ -89,14 +89,15 @@ class FrameDataset(BaseDataset):
         [x[0].to(*args, **kwargs) for x in self.datasets.values()]
 
     def transform(self, sentences, skip_unk=False, keep_empty=False,
-                  save=True):
-        """Invoke `.transform(sentences, skip_unk, keep_empty, save)` methods
-        for all added `Dataset` objects.
+                  save=True, append=False):
+        """Invoke `.transform(sentences, skip_unk, keep_empty, save, append)`
+        methods for all nested `Dataset` objects.
 
         If *save* is ``False``, we'll return the stacked result of objects'
         returns."""
         data = tuple(x[0].transform(sentences, skip_unk=skip_unk,
-                                    keep_empty=keep_empty, save=save)
+                                    keep_empty=keep_empty, save=save,
+                                    append=append)
                          for x in self.datasets.values())
         if not save:
             return tuple(data)

@@ -155,7 +155,7 @@ class CharDataset(BaseDataset):
                     for i in ids]
 
     def transform(self, sentences, skip_unk=False, keep_empty=False,
-                  save=True):
+                  save=True, append=False):
         """Convert sentences of token to the sequences of the lists of the
         indices corresponding to token's chars and adjust their format for
         Dataset. If *skip_unk* is ``True``, unknown chars will be skipped.
@@ -163,7 +163,11 @@ class CharDataset(BaseDataset):
         have no data after converting.
 
         If save is ``True``, we'll keep the converted sentences as the Dataset
-        source."""
+        source.
+
+        If *append* is ``True``, we'll append the converted sentences to the
+        existing Dataset source. Elsewise (default), the existing Dataset
+        source will be replaced. The param is used only if *save*=True."""
         data = [[
             tensor(i, dtype=self.int_tensor_dtype)
                 for i in s if keep_empty or i is not None
@@ -172,7 +176,10 @@ class CharDataset(BaseDataset):
                 for s in sentences
         ] if keep_empty or s]
         if save:
-            self.data = data
+            if append:
+                self.data += data
+            else:
+                self.data = data
         else:
             return data
 
