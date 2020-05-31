@@ -114,3 +114,21 @@ vector is appended.
 `1`) the norm of the new vector.
 
 Returns **vectors** appended.
+
+```python
+junky.absmax(array, axis=None)
+```
+Returns `numpy.ndarray` with absolute maximum values of **array** according to
+**axis**.
+
+Here, **array** is a `numpy.ndarray` or a `list` of `numpy.ndarray`, **axis**
+is of `int` type.
+
+```python
+junky.absmax_torch(tensors, dim=None)
+```
+Returns `torch.Tensor` with absolute maximum values of **tensors** according
+to **dim**
+
+Here, **tensors** is a `torch.Tensor` or a `list` of `torch.Tensors`, **dim**
+is of `int` type.

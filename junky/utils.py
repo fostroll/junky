@@ -8,7 +8,6 @@ Provides a bunch of utilities to use with PyTorch.
 """
 import numpy as np
 import torch
-from torch import Tensor, tensor
 
 CPU = torch.device('cpu')
 
@@ -124,7 +123,8 @@ def pad_array_torch(array, padding_value=0, **kwargs):
     :param kwargs: keyword args for the ``torch.tensor()`` method.
     :rtype: torch.Tensor
     """
-    return tensor(pad_array(array, padding_value=padding_value), **kwargs)
+    return torch.tensor(pad_array(array, padding_value=padding_value),
+                        **kwargs)
 
 def pad_sequences_with_tensor(sequences, padding_tensor=0.):
     """Pad the `seq` dimension of *sequences* of shape
@@ -141,9 +141,9 @@ def pad_sequences_with_tensor(sequences, padding_tensor=0.):
     t = sequences[0]
     device = t.get_device() if t.is_cuda else CPU
     N, S = len(sequences), max(s.shape[0] for s in sequences)
-    if not isinstance(padding_tensor, Tensor):
+    if not isinstance(padding_tensor, torch.Tensor):
         if isinstance(padding_tensor, Iterable):
-            padding_tensor = tensor(padding_tensor, device=device)
+            padding_tensor = torch.tensor(padding_tensor, device=device)
         else:
             padding_tensor = t.new_full(t.shape[2:], padding_tensor)
     #res = padding_tensor.to(device).expand(N, S, *t.shape[2:]).clone()
@@ -211,3 +211,87 @@ def add_mean_vector(vectors, axis=0, shift=0., scale=1.):
     )).mean()
     vector = np.expand_dims(get_rand_vector(norm, shift, dtype=vectors.dtype))
     return np.append(vectors, vector, axis=axis)
+
+def absmax(array, axis=None):
+    """Returns an array with absolute maximum values of *array* according to
+    *axis*.
+
+    :type array: numpy.ndarray|list([numpy.ndarray])
+    :type axis: int
+    :rtype: numpy.ndarray
+    """
+    if not isinstance(array, np.ndarray):
+        array = list(array)
+        assert len(array) > 0, 'ERROR: array has no data'
+        assert isinstance(array[0], np.ndarray), \
+               'ERROR: array has unsupported type'
+        array = np.stack(array, axis=-1 if axis is None else axis)
+
+    if axis is None:
+        res = array.max()
+        res_min = array.min()
+        if -res_min > res:
+            res = res_min
+
+    else:
+        amax = np.broadcast_to(
+            np.expand_dims(
+                abs(array).argmax(axis=axis), axis=axis
+            ), array.shape
+        )
+
+        shape = [(*[None] * len(amax.shape))]
+        shape[axis] = ...
+        mask = np.broadcast_to(
+            np.arange(amax.shape[axis])[tuple(shape)],
+            array.shape
+        )
+
+        res = array.copy()
+        res[mask != amax] = 0
+
+        res = res.sum(axis=axis)
+
+    return res
+
+def absmax_torch(tensors, dim=None):
+    """Returns a tensor with absolute maximum values of *tensors* according to
+    *dim*.
+
+    :type tensors: torch.Tensor|list([torch.Tensor])
+    :type axis: int
+    :rtype: torch.Tensor
+    """
+    if not isinstance(tensors, torch.Tensor):
+        tensors = list(tensors)
+        assert len(tensors) > 0, 'ERROR: tensors has no data'
+        assert isinstance(tensors[0], torch.Tensor), \
+               'ERROR: tensors have unsupported type'
+        tensors = torch.stack(tensors, dim=-1 if dim is None else dim)
+
+    if dim is None:
+        res = tensors.max()
+        res_min = tensors.min()
+        if -res_min > res:
+            res = res_min
+
+    else:
+        amax = tensors.abs() \
+                      .argmax(dim=dim) \
+                      .unsqueeze(dim=dim) \
+                      .expand(tensors.shape)
+
+        shape = [(*[None] * len(amax.shape))]
+        shape[dim] = ...
+        mask = torch.arange(amax.shape[dim])[tuple(shape)] \
+                    .expand(amax.shape)
+
+        if tensors.is_cuda:
+            mask = mask.to(tensors.device)
+
+        res = tensors.clone()
+        res[mask != amax] = 0
+
+        res = res.sum(dim=dim)
+
+    return res
