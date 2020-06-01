@@ -505,4 +505,4 @@ class BertDataset(BaseDataset):
             x = pad_array_torch(batch, padding_value=pad,
                                 device=device, dtype=tensor_dtype)
 
-        return x, *lens
+        return (x, *lens)
