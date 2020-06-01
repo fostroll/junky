@@ -230,7 +230,7 @@ def get_conllu_fields(corpus=None, fields=None, word2idx=None, unk_token=None,
             if field or with_empty:
                 sents[i].append(field)
 
-    return sents
+    return sents if fields else sents[0]
 
 
 class WordSeqDataset(torch.utils.data.Dataset):
