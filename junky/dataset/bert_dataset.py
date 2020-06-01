@@ -165,7 +165,6 @@ class BertDataset(BaseDataset):
             x for x in [[i] * x for i, x in enumerate(x)]
               for x in x
         ] for x in num_subtokens]
-        print_list(sub_to_kens)
         # for each token we keep its start in flatten tokenized_sentences
         token_starts = []
         for sent in sub_to_kens:
@@ -335,10 +334,8 @@ class BertDataset(BaseDataset):
         ])
 
         data = []
-        print(num_sents, len(input_ids), len(attention_masks))
         for batch_i in range(0, num_sents, batch_size):
 
-            print(i)
             with torch.no_grad():
                 hiddens = self.model(
                     torch.cat(
@@ -393,8 +390,6 @@ class BertDataset(BaseDataset):
                     else:
                         data.append(sent)
 
-        print(len(num_subtokens))
-        print('d', len(data))
         for i, token_lens in enumerate(num_subtokens):
             token_lens = num_subtokens[i]
             '''
