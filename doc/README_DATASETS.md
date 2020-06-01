@@ -608,6 +608,7 @@ Example:
 ```python
 from corpuscula.corpus_utils import syntagrus
 import junky
+from junky.dataset import BertDataset
 from transformers import BertConfig, BertForTokenClassification, BertTokenizer
 
 bert_model_name = 'bert-base-multilingual-cased'
