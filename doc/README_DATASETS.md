@@ -729,7 +729,7 @@ create several instances of `DataLoader` for **ds** (each with `workers=0`)
 and use them in parallel.
 
 The created `DataLoader` will return batches of the format (*<`list` of words'
-vectors>, *\<length of the sentence>*[, *\<`list` of lengths of tokens>*]).
+vectors>, *\<length of the sentence>*\[, *\<`list` of lengths of tokens>*]).
 If you use `BertDataset` as part of `FrameDataset`, you can set the param
 **with_lens** to `False` to omit the lengths from the batches:
 
@@ -755,8 +755,8 @@ ds = FrameDataset()
 #### Attributes
 
 `ds.datasets` (`dict({str: [junky.dataset.BaseDataset, int, kwargs]})`): the
-list of `Dataset` objects. Format: {name: [`Dataset`,
-<number of data columns>, <collate kwargs>]}
+list of `Dataset` objects. Format: {name: \[`Dataset`, *\<number of data
+columns>*, *\<collate kwargs>*]}
 
 Generally, you don't need to change any attribute directly.
 
@@ -847,10 +847,10 @@ Let us suppose that we have sets of data for training (**train** and
 sentences and a `list` of sequences of the corresponding labels. We want a
 `DataLoader` that will return batches for each set.
 
-Format of the element of the each batch is: (\<`list` of words' vectors>, 
-\<length of the sentence>, \<`list` of `list` of indices of words'
-characters>, \<`list` of lengths of words>, \<`list` of indices of words'
-labels>.
+Format of the element of the each batch is: (*\<`list` of words' vectors>*, 
+*\<length of the sentence>*, *\<`list` of `list` of indices of words'
+characters>*, *\<`list` of lengths of words>*, *\<`list` of indices of words'
+labels>*.
 
 Firstly, we create 3 datasets: for words' vectors, for chars' indices and for
 labels' indices.
