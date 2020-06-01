@@ -22,13 +22,13 @@ class TokenDataset(BaseDataset):
             internal dict: str.
         pad_token: add a token for padding: str.
         extra_tokens: add tokens for any other purposes: list([str]).
+        int_tensor_dtype: dtype for int tensors: torch.dtype.
         transform: if ``True``, transform and save `sentences`.
         skip_unk, keep_empty: params for the `.transform()` method.
-        int_tensor_dtype: dtype for int tensors: torch.dtype.
     """
     def __init__(self, sentences, unk_token=None, pad_token=None,
-                 extra_tokens=None, transform=False, skip_unk=False,
-                 keep_empty=False, int_tensor_dtype=int64):
+                 extra_tokens=None, int_tensor_dtype=int64,
+                 transform=False, skip_unk=False, keep_empty=False):
         super().__init__()
         self.int_tensor_dtype = int_tensor_dtype
         self.fit(sentences, unk_token=unk_token, pad_token=pad_token,
@@ -104,7 +104,7 @@ class TokenDataset(BaseDataset):
 
     def transform(self, sentences, skip_unk=False, keep_empty=False,
                   save=True, append=False):
-        """Convert sentences of token to the sequences of the corresponding
+        """Convert *sentences* of tokens to the sequences of the corresponding
         indices and adjust their format for Dataset. If *skip_unk* is
         ``True``, unknown tokens will be skipped. If *keep_empty* is
         ``False``, we'll remove sentences that have no data after converting.
@@ -131,7 +131,7 @@ class TokenDataset(BaseDataset):
 
     def reconstruct(self, sequences, skip_unk=False, skip_pad=True,
                     keep_empty=False):
-        """Convert sequences of indices in Dataset format to the sentences
+        """Convert *sequences* of indices in Dataset format to the sentences
         of the corresponding tokens. If *skip_unk* is ``True``, unknown
         indices will be skipped. If *skip_pad* is ``True``, padding will be
         removed. If *keep_empty* is ``False``, we'll remove sentences that

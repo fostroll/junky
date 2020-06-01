@@ -204,6 +204,9 @@ def get_conllu_fields(corpus=None, fields=None, word2idx=None, unk_token=None,
     :return: splitted corpus
     :rtype: tuple(list([list([str|OrderedDict])]))
     """
+    if fields is None:
+        fields = []
+
     if not silent:
         clear_stderr()
 
@@ -218,7 +221,7 @@ def get_conllu_fields(corpus=None, fields=None, word2idx=None, unk_token=None,
         for i, field in enumerate(zip(*[
             (x['FORM'] if not word2idx or x['FORM'] in word2idx else
              unk_token,
-             *([x[y] for y in fields] if fields else []))
+             *[x[y] for y in fields])
                  for x in sent
                      if x['FORM'] and '-' not in x['ID']
                                   and (not word2idx or x['FORM'] in word2idx

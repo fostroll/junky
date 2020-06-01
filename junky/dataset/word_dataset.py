@@ -28,18 +28,18 @@ class WordDataset(BaseDataset):
         pad_vec_norm: the norm of the vector for *pad_token*: float.
         extra_tokens: add tokens for any other purposes: list([str]).
         extra_vec_norm: the norm of the vectors for *extra_tokens*: float.
+        float_tensor_dtype: dtype for float tensors: torch.dtype.
+        int_tensor_dtype: dtype for int tensors: torch.dtype.
         sentences: sequences of words: list([list([str])]). If not ``None``,
             they will be transformed and saved.
         skip_unk, keep_empty: params for the `.transform()` method.
-        float_tensor_dtype: dtype for float tensors: torch.dtype.
-        int_tensor_dtype: dtype for int tensors: torch.dtype.
     """
     def __init__(self, emb_model, vec_size,
                  unk_token=None, unk_vec_norm=1.,
                  pad_token=None, pad_vec_norm=0.,
                  extra_tokens=None, extra_vec_norm=1.,
-                 sentences=None, skip_unk=False, keep_empty=False,
-                 float_tensor_dtype=float32, int_tensor_dtype=int64):
+                 float_tensor_dtype=float32, int_tensor_dtype=int64,
+                 sentences=None, skip_unk=False, keep_empty=False):
         super().__init__()
         self.emb_model = emb_model
         self.vec_size = vec_size
@@ -91,7 +91,7 @@ class WordDataset(BaseDataset):
 
     def transform(self, sentences, skip_unk=False, keep_empty=False,
                   save=True, append=False):
-        """Convert sentences of words to the sequences of the corresponding
+        """Convert *sentences* of words to the sequences of the corresponding
         vectors and adjust their format for Dataset. If *skip_unk* is
         ``True``, unknown words will be skipped. If *keep_empty* is ``False``,
         we'll remove sentences that have no data after converting.

@@ -12,8 +12,8 @@ Maps tokenized sentences to sequences of their tokens' indices.
 ```python
 from junky.dataset import TokenDataset
 ds = TokenDataset(sentences, unk_token=None, pad_token=None,
-                  extra_tokens=None, transform=False, skip_unk=False,
-                  keep_empty=False, int_tensor_dtype=int64)
+                  extra_tokens=None, int_tensor_dtype=int64,
+                  transform=False, skip_unk=False, keep_empty=False)
 ```
 Params:
 
@@ -26,13 +26,13 @@ internal dict (further, **&lt;UNK&gt;**).
 
 **extra_tokens** (`list([str])`): add tokens for any other purposes.
 
+**int_tensor_dtype** (`torch.dtype`, default `torch.int64`): type for int
+tensors. Don't change it.
+
 **transform**: if `True`, invoke `.transform(sentences, save=True)` right
 after object creation.
 
 **skip_unk**, **keep_empty**: params for the `.transform()` method.
-
-**int_tensor_dtype** (`torch.dtype`, default `torch.int64`): type for int
-tensors. Don't change it.
 
 #### Attributes
 
@@ -173,7 +173,7 @@ ds.create_loader(self, batch_size=32, shuffle=False, num_workers=0, **kwargs)
 Creates `torch.utils.data.DataLoader` for this object. All params are the
 params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
 
-**NB:** If you set **num_workers** != `0` don't move the **ds** source to
+**NB:** If you set **num_workers** != `0`, don't move the **ds** source to
 *CUDA*. The `torch` multiprocessing implementation can't bear it. Better,
 create several instances of `DataLoader` for **ds** (each with `workers=0`)
 and use them in parallel.
@@ -197,8 +197,8 @@ chars.
 from junky.dataset import CharDataset
 ds = CharDataset(sentences, unk_token=None, pad_token=None,
                   extra_tokens=None, allowed_chars=None, exclude_chars=None,
-                  transform=False, skip_unk=False, keep_empty=False,
-                  int_tensor_dtype=int64, min_len=None)
+                  int_tensor_dtype=int64, min_len=None,
+                  transform=False, skip_unk=False, keep_empty=False)
 ```
 Params:
 
@@ -217,16 +217,16 @@ dict (further, **&lt;UNK&gt;**).
 **exclude_chars** (`str`|`list([str])`): if not `None`, all charactes from
 **exclude_chars** will be removed.
 
-**transform**: if `True`, invoke `.transform(sentences, save=True)` right
-after object creation.
-
-**skip_unk**, **keep_empty**: params for the `.transform()` method.
-
 **int_tensor_dtype** (`torch.dtype`, default `torch.int64`): type for int
 tensors. Don't change it.
 
 **min_len** (`int`): if specified, `collate_fn` of internal `DataLoader` will
 pad sentences in batch that are shorter than this value.
+
+**transform**: if `True`, invoke `.transform(sentences, save=True)` right
+after object creation.
+
+**skip_unk**, **keep_empty**: params for the `.transform()` method.
 
 #### Attributes
 
@@ -400,7 +400,7 @@ ds.create_loader(self, batch_size=32, shuffle=False, num_workers=0, **kwargs)
 Creates `torch.utils.data.DataLoader` for this object. All params are the
 params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
 
-**NB:** If you set **num_workers** != `0` don't move the **ds** source to
+**NB:** If you set **num_workers** != `0`, don't move the **ds** source to
 *CUDA*. The `torch` multiprocessing implementation can't bear it. Better,
 create several instances of `DataLoader` for **ds** (each with `workers=0`)
 and use them in parallel.
@@ -429,8 +429,8 @@ ds = WordDataset(emb_model, vec_size,
                  unk_token=None, unk_vec_norm=1e-2,
                  pad_token=None, pad_vec_norm=0.,
                  extra_tokens=None, extra_vec_norm=1e-2,
-                 sentences=None, skip_unk=False, keep_empty=False,
-                 float_tensor_dtype=float32, int_tensor_dtype=int64)
+                 float_tensor_dtype=float32, int_tensor_dtype=int64,
+                 sentences=None, skip_unk=False, keep_empty=False)
 ```
 Params:
 
@@ -452,16 +452,16 @@ internal dict (further, **&lt;UNK&gt;**).
 
 **extra_vec_norm** (`float`): the norm of the vectors for **extra_tokens**.
 
-**sentences** (`list([list([str])])`): already tokenized sentences of words.
-If not `None`, they will be transformed and saved.
-
-**skip_unk**, **keep_empty**: params for the `.transform()` method.
-
 **float_tensor_dtype** (`torch.dtype`, default `torch.float32`): type for
 float tensors. Don't change it.
 
 **int_tensor_dtype** (`torch.dtype`, default `torch.int64`): type for int
 tensors. Don't change it.
+
+**sentences** (`list([list([str])])`): already tokenized sentences of words.
+If not `None`, they will be transformed and saved.
+
+**skip_unk**, **keep_empty**: params for the `.transform()` method.
 
 #### Attributes
 
@@ -542,7 +542,8 @@ it if need by its own method.
 ds = WordDataset.load(file_path, emb_model):
 ```
 Load the `WordDataset` object from **file_path**. You should specify
-**emb_model** that you used during object's creation.
+**emb_model** that you used during object's creation (or received from the
+`.save()` method).
 
 ```python
 ds.to(*args, **kwargs):
@@ -557,7 +558,7 @@ ds.create_loader(self, batch_size=32, shuffle=False, num_workers=0, **kwargs)
 Creates `torch.utils.data.DataLoader` for this object. All params are the
 params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
 
-**NB:** If you set **num_workers** != `0` don't move the **ds** source to
+**NB:** If you set **num_workers** != `0`, don't move the **ds** source to
 *CUDA*. The `torch` multiprocessing implementation can't bear it. Better,
 create several instances of `DataLoader` for **ds** (each with `workers=0`)
 and use them in parallel.
@@ -571,6 +572,175 @@ lengths from the batches:
 # fds - object of junky.dataset.FrameDataset
 fds.add('x', ds, with_lens=False)
 ```
+
+### BertDataset
+
+Maps tokenized sentences to sequences of their contextual words' vectors.
+
+```python
+from junky.dataset import BertDataset
+ds = BertDataset(model, tokenizer, int_tensor_dtype=int64,
+                 sentences=None, max_len=None, batch_size=32, hidden_ids=0,
+                 aggregate_hiddens_op='mean', aggregate_subtokens_op='max')
+```
+Params:
+
+**model**: one of the token classification models from the
+[*transformers*](https://huggingface.co/transformers/index.html) package. It
+should be created with *config* containing `output_hidden_states=True`. NB:
+Don't forget to set **model** in the `eval` mode before use it with this
+class.
+
+**tokenizer**: a tokenizer from the *transformers* package corresponding to
+**model** chosen.
+
+**int_tensor_dtype** (`torch.dtype`, default `torch.int64`): type for int
+tensors. Don't change it.
+
+**sentences** (`list([list([str])])`): already tokenized sentences of words.
+If not `None`, they will be transformed and saved. NB: All the sentences must
+not be empty.
+
+all other args are params for the `.transpose()` method. They are used only if
+**sentences** is not `None`.
+
+Example:
+```python
+from corpuscula.corpus_utils import syntagrus
+import junky
+from transformers import BertConfig, BertForTokenClassification, BertTokenizer
+
+bert_model_name = 'bert-base-multilingual-cased'
+
+bert_tokenizer = BertTokenizer.from_pretrained(
+    bert_model_name, do_lower_case=False
+)
+bert_config = BertConfig.from_pretrained(bert_model_name,
+                                         output_hidden_states=True)
+bert_model = BertForTokenClassification.from_pretrained(
+    bert_model_name, config=bert_config
+).to('cuda:0')
+bert_model.eval()
+
+train = junky.get_conllu_fields(syntagrus.train, fields=[])
+
+ds = BertDataset(bert_model, bert_tokenizer)
+ds.transform(train, max_len=32, hidden_ids=range(9, 13),
+             aggregate_hiddens_op='mean', aggregate_subtokens_op='max')
+
+loader = ds.create_loader(shuffle=True)
+x, lens = next(iter(loader))
+print(x.shape)
+print(lens[0])
+```
+
+#### Attributes
+
+`ds.model`: a model from the *transformers* package.
+
+`ds.tokenizer` a tokenizer from the *transformers* package corresponding to
+`ds.model`.
+
+`ds.int_tensor_dtype` (`torch.dtype`): type for int tensors.
+
+Generally, you don't need to change any attribute directly.
+
+#### Methods
+
+```python
+ds.transform(sentences, max_len=None, batch_size=None, hidden_ids=0,
+             aggregate_hiddens_op='mean', aggregate_subtokens_op='max',
+             save=True, append=False)
+```
+Converts tokenized **sentences** to the sequences of the corresponding
+contextual vectors and adjust their format for `torch.utils.data.Dataset`.
+
+**max_len** is a param for `ds.tokenizer`. We'll transform lines of any
+length, but the quality is higher if **max_len** is greater.
+
+**batch_size** affects only on the execution time. Greater is faster, but big
+**batch_size** may be cause of CUDA Memory Error. If `None` (default), we'll
+try to convert all **sentences** with one batch.
+
+**hidden_ids**: hidden score layers that we need to aggregate. Allowed `int`
+or `tuple(int)`. If `None`, we'll aggregate all the layers.
+
+**aggregate_hidden_op**: how to aggregate hidden scores. The ops allowed:
+`'cat'`, `'max'`, `'mean'`, `'sum'`. For `'max'` method we take into account
+the absolute values of the compared items (*absmax* method).
+
+**aggregate_subtokens_op**: how to aggregate subtokens vectors to form only
+one vector for each input token. The ops allowed: `None`, `'max'`, `'mean'`,
+`'sum'`. For `'max'` method we take into account the absolute values of the
+compared items (`absmax` method).
+
+If **save** is `True` (default), we'll keep the converted **sentences** as the
+`Dataset` source.
+
+If **append** is `True`, we'll append the converted sentences to the existing
+`Dataset` source. Elsewise (default), the existing `Dataset` source will be
+replaced. The param is used only if `save=True`.
+
+If **save** is `False`, the method returns the result of the transformation.
+Elsewise, `None` is returned.
+
+```python
+o = ds.clone(with_data=True)
+```
+Makes a deep copy of the `BertDataset` object. If **with_data** is `False`,
+the `Dataset` source in the new object will be empty. All attributes will be
+copied but `ds.model` and `ds.tokenizer` that are copied by link.
+
+```python
+model, tokenizer = ds.save(file_path, with_data=True)
+```
+Saves the `BertDataset` object to **file_path**. If **with_data** is `False`,
+the `Dataset` source of the saved object will be empty. All attributes will be
+saved but `ds.model` and `ds.tokenizer` that are returned by the method for
+you saved them if need by their own methods.
+
+```python
+ds = BertDataset.load(file_path, (model, tokenizer)):
+```
+Load the `BertDataset` object from **file_path**. You should specify **model**
+and **tokenizer** that you used during object's creation (or received from the
+`.save()` method).
+
+**NB:** Really, without `ds.model` and `ds.tokenizer`, `BertDataset` is almost
+empty. It's easier to create the object from scratch then bother with all
+those `save` / `load` / `clone` actions.
+
+```python
+ds.to(*args, **kwargs):
+```
+Invokes `.to(*args, **kwargs)` methods for all the elements of the `Dataset`
+source that have `torch.Tensor` or `torch.nn.Model` type. All the params will
+be transferred as is.
+
+```python
+ds.create_loader(self, batch_size=32, shuffle=False, num_workers=0, **kwargs)
+```
+Creates `torch.utils.data.DataLoader` for this object. All params are the
+params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
+
+**NB:** If you set **num_workers** != `0`, don't move the **ds** source to
+*CUDA*. The `torch` multiprocessing implementation can't bear it. Better,
+create several instances of `DataLoader` for **ds** (each with `workers=0`)
+and use them in parallel.
+
+The created `DataLoader` will return batches of the format (*<`list` of words'
+vectors>, *\<length of the sentence>*[, *\<`list` of lengths of tokens>*]).
+If you use `BertDataset` as part of `FrameDataset`, you can set the param
+**with_lens** to `False` to omit the lengths from the batches:
+
+```python
+# fds - object of junky.dataset.FrameDataset
+fds.add('x', ds, with_lens=False)
+```
+
+If you don't need the lengths of tokens, you can set to `False` the param
+**with_token_lens**. Note, that you have it only if you invoked
+`.transform(save=True)` with `aggregate_subtokens_op=None` option.
 
 ### FrameDataset
 
@@ -664,7 +834,7 @@ ds.create_loader(self, batch_size=32, shuffle=False, num_workers=0, **kwargs)
 Creates `torch.utils.data.DataLoader` for this object. All params are the
 params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
 
-**NB:** If you set **num_workers** != `0` don't move the **ds** source to
+**NB:** If you set **num_workers** != `0`, don't move the **ds** source to
 *CUDA*. The `torch` multiprocessing implementation can't bear it. Better,
 create several instances of `DataLoader` for **ds** (each with `workers=0`)
 and use them in parallel.

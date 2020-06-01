@@ -26,16 +26,16 @@ class CharDataset(BaseDataset):
             will be removed: str|list([str]).
         exclude_chars: if not None, all charactes from *exclude_chars* will
             be removed: str|list([str]).
-        transform: if ``True``, transform and save `sentences`.
-        skip_unk, keep_empty: params for the `.transform()` method.
         int_tensor_dtype: dtype for int tensors: torch.dtype.
         min_len: if specified, `._collate()` will pad sentences in batch that
             are shorter than `min_len`: int.
+        transform: if ``True``, transform and save `sentences`.
+        skip_unk, keep_empty: params for the `.transform()` method.
     """
     def __init__(self, sentences, unk_token=None, pad_token=None,
                  extra_tokens=None, allowed_chars=None, exclude_chars=None,
-                 transform=False, skip_unk=False, keep_empty=False,
-                 int_tensor_dtype=int64, min_len=None):
+                 int_tensor_dtype=int64, min_len=None,
+                 transform=False, skip_unk=False, keep_empty=False):
         super().__init__()
         self.int_tensor_dtype = int_tensor_dtype
         self.min_len = min_len
@@ -155,7 +155,7 @@ class CharDataset(BaseDataset):
 
     def transform(self, sentences, skip_unk=False, keep_empty=False,
                   save=True, append=False):
-        """Convert sentences of token to the sequences of the lists of the
+        """Convert *sentences* of tokens to the sequences of the lists of the
         indices corresponding to token's chars and adjust their format for
         Dataset. If *skip_unk* is ``True``, unknown chars will be skipped.
         If *keep_empty* is ``False``, we'll remove tokens and sentences that
@@ -184,11 +184,11 @@ class CharDataset(BaseDataset):
 
     def reconstruct(self, sequences, skip_unk=False, skip_pad=True,
                     keep_empty=False, aslist=False):
-        """Convert sequences of the lists of the indices in Dataset format to
-        the sentences of the corresponding tokens. If *skip_unk* is ``True``,
-        unknown indices will be skipped. If *skip_pad* is ``True``, padding
-        will be removed. If *keep_empty* is ``False``, we'll remove sentences
-        that have no data after converting.
+        """Convert *sequences* of the lists of the indices in Dataset format
+        to the sentences of the corresponding tokens. If *skip_unk* is
+        ``True``, unknown indices will be skipped. If *skip_pad* is ``True``,
+        padding will be removed. If *keep_empty* is ``False``, we'll remove
+        sentences that have no data after converting.
 
         :param aslist: if ``True``, we want lists of characters instead of
             tokens in the result.
@@ -212,7 +212,7 @@ class CharDataset(BaseDataset):
                               keep_empty=keep_empty, save=save)
 
     def _frame_collate(self, batch, pos, with_lens=True,
-                          with_token_lens=True):
+                       with_token_lens=True):
         """The method to use with junky.dataset.FrameDataset.
 
         :param pos: position of the data in *batch*.
