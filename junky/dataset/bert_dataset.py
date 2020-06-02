@@ -222,16 +222,16 @@ class BertDataset(BaseDataset):
                     # токена относительно текущего начала
                     pos_ = pos - token_ids[0]
                     if not pos_:
-                        pos, pos_ = token_ids[sub_ids[1]], 1
+                        pos, pos_ = token_ids[sub_ids[1] - sub_ids[0]], 1
                     # находим индекс сабтокена: из индекса сабтокена
                     # найденного токена вычитаем индекс текущего нулевого
                     # сабтокена
                     start = sub_ids[pos_] - sub_ids[0]
                     if start > max_len_:
                         raise RuntimeError(
-                            ('ERROR: too long token in sentence {}, '
-                             'token {} (longer than max_len)')
-                                 .format(i, pos)
+                            ('ERROR: too long token (longer than '
+                             'effective max_len):\n{}')
+                                 .format(sent[:start])
                         )
                     overlap_sents.append(sent[start:])
                     overlap_sent_lens.append(sent_len - start)
