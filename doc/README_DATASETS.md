@@ -581,7 +581,8 @@ Maps tokenized sentences to sequences of their contextual words' vectors.
 from junky.dataset import BertDataset
 ds = BertDataset(model, tokenizer, int_tensor_dtype=int64,
                  sentences=None, max_len=None, batch_size=32, hidden_ids=0,
-                 aggregate_hiddens_op='mean', aggregate_subtokens_op='max')
+                 aggregate_hiddens_op='mean', aggregate_subtokens_op='max',
+                 silent=False)
 ```
 Params:
 
@@ -601,7 +602,7 @@ tensors. Don't change it.
 If not `None`, they will be transformed and saved. NB: All the sentences must
 not be empty.
 
-all other args are params for the `.transpose()` method. They are used only if
+all other args are params for the `.transform()` method. They are used only if
 **sentences** is not `None`.
 
 Example:
@@ -651,7 +652,7 @@ Generally, you don't need to change any attribute directly.
 ```python
 ds.transform(sentences, max_len=None, batch_size=None, hidden_ids=0,
              aggregate_hiddens_op='mean', aggregate_subtokens_op='max',
-             save=True, append=False)
+             save=True, append=False, silent=False)
 ```
 Converts tokenized **sentences** to the sequences of the corresponding
 contextual vectors and adjust their format for `torch.utils.data.Dataset`.
@@ -675,6 +676,10 @@ one vector for each input token. The ops allowed: `None`, `'max'`, `'mean'`,
 `'sum'`. For `'max'` method we take into account the absolute values of the
 compared items (`absmax` method).
 
+If you want to get the result placed on some exact device, specify the device
+with **to** param. If **to** is `None` (defautl), data will be placed to the
+very device that `bs.model` is used.
+
 If **save** is `True` (default), we'll keep the converted **sentences** as the
 `Dataset` source.
 
@@ -682,8 +687,16 @@ If **append** is `True`, we'll append the converted sentences to the existing
 `Dataset` source. Elsewise (default), the existing `Dataset` source will be
 replaced. The param is used only if `save=True`.
 
+If **silent** is True, the logging will be suppressed.
+
 If **save** is `False`, the method returns the result of the transformation.
 Elsewise, `None` is returned.
+
+The result is depend on **aggregate_subtokens_op** param. If it is `None`,
+then for each token we keeps in the result a tensor with stacked vectors for
+all its subtokens. Otherwise, if any **aggregate_subtokens_op** is used, each
+sentence will be converted to exactly one tensor of shape \[*\<sentence
+length>*, *\<vector size>*].
 
 ```python
 o = ds.clone(with_data=True)
