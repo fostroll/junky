@@ -14,6 +14,20 @@ import torch
 from torch import Tensor, tensor
 
 
+# from collections import Iterable
+#
+# def print_struct(o, shift=0):
+#     if isinstance(o, torch.Tensor):
+#         print('{}tensor({}, dtype={})'
+#                   .format(' ' * shift, o.shape, o.dtype))
+#     elif isinstance(o, Iterable):
+#         print(' ' * (shift - 1), type(o), 'len =', len(o))
+#         for o_ in o:
+#             print_struct(o_, shift=shift + 4)
+#
+# def print_list(lst):
+#     [print('   ', x) for x in lst]
+
 class BertDataset(BaseDataset):
     """
     `torch.utils.data.Dataset` for word-level input with contextual
@@ -31,22 +45,17 @@ class BertDataset(BaseDataset):
             they will be transformed and saved. NB: All the sentences must
             not be empty.
         all other args are params for the `.transpose()` method. They are used
-            only if sentences is not ``None``.
+            only if sentences is not ``None``. You can use any args but `save`
+            that is set to `True`.
     """
     def __init__(self, model, tokenizer, int_tensor_dtype=torch.int64,
-                 sentences=None, max_len=64, batch_size=64, hidden_ids=0,
-                 aggregate_hiddens_op='mean', aggregate_subtokens_op='max',
-                 to=None, silent=False):
+                 sentences=None, **kwargs):
         super().__init__()
         self.model = model
         self.tokenizer = tokenizer
         self.int_tensor_dtype = int_tensor_dtype
         if sentences:
-            self.transform(sentences, max_len=max_len,
-                           batch_size=batch_size, hidden_ids=hidden_ids,
-                           aggregate_hiddens_op=aggregate_hiddens_op,
-                           aggregate_subtokens_op=aggregate_hiddens_op,
-                           to=to, save=True, silent=silent)
+            self.transform(sentences, save=True, **kwargs)
 
     def _pull_xtrn(self):
         xtrn = [self.model, self.tokenizer]
@@ -90,7 +99,7 @@ class BertDataset(BaseDataset):
     def transform(self, sentences, max_len=64, batch_size=64,
                   hidden_ids=0, aggregate_hiddens_op='mean',
                   aggregate_subtokens_op='max', to=None,
-                  save=True, append=False, silent=False):
+                  save=True, append=False, loglevel=1):
         """Convert *sentences* of words to the sequences of the corresponding
         contextual vectors and adjust their format for Dataset.
 
@@ -125,7 +134,7 @@ class BertDataset(BaseDataset):
         existing Dataset source. Elsewise (default), the existing Dataset
         source will be replaced. The param is used only if *save*=True.
 
-        If *silent* is True, the logging will be suppressed.
+        *loglevel* can be set to `0`, `1` or `2`. `0` means no output.
 
         The result is depend on *aggregate_subtokens_op* param. If it is
         ``None``, then for each token we keeps in the result a tensor with
@@ -164,12 +173,16 @@ class BertDataset(BaseDataset):
 
         shift = int(max_len_ * OVERLAP_SHIFT_COEF)
 
+        _src = sentences
+        if loglevel == 2:
+            print('Tokenizing')
+            _src = tqdm(_src, file=sys.stdout)
         time0 = time()
         # tokenize each token separately by the BERT tokenizer
         tokenized_sentences = [[self.tokenizer.tokenize(x) for x in x]
-                                   for x in sentences]
-        if time() - time0 < 5:
-            silent = True
+                                   for x in _src]
+        if time() - time0 < 5 and loglevel == 1:
+            loglevel = 0
 
         # number of subtokens in tokens of tokenized_sentences
         num_subtokens = [[len(x) for x in x] for x in tokenized_sentences]
@@ -357,10 +370,11 @@ class BertDataset(BaseDataset):
             batch_size = num_sents
 
         data = []
-        range_ = range(0, num_sents, batch_size)
-        if not silent:
-            range_ = tqdm(range_)
-        for batch_i in range_:
+        _src = range(0, num_sents, batch_size)
+        if loglevel:
+            print('Vectorizing')
+            _src = tqdm(_src, file=sys.stdout)
+        for batch_i in _src:
 
             with torch.no_grad():
                 hiddens = self.model(
@@ -383,9 +397,8 @@ class BertDataset(BaseDataset):
                 if to:
                     hiddens = hiddens.to(to)
 
-                for i, (sent, sent_len) in enumerate(
-                    zip(hiddens, splitted_sent_lens), start=batch_i
-                ):
+                for i, sent in enumerate(hiddens, start=batch_i):
+                    sent_len = splitted_sent_lens[i]
                     if i in overmap:
                         j, over_pos_start = overmap[i]
                         over_pos_end = sub_to_kens[j][len(data[j])]
@@ -421,9 +434,13 @@ class BertDataset(BaseDataset):
                             data[j][:end1], sent[1 + start2:1 + sent_len]
                         ], dim=0)
                     else:
-                        data.append(sent[1:sent_len + 1])
+                        data.append(sent[1:1 + sent_len])
 
-        for i, token_lens in enumerate(num_subtokens):
+        _src = num_subtokens
+        if loglevel:
+            print('Adjusting')
+            _src = tqdm(_src, file=sys.stdout)
+        for i, token_lens in enumerate(_src):
             token_lens = num_subtokens[i]
             '''
         for i in range(len(data)):
