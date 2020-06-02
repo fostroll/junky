@@ -97,7 +97,7 @@ class BertDataset(BaseDataset):
                 )
         return hiddens
 
-    def transform(self, sentences, max_len=64, batch_size=64,
+    def transform(self, sentences, max_len=None, batch_size=64,
                   hidden_ids=0, aggregate_hiddens_op='mean',
                   aggregate_subtokens_op='max', to=None,
                   save=True, append=False, loglevel=1):
@@ -106,6 +106,7 @@ class BertDataset(BaseDataset):
 
         *max_len* is a param for tokenizer. We'll transform lines of any
             length, but the quality is higher if *max_len* is greater.
+            ``None`` means the maximum for the model (usually, 512).
 
         *batch_size* affects only on the execution time. Greater is faster,
             but big *batch_size* may be cause of CUDA Memory Error. If ``None``
@@ -182,7 +183,7 @@ class BertDataset(BaseDataset):
         # tokenize each token separately by the BERT tokenizer
         tokenized_sentences = [[self.tokenizer.tokenize(x) for x in x]
                                    for x in _src]
-        if time() - time0 < 5 and loglevel == 1:
+        if time() - time0 < 2 and loglevel == 1:
             loglevel = 0
 
         # number of subtokens in tokens of tokenized_sentences
@@ -207,6 +208,22 @@ class BertDataset(BaseDataset):
                                    for x in tokenized_sentences]
         # lengths of flattened tokenized_sentences
         sent_lens = [len(x) for x in tokenized_sentences]
+
+        ## sort tokenized sentences by lenght
+        ######
+        sent_lens, sorted_sent_ids = zip(*sorted(
+            [(x, i) for i, x in enumerate(sent_lens)]
+        ))
+        tokenized_sentences = [
+            tokenized_sentences[i] for i in sorted_sent_ids
+        ]
+        sub_to_kens = [
+            sub_to_kens[i] for i in sorted_sent_ids
+        ]
+        token_starts = [
+            token_starts[i] for i in sorted_sent_ids
+        ]
+        ######
 
         def process_long_sentences(sents, sent_lens, sub_to_kens,
                                    token_starts):
@@ -290,83 +307,6 @@ class BertDataset(BaseDataset):
 #         print('\nRESTORE:')
 #         print_list(a)
 
-        '''
-        def process_long_sentences (sents, sent_lens, num_subtokens):
-            overlap_sents, overlap_sent_lens, \
-            overlap_num_subtokens, overmap = [], [], [], []
-            for i, (sent, sent_len, sub_lens) \
-                    in enumerate(zip(sents, sent_lens, num_subtokens)):
-                if sent_len > max_len_:
-                    num, start, pos = 0, 0, 0
-                    for j, num_ in enumerate(sub_lens):
-                        new_num = num + num_
-                        if not start and new_num > shift:
-                            pos, start = (j, num) if j else (1, new_num)
-                            if start > max_len_:
-                                raise RuntimeError(
-                                    ('ERROR: too long token in sentence {}, '
-                                     'token {} (longer than max_len)')
-                                        .format(i, j)
-                                )
-                        if new_num > max_len_:
-                            overlap_sents.append(sent[start:])
-                            overlap_sent_lens.append(sent_len - start)
-                            overlap_num_subtokens.append(sub_lens[pos:])
-                            overmap.append((i, pos))
-                            sent[num:] = []
-                            break
-                        num = new_num
-            return overlap_sents, overlap_sent_lens, overlap_num_subtokens, \
-                   overmap
-
-        overlap_sents, overlap_sent_lens, overlap_num_subtokens, overmap = \
-            process_long_sentences(tokenized_sentences, sent_lens,
-                                   num_subtokens)
-        num_sents = len(tokenized_sentences)
-        overmap = {i + num_sents: (orig_i, pos)
-                       for i, (orig_i, pos) in enumerate(overmap)}
-
-        while overlap_sents:
-            tokenized_sentences += overlap_sents
-            sent_lens += overlap_sent_lens
-            num_subtokens += overlap_num_subtokens
-            prev_num_sents = num_sents
-            num_sents = len(tokenized_sentences)
-            overlap_sents, overlap_sent_lens, overlap_num_subtokens,
-            overmap_ = process_long_sentences(
-                overlap_sents, overlap_sent_lens, overlap_num_subtokens
-            )
-            for i, (orig_i, pos) in enumerate(overmap_):
-                prev_map = overmap[orig_i + prev_num_sents]
-                overmap[i + num_sents] = (prev_map[0], prev_map[1] + pos)
-
-#         a = []
-#         for i, sent in enumerate(tokenized_sentences):
-#             if i in overmap:
-#                 j, pos = overmap[i]
-#                 start = sum(num_subtokens[j][:pos])
-#                 a[j][start:] = sent
-#             else:
-#                 a.append(sent)
-#         print('\nRESTORE:')
-#         print_list(a)
-        '''
-
-        encoded_sentences = [
-            self.tokenizer.encode_plus(text=sent,
-                                       add_special_tokens=True,
-                                       max_length=max_len,
-                                       pad_to_max_length=True,
-                                       return_tensors='pt',
-                                       return_attention_mask=True,
-                                       return_overflowing_tokens=False)
-                for sent in tokenized_sentences
-        ]
-        input_ids, attention_masks = zip(*[
-            (x['input_ids'], x['attention_mask'])
-                for x in encoded_sentences
-        ])
-
         if batch_size is None:
             batch_size = num_sents
 
@@ -377,15 +317,36 @@ class BertDataset(BaseDataset):
             _src = tqdm(_src, file=sys.stdout)
         for batch_i in _src:
 
+            batch_max_len = min(
+                max(splitted_sent_lens[batch_i:batch_i + batch_size]) + 2,
+                max_len
+            )
+
+            encoded_sentences = [
+                self.tokenizer.encode_plus(text=sent,
+                                           add_special_tokens=True,
+                                           max_length=batch_max_len,
+                                           pad_to_max_length=True,
+                                           return_tensors='pt',
+                                           return_attention_mask=True,
+                                           return_overflowing_tokens=False)
+                    for sent in tokenized_sentences[batch_i:batch_i
+                                                  + batch_size]
+            ]
+            input_ids, attention_masks = zip(*[
+                (x['input_ids'], x['attention_mask'])
+                    for x in encoded_sentences
+            ])
+
             with torch.no_grad():
                 hiddens = self.model(
                     torch.cat(
-                        input_ids[batch_i:batch_i + batch_size],
+                        input_ids,
                         dim=0
                     ).to(device),
                     token_type_ids=None,
                     attention_mask=torch.cat(
-                        attention_masks[batch_i:batch_i + batch_size],
+                        attention_masks,
                         dim=0
                     ).to(device)
                 )[-1]
@@ -437,16 +398,21 @@ class BertDataset(BaseDataset):
                     else:
                         data.append(sent[1:1 + sent_len])
 
+        ## sort data in original order
+        ######
+        _, data = zip(*sorted(
+            [(i, x) for i, x in enumerate(data)],
+            key=lambda x: sorted_sent_ids[x[0]]
+        ))
+        data = list(data)
+        ######
+
         _src = num_subtokens
         if loglevel:
             print('Adjusting')
             _src = tqdm(_src, file=sys.stdout)
         for i, token_lens in enumerate(_src):
             token_lens = num_subtokens[i]
-            '''
-        for i in range(len(data)):
-            token_lens = num_subtokens[i]
-            '''
             start = 0
             sent = data[i]
             sent_ = []

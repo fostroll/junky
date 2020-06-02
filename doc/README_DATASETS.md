@@ -659,7 +659,8 @@ Converts tokenized **sentences** to the sequences of the corresponding
 contextual vectors and adjust their format for `torch.utils.data.Dataset`.
 
 **max_len** is a param for `ds.tokenizer`. We'll transform lines of any
-length, but the quality is higher if **max_len** is greater.
+length, but the quality is higher if **max_len** is greater. `None` means the
+maximum for the model (usually, `512`).
 
 **batch_size** affects only on the execution time. Greater is faster, but big
 **batch_size** may be cause of CUDA Memory Error. If `None` (default), we'll
