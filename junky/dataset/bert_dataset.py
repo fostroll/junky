@@ -10,7 +10,8 @@ from junky import CPU, absmax_torch, pad_sequences_with_tensor
 from junky.dataset.base_dataset import BaseDataset
 from time import time
 from tqdm import tqdm
-from torch import Tensor, float32, int64, tensor
+import torch
+from torch import Tensor, tensor
 
 
 class BertDataset(BaseDataset):
@@ -32,7 +33,7 @@ class BertDataset(BaseDataset):
         all other args are params for the `.transpose()` method. They are used
             only if sentences is not ``None``.
     """
-    def __init__(self, model, tokenizer, int_tensor_dtype=int64,
+    def __init__(self, model, tokenizer, int_tensor_dtype=torch.int64,
                  sentences=None, max_len=64, batch_size=64, hidden_ids=0,
                  aggregate_hiddens_op='mean', aggregate_subtokens_op='max',
                  to=None, silent=False):
