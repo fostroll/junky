@@ -689,12 +689,10 @@ If **append** is `True`, we'll append the converted sentences to the existing
 `Dataset` source. Elsewise (default), the existing `Dataset` source will be
 replaced. The param is used only if `save=True`.
 
-If **silent** is True, the logging will be suppressed.
+**loglevel** can be set to `0`, `1` or `2`. `0` means no output.
 
 If **save** is `False`, the method returns the result of the transformation.
 Elsewise, `None` is returned.
-
-**loglevel** can be set to `0`, `1` or `2`. `0` means no output.
 
 The result is depend on **aggregate_subtokens_op** param. If it is `None`,
 then for each token we keeps in the result a tensor with stacked vectors for
