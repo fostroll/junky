@@ -602,8 +602,9 @@ tensors. Don't change it.
 If not `None`, they will be transformed and saved. NB: All the sentences must
 not be empty.
 
-all other args are params for the `.transform()` method. They are used only if
-**sentences** is not `None`.
+All other args are params for the `.transpose()` method. They are used only if
+**sentences** is not `None`. You can use any args but `save` that is set to
+`True`.
 
 Example:
 ```python
@@ -652,7 +653,7 @@ Generally, you don't need to change any attribute directly.
 ```python
 ds.transform(sentences, max_len=None, batch_size=None, hidden_ids=0,
              aggregate_hiddens_op='mean', aggregate_subtokens_op='max',
-             save=True, append=False, silent=False)
+             save=True, append=False, loglevel=1)
 ```
 Converts tokenized **sentences** to the sequences of the corresponding
 contextual vectors and adjust their format for `torch.utils.data.Dataset`.
@@ -691,6 +692,8 @@ If **silent** is True, the logging will be suppressed.
 
 If **save** is `False`, the method returns the result of the transformation.
 Elsewise, `None` is returned.
+
+**loglevel** can be set to `0`, `1` or `2`. `0` means no output.
 
 The result is depend on **aggregate_subtokens_op** param. If it is `None`,
 then for each token we keeps in the result a tensor with stacked vectors for

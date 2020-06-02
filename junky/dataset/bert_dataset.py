@@ -44,9 +44,9 @@ class BertDataset(BaseDataset):
         sentences: sequences of words: list([list([str])]). If not ``None``,
             they will be transformed and saved. NB: All the sentences must
             not be empty.
-        all other args are params for the `.transpose()` method. They are used
-            only if sentences is not ``None``. You can use any args but `save`
-            that is set to `True`.
+        All other args are params for the `.transpose()` method. They are used
+            only if *sentences* is not ``None``. You can use any args but
+            `save` that is set to `True`.
     """
     def __init__(self, model, tokenizer, int_tensor_dtype=torch.int64,
                  sentences=None, **kwargs):
