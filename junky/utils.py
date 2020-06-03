@@ -6,6 +6,7 @@
 """
 Provides a bunch of utilities to use with PyTorch.
 """
+from collections import Iterable
 import numpy as np
 import torch
 
