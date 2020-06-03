@@ -111,10 +111,13 @@ class BertDataset(BaseDataset):
 
         *max_len* is a param for tokenizer. We'll transform lines of any
             length, but the quality is higher if *max_len* is greater.
+            ``None`` (default) or `0` means the maximum for the model
+            (usually, 512).
 
         *batch_size* affects only on the execution time. Greater is faster,
-            but big *batch_size* may be cause of CUDA Memory Error. If ``None``
-            (default), we'll try to convert all *sentences* with one batch.
+            but big *batch_size* may be cause of CUDA Memory Error. If
+            ``None`` or 0, we'll try to convert all *sentences* with one
+            batch.
 
         *hidden_ids*: hidden score layers that we need to aggregate. Allowed
             int or tuple of ints. If ``None``, we'll aggregate all the layers.
@@ -173,10 +176,12 @@ class BertDataset(BaseDataset):
         device = next(self.model.parameters()).device
         max_len_ = max_len - 2  # for [CLS] and [SEP]
 
-        overlap_border = 0 if self.overlap_border < 0 else self.overlap_border
+        overlap_border = max_len if self.overlap_border is None else \
+                         0 if self.overlap_border < 0 else \
+                         self.overlap_border
         shift = int(max(min(max_len_, self.overlap_shift)
-        if self.overlap_shift >= 1 else
-            (max_len_ * self.overlap_shift), 1))
+                        if self.overlap_shift >= 1 else
+                    (max_len_ * self.overlap_shift), 1))
 
         _src = sentences
         if loglevel == 2:

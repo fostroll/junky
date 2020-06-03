@@ -642,8 +642,9 @@ bert_model.eval()
 train = junky.get_conllu_fields(syntagrus.train, fields=[])
 
 ds = BertDataset(bert_model, bert_tokenizer)
-ds.transform(train, max_len=32, hidden_ids=range(9, 13),
-             aggregate_hiddens_op='mean', aggregate_subtokens_op='max')
+ds.transform(train, max_len=0, batch_size=256, hidden_ids=range(9, 13),
+             aggregate_hiddens_op='mean', aggregate_subtokens_op='max',
+             to=junky.CPU, loglevel=2)
 
 loader = ds.create_loader(shuffle=True)
 x, lens = next(iter(loader))
@@ -678,8 +679,8 @@ calculated as weighted sum of both parts. The weights are proportional to
 the distance to the middle of the zone: earlier part has dominance left of the
 middle, later part has dominance right. In the very middle (if it's exist),
 both weights equal to `.5`. If you set `ds.overlap_border` high enough
-(greater than `(max_len - shift) / 2`) or `None`, it would be set to the
-middle of the overlap zone. Thus, weighted algorithm would be dwindle.
+(greater than `(max_len - shift) / 2`) or `None`, it will be set to the middle
+of the overlap zone. Thus, weighted algorithm will be dwindle.
 
 `ds.use_batch_max_len = True`: Do we want to use the length of the longest
 sentence in the batch instead of the `max_len` param of `.transform()`. We use
@@ -703,12 +704,12 @@ Converts tokenized **sentences** to the sequences of the corresponding
 contextual vectors and adjust their format for `torch.utils.data.Dataset`.
 
 **max_len** is a param for `ds.tokenizer`. We'll transform lines of any
-length, but the quality is higher if **max_len** is greater. `None` means the
-maximum for the model (usually, `512`).
+length, but the quality is higher if **max_len** is greater. `None` (default)
+or `0` means the maximum for the `ds.model` (usually, `512`).
 
 **batch_size** affects only on the execution time. Greater is faster, but big
-**batch_size** may be cause of CUDA Memory Error. If `None` (default), we'll
-try to convert all **sentences** with one batch.
+**batch_size** may be cause of CUDA Memory Error. If `None` or `0`, we'll try
+to convert all **sentences** with one batch.
 
 **hidden_ids**: hidden score layers that we need to aggregate. Allowed `int`
 or `tuple(int)`. If `None`, we'll aggregate all the layers.
@@ -834,7 +835,7 @@ what params the **dataset** has.
 ```python
 ds.remove(name)
 ```
-Removes `Dataset` with a specified **name** from model `ds.datasets`.
+Removes `Dataset` with a specified **name** from `ds.datasets`.
 
 ```python
 ds_ = ds.get(name)
