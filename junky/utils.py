@@ -146,7 +146,7 @@ def pad_sequences_with_tensor(sequences, padding_tensor=0.):
         if isinstance(padding_tensor, Iterable):
             padding_tensor = torch.tensor(padding_tensor, device=device)
         else:
-            padding_tensor = t.new_full(t.shape[2:], padding_tensor)
+            padding_tensor = t.new_full(t.shape[1:], padding_tensor)
     #res = padding_tensor.to(device).expand(N, S, *t.shape[2:]).clone()
     res = padding_tensor.to(device).repeat(N, S, 1)
 
