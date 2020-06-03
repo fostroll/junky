@@ -54,12 +54,17 @@ class BertDataset(BaseDataset):
     use_batch_max_len = True
     sort_dataset = True
 
+    @property
+    def vec_size(self)
+        return self.model.config.hidden_size
+
     def __init__(self, model, tokenizer, int_tensor_dtype=torch.int64,
                  sentences=None, **kwargs):
         super().__init__()
         self.model = model
         self.tokenizer = tokenizer
         self.int_tensor_dtype = int_tensor_dtype
+        self.vec_size = bert_model.config.hidden_size
         if sentences:
             self.transform(sentences, save=True, **kwargs)
 
