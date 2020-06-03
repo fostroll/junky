@@ -700,7 +700,7 @@ about `1e-7`).
 ```python
 ds.transform(sentences, max_len=None, batch_size=None, hidden_ids=0,
              aggregate_hiddens_op='mean', aggregate_subtokens_op='max',
-             save=True, append=False, loglevel=1)
+             to=CPU, save=True, append=False, loglevel=1)
 ```
 Converts tokenized **sentences** to the sequences of the corresponding
 contextual vectors and adjust their format for `torch.utils.data.Dataset`.
@@ -726,8 +726,8 @@ one vector for each input word. The ops allowed: `None`, `'max'`, `'mean'`,
 compared items (`absmax` method).
 
 If you want to get the result placed on some exact device, specify the device
-with **to** param. If **to** is `None` (defautl), data will be placed to the
-very device that `bs.model` is used.
+with **to** param. If **to** is `None`, the data will be placed to the very
+device that `bs.model` is used.
 
 If **save** is `True` (default), we'll keep the converted **sentences** as the
 `Dataset` source.
