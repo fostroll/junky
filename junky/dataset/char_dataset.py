@@ -263,6 +263,7 @@ class CharDataset(BaseDataset):
         if self.min_len is not None:
             batch.append([tensor([self.pad], device=device,
                                  dtype=self.int_tensor_dtype)] * self.min_len)
+        batch = self._to(batch, CPU)
         x = pad_array_torch(batch, padding_value=self.pad,
                             device=device, dtype=self.int_tensor_dtype)
         if self.min_len is not None:
