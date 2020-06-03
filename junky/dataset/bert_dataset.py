@@ -108,7 +108,7 @@ class BertDataset(BaseDataset):
 
     def transform(self, sentences, max_len=None, batch_size=64,
                   hidden_ids=0, aggregate_hiddens_op='mean',
-                  aggregate_subtokens_op='max', to=CPU,
+                  aggregate_subtokens_op='max', to=None,
                   save=True, append=False, loglevel=1):
         """Convert *sentences* of words to the sequences of the corresponding
         contextual vectors and adjust their format for Dataset.
@@ -225,7 +225,8 @@ class BertDataset(BaseDataset):
         ######
         if self.sort_dataset:
             sent_lens, sorted_sent_ids = zip(*sorted(
-                [(x, i) for i, x in enumerate(sent_lens)]
+                [(x, i) for i, x in enumerate(sent_lens)],
+                reverse=True
             ))
             sent_lens = list(sent_lens)
             tokenized_sentences = [
