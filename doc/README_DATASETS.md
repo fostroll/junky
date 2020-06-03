@@ -584,6 +584,20 @@ ds = BertDataset(model, tokenizer, int_tensor_dtype=int64,
                  aggregate_hiddens_op='mean', aggregate_subtokens_op='max',
                  silent=False)
 ```
+`Dataset` process sentences of any length without cutting. If the length of
+subtokens in any sentence greater than **max_len**, we split the sentence with
+overlap, process all parts separately and then combine vectors of all parts to
+single vector' sequence. We make splits by word's borders, so, if any word
+contain number of subtokens that greater than *effective max_len*
+(`max_len - 2`, taking into account `[CLS]` and `[SEP]` tokens), it will cause
+`RuntimeError`.
+
+In general mode, `BertDataset` replaces **max_len** with the length of the
+longest sentence in batch (if that length is less than **max_len**). Also, we
+sort all the **sentences** by size before processing them with **model**. All
+that speed the processing up drasticaly without quality loss, but that
+behavior can be changed (see *Attributes* section).
+
 Params:
 
 **model**: one of the token classification models from the
@@ -641,12 +655,42 @@ print(lens[0])
 
 `ds.model`: a model from the *transformers* package.
 
-`ds.tokenizer` a tokenizer from the *transformers* package corresponding to
+`ds.tokenizer`: a tokenizer from the *transformers* package corresponding to
 `ds.model`.
 
 `ds.int_tensor_dtype` (`torch.dtype`): type for int tensors.
 
-Generally, you don't need to change any attribute directly.
+Generally, you don't need to change those attribute directly.
+
+Next attributes define the overlap processing. They allow only manual
+changing.
+
+`ds.overlap_shift = .5`: Defines the overlap's `shift` from the sentence's
+start. We count it in tokens, so, if sentence has `9` tokens, the shift will
+be `int(.5 * 9)`, i.e., `4`. The minimum value for `shift` is `1`. If you 
+set `ds.overlap_shift` > `1`, we will treat it as absolute value (but reduce
+it to `max_len` if your `ds.overlap_shift` would be greater.
+
+`ds.overlap_border = 2`. The overlap is processed as follows. The left zone of
+width equals to `ds.overlap_border` is taken from the earlier part of the
+sentence; the right zone - from the later. The zone between borders is
+calculated as weighted sum of both parts. The weights are proportional to
+the distance to the middle of the zone: earlier part has dominance left of the
+middle, later part has dominance right. In the very middle (if it's exist),
+both weights equal to `.5`. If you set `ds.overlap_border` high enough
+(greater than `(max_len - shift) / 2`) or `None`, it would be set to the
+middle of the overlap zone. Thus, weighted algorithm would be dwindle.
+
+`ds.use_batch_max_len = True`: Do we want to use the length of the longest
+sentence in the batch instead of the `max_len` param of `.transform()`. We use
+it only if that length is less than `max_len`, and as result, with high
+**max_len**, we have substantial speed increasing without any change or
+resulting data.
+
+`ds.sort_dataset = True`: Do we want to sort the dataset before feeding it to
+`ds.model`. With high **max_len** it increase sped highly, and affects to
+resulting data only because of different sentences' grouping (inequality is
+about `1e-7`).
 
 #### Methods
 

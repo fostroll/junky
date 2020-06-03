@@ -49,6 +49,11 @@ class BertDataset(BaseDataset):
             only if *sentences* is not ``None``. You can use any args but
             `save` that is set to `True`.
     """
+    overlap_shift = .5
+    overlap_border = 2
+    use_batch_max_len = True
+    sort_dataset = True
+
     def __init__(self, model, tokenizer, int_tensor_dtype=torch.int64,
                  sentences=None, **kwargs):
         super().__init__()
@@ -106,7 +111,6 @@ class BertDataset(BaseDataset):
 
         *max_len* is a param for tokenizer. We'll transform lines of any
             length, but the quality is higher if *max_len* is greater.
-            ``None`` means the maximum for the model (usually, 512).
 
         *batch_size* affects only on the execution time. Greater is faster,
             but big *batch_size* may be cause of CUDA Memory Error. If ``None``
@@ -144,10 +148,6 @@ class BertDataset(BaseDataset):
         *aggregate_subtokens_op* is used, each sentence will be converted to
         exactly one tensor of shape [<sentence length>, <vector size>]."""
 
-        # overlap zone
-        OVERLAP_SHIFT_COEF = .5
-        OVERLAP_BORDER = 2
-
         if not max_len:
             max_len = self.tokenizer.max_len
         assert max_len >= 16, 'ERROR: max len must be >= 16'
@@ -173,7 +173,10 @@ class BertDataset(BaseDataset):
         device = next(self.model.parameters()).device
         max_len_ = max_len - 2  # for [CLS] and [SEP]
 
-        shift = int(max_len_ * OVERLAP_SHIFT_COEF)
+        overlap_border = 0 if self.overlap_border < 0 else self.overlap_border
+        shift = int(max(min(max_len_, self.overlap_shift)
+                            if self.overlap_shift >= 1 else
+                        max_len_ * self.overlap_shift), 1)
 
         _src = sentences
         if loglevel == 2:
@@ -211,19 +214,21 @@ class BertDataset(BaseDataset):
 
         ## sort tokenized sentences by lenght
         ######
-        sent_lens, sorted_sent_ids = zip(*sorted(
-            [(x, i) for i, x in enumerate(sent_lens)]
-        ))
-        tokenized_sentences = [
-            tokenized_sentences[i] for i in sorted_sent_ids
-        ]
-        sub_to_kens = [
-            sub_to_kens[i] for i in sorted_sent_ids
-        ]
-        token_starts = [
-            token_starts[i] for i in sorted_sent_ids
-        ]
-        ######
+        if self.sort_dataset:
+            sent_lens, sorted_sent_ids = zip(*sorted(
+                [(x, i) for i, x in enumerate(sent_lens)]
+            ))
+            sent_lens = list(sent_lens)
+            tokenized_sentences = [
+                tokenized_sentences[i] for i in sorted_sent_ids
+            ]
+            sub_to_kens = [
+                sub_to_kens[i] for i in sorted_sent_ids
+            ]
+            token_starts = [
+                token_starts[i] for i in sorted_sent_ids
+            ]
+            ######
 
         def process_long_sentences(sents, sent_lens, sub_to_kens,
                                    token_starts):
@@ -307,7 +312,7 @@ class BertDataset(BaseDataset):
 #         print('\nRESTORE:')
 #         print_list(a)
 
-        if batch_size is None:
+        if not batch_size:
             batch_size = num_sents
 
         data = []
@@ -320,7 +325,7 @@ class BertDataset(BaseDataset):
             batch_max_len = min(
                 max(splitted_sent_lens[batch_i:batch_i + batch_size]) + 2,
                 max_len
-            )
+            ) if self.use_batch_max_len else max_len
 
             encoded_sentences = [
                 self.tokenizer.encode_plus(text=sent,
@@ -365,9 +370,9 @@ class BertDataset(BaseDataset):
                         j, over_pos_start = overmap[i]
                         over_pos_end = sub_to_kens[j][len(data[j])]
                         overlap = over_pos_end - over_pos_start
-                        if overlap > OVERLAP_BORDER + OVERLAP_BORDER:
-                            start1 = over_pos_start + OVERLAP_BORDER
-                            end1 = over_pos_end - OVERLAP_BORDER
+                        if overlap > overlap_border * 2:
+                            start1 = over_pos_start + overlap_border
+                            end1 = over_pos_end - overlap_border
                             overlap = end1 - start1
                             half2 = int(overlap / 2)
                             half1 = overlap - half2
@@ -376,15 +381,15 @@ class BertDataset(BaseDataset):
                                 coef = (k + 1) / half / 2
                                 data[j][start1 + k] = \
                                     data[j][start1 + k] * (1 - coef) \
-                                  + sent[OVERLAP_BORDER + k] * coef
+                                  + sent[overlap_border + k] * coef
                                 k_ = overlap - k - k
                                 data[j][start1 + k_] = \
                                     data[j][start1 + k_] * coef \
-                                  + sent[OVERLAP_BORDER + k_] * (1 - coef)
+                                  + sent[overlap_border + k_] * (1 - coef)
                             if half1 != half2:
                                 data[j][start1 + half1] = (
                                     data[j][start1 + half1]
-                                  + sent[OVERLAP_BORDER + half1]
+                                  + sent[overlap_border + half1]
                                 ) / 2
                             end1 = token_starts[j][end1]
                         else:
@@ -400,11 +405,12 @@ class BertDataset(BaseDataset):
 
         ## sort data in original order
         ######
-        _, data = zip(*sorted(
-            [(i, x) for i, x in enumerate(data)],
-            key=lambda x: sorted_sent_ids[x[0]]
-        ))
-        data = list(data)
+        if self.sort_dataset:
+            _, data = zip(*sorted(
+                [(i, x) for i, x in enumerate(data)],
+                key=lambda x: sorted_sent_ids[x[0]]
+            ))
+            data = list(data)
         ######
 
         _src = num_subtokens
