@@ -175,8 +175,8 @@ class BertDataset(BaseDataset):
 
         overlap_border = 0 if self.overlap_border < 0 else self.overlap_border
         shift = int(max(min(max_len_, self.overlap_shift)
-                            if self.overlap_shift >= 1 else
-                        max_len_ * self.overlap_shift), 1)
+        if self.overlap_shift >= 1 else
+            (max_len_ * self.overlap_shift), 1))
 
         _src = sentences
         if loglevel == 2:
