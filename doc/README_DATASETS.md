@@ -659,6 +659,8 @@ print(lens[0])
 `ds.tokenizer`: a tokenizer from the *transformers* package corresponding to
 `ds.model`.
 
+`ds.vec_size`: the length of word's vector.
+
 `ds.int_tensor_dtype` (`torch.dtype`): type for int tensors.
 
 Generally, you don't need to change those attribute directly.
@@ -667,10 +669,10 @@ Next attributes define the overlap processing. They allow only manual
 changing.
 
 `ds.overlap_shift = .5`: Defines the overlap's `shift` from the sentence's
-start. We count it in tokens, so, if sentence has `9` tokens, the shift will
-be `int(.5 * 9)`, i.e., `4`. The minimum value for `shift` is `1`. If you 
-set `ds.overlap_shift` > `1`, we will treat it as absolute value (but reduce
-it to `max_len` if your `ds.overlap_shift` would be greater.
+start. We count it in words, so, if sentence has `9` words, the shift will be
+`int(.5 * 9)`, i.e., `4`. The minimum value for `shift` is `1`. If you set
+`ds.overlap_shift` > `1`, we will treat it as absolute value (but reduce it to
+`max_len` if your `ds.overlap_shift` would be greater.
 
 `ds.overlap_border = 2`. The overlap is processed as follows. The left zone of
 width equals to `ds.overlap_border` is taken from the earlier part of the
@@ -719,7 +721,7 @@ or `tuple(int)`. If `None`, we'll aggregate all the layers.
 the absolute values of the compared items (*absmax* method).
 
 **aggregate_subtokens_op**: how to aggregate subtokens vectors to form only
-one vector for each input token. The ops allowed: `None`, `'max'`, `'mean'`,
+one vector for each input word. The ops allowed: `None`, `'max'`, `'mean'`,
 `'sum'`. For `'max'` method we take into account the absolute values of the
 compared items (`absmax` method).
 
@@ -740,8 +742,8 @@ If **save** is `False`, the method returns the result of the transformation.
 Elsewise, `None` is returned.
 
 The result is depend on **aggregate_subtokens_op** param. If it is `None`,
-then for each token we keeps in the result a tensor with stacked vectors for
-all its subtokens. Otherwise, if any **aggregate_subtokens_op** is used, each
+then for each word we keep in the result a tensor with stacked vectors for all
+its subtokens. Otherwise, if any **aggregate_subtokens_op** is used, each
 sentence will be converted to exactly one tensor of shape \[*\<sentence
 length>*, *\<vector size>*].
 
@@ -790,9 +792,10 @@ create several instances of `DataLoader` for **ds** (each with `workers=0`)
 and use them in parallel.
 
 The created `DataLoader` will return batches of the format (*<`list` of words'
-vectors>, *\<length of the sentence>*\[, *\<`list` of lengths of tokens>*]).
-If you use `BertDataset` as part of `FrameDataset`, you can set the param
-**with_lens** to `False` to omit the lengths from the batches:
+vectors>, *\<length of the sentence>*\[, *\<`list` of numbers subtokens in
+corresponding words>*]). If you use `BertDataset` as part of `FrameDataset`,
+you can set the param **with_lens** to `False` to omit the lengths from the
+batches:
 
 ```python
 # fds - object of junky.dataset.FrameDataset
