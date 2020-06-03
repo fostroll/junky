@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# junky lib: CharDataset
+# junky lib: dataset.CharDataset
 #
 # Copyright (C) 2020-present by Sergei Ternovykh, Anastasiya Nikiforova
 # License: BSD, see LICENSE for details

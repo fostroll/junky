@@ -7,8 +7,10 @@
 Provides a bunch of tools and utilities to use with PyTorch.
 """
 from junky._version import __version__
+
+from junky.utils import *
+from junky.supplements import *
+
 from junky.autotrain import *
 from junky.layers import *
 from junky.plotter import *
-from junky.supplements import *
-from junky.utils import *

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# junky lib: TokenDataset
+# junky lib: dataset.TokenDataset
 #
 # Copyright (C) 2020-present by Sergei Ternovykh, Anastasiya Nikiforova
 # License: BSD, see LICENSE for details

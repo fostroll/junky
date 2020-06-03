@@ -166,34 +166,6 @@ layers.
 - Output: :math:`(N, S, E)` where `N`, `S` are the same shape as the input and
 :math:`E = \text{emb_dim}`.
 
-### Highway
-
-```python
-layer = junky.Highway(dim, H_layer=None, H_activation=None)
-```
-*Highway* layer for *Highway Networks* as described in
-[Srivastava et al.](https://arxiv.org/abs/1505.00387) and
-[Srivastava et al.](https://arxiv.org/abs/1507.06228) articles.
-
-Applies **H(x)\*T(x) + x\*(1 - T(x))** transformation, where:
-
-**H(x)** - affine trainsformation followed by a non-linear activation. The layer
-that we make Highway around;<br/>
-**T(x)** - transform gate: affine transformation followed by a sigmoid
-activation;<br/>
-**\*** - element-wise multiplication.
-
-Args:
-
-**dim**: size of each input and output sample.
-
-**H_layer**: **H(x)** layer. If `None` (default), affine transformation is used.
-
-**H_activation**: non-linear activation after **H(x)**. If `None` (default),
-then, if **H_layer** is `None`, too, we apply `F.relu`; otherwise, activation
-function is not used.
-
-
 ### HighwayNetwork
 
 ```python
@@ -282,9 +254,7 @@ If **x_hw** is `None`, we adopt **x_hw = x**.
 
 **\*U_args** and **\*\*U_kwargs** are params for **U_layer** if it needs ones.
 
-
 ### Highway biLSTM
-
 
 ```python
 layer = junky.HighwayBiLSTM(hw_num_layers, lstm_hidden_dim, lstm_num_layers, 
