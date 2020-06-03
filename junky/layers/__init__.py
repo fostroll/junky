@@ -10,4 +10,4 @@ from junky.layers.char_emb_cnn import *
 from junky.layers.char_emb_rnn import *
 from junky.layers.highway_bilstm import *
 from junky.layers.highway_network import *
-from junky.layers.masking.py import *
+from junky.layers.masking import *
