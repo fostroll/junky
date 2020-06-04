@@ -296,3 +296,7 @@ def absmax_torch(tensors, dim=None):
         res = res.sum(dim=dim)
 
     return res
+
+def kwargs (**kwargs):
+    """Return any keyword arguments as a dict."""
+    return kwargs

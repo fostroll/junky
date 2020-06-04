@@ -2,7 +2,7 @@
 
 ## Utilities
 
-The lib contains some utilities to use with *PyTorch* models.
+The lib contains a bunch of utilities to use with *PyTorch* models or without.
 
 ```python
 import junky
@@ -132,3 +132,8 @@ to **dim**
 
 Here, **tensors** is a `torch.Tensor` or a `list` of `torch.Tensors`, **dim**
 is of `int` type.
+
+```python
+kwargs = junky.kwargs(**kwargs)
+```
+Returns any keyword arguments as a `dict`.

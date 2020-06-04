@@ -7,6 +7,7 @@
 A frame for use several torch.utils.data.Dataset together.
 """
 from collections import OrderedDict
+from junky import kwargs
 from junky.dataset.base_dataset import BaseDataset
 from torch.utils.data import DataLoader, Dataset
 
@@ -88,17 +89,22 @@ class FrameDataset(BaseDataset):
         `torch.nn.Module` type."""
         [x[0].to(*args, **kwargs) for x in self.datasets.values()]
 
-    def transform(self, sentences, skip_unk=False, keep_empty=False,
-                  save=True, append=False):
-        """Invoke `.transform(sentences, skip_unk, keep_empty, save, append)`
-        methods for all nested `Dataset` objects.
+    def transform(self, sentences, save=True, append=False, part_kwargs=None,
+                  **kwargs):
+        """Invoke `.transform()` methods for all nested `Dataset` objects.
+
+        *save*, *append* and **kwargs will be transfered to any nested
+        `.transform()` methods.
+
+        *part_kwargs* is a `dict` of format: {<name>: kwargs, ...}, where one
+        can specify separate keyword args for `.transform()` metods of certain
+        nested `Dataset` objects.
 
         If *save* is ``False``, we'll return the stacked result of objects'
         returns."""
-        data = tuple(x[0].transform(sentences, skip_unk=skip_unk,
-                                    keep_empty=keep_empty, save=save,
-                                    append=append)
-                         for x in self.datasets.values())
+        data = tuple(y[0].transform(sentences, save=save, append=append,
+                                    **kwargs, **part_kwargs[x])
+                         for x, y in self.datasets.items())
         if not save:
             return tuple(data)
 
