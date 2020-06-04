@@ -56,11 +56,11 @@ To re-initialize the `Dataset`, call
 ```python
 ds.fit(sentences, unk_token=None, pad_token=None, extra_tokens=None)
 ```
-The method fits the `Dataset` model to **sentences**. All params here has the
+The method fits the `Dataset` model to **sentences**. All params here have the
 same meaning as in the constructor, and this method is invoked from the
 constructor. So, you need it only if you want to reuse already existing
-`Dataset` object for some new task with a different set of tokens. Really, you
-can just create a new object for that.
+`Dataset` object for a new task with a different set of tokens. In fact, you
+should just create a new object for that.
 
 ```python
 idx = ds.token_to_idx(token, skip_unk=False)
@@ -79,11 +79,11 @@ token = ds.idx_to_token(idx, skip_unk=False, skip_pad=True)
 Returns the **token** by its index. If the **idx** is not present in the
 internal dict, returns **&lt;UNK&gt;** or empty string if it's not defined or
 **skip_unk** is `True`. If **skip_pad** is `True` (default), index of
-**&lt;PAD&gt;** will be replaced to empty string, too.
+**&lt;PAD&gt;** will be replaced by an empty string, too.
 
-**NB:** If you created the `Dataset` with **&lt;UNK&gt;**, this tokens is
+**NB:** If you created the `Dataset` with **&lt;UNK&gt;**, this token is
 present in the dictionary. So, if exactly its index will be met, the token
-will be returned by the method even with `skip_unk=True` params.
+will be returned by the method even with `skip_unk=True` param.
 Alternatively, with `skip_pad=True`, the method removes padding if the
 **&lt;PAD&gt;** token is present in the dictionary.
 
@@ -98,8 +98,8 @@ tokens = ds.reconstruct_tokens(ids, skip_unk=False, skip_pad=True)
 ```
 Converts an index or a `list` of indices to the corresponding
 token|`list` of tokens. If **skip_unk** is `True`, unknown indices will be
-replaced to empty strings. If **skip_pad** is `True` (default), indices of
-**&lt;PAD&gt;** will be replaced to empty strings, too.
+replaced by empty strings. If **skip_pad** is `True` (default), indices of
+**&lt;PAD&gt;** will be replaced by empty strings, too.
 
 ```python
 ds.transform(sentences, skip_unk=False, keep_empty=False, save=True,
@@ -139,14 +139,14 @@ Fits the `Dataset` model to **sentences** and then transforms them. In
 sequence, calls the `.fit()` and the `.transform()` methods. All params are
 the params of those methods. Returns the return of the `.transform()`.
 
-Consider new object creation instead. One boy is invoked this method and died.
+Consider new object creation instead. One boy has invoked this method and died.
 
 ```python
 o = ds.clone(with_data=True)
 ```
 Makes a deep copy of the `TokenDataset` object. If **with_data** is `False`,
 the `Dataset` source in the new object will be empty. The model and all other
-attributes attributes will be copied.
+attributes will be copied.
 
 ```python
 ds.save(file_path, with_data=True)
@@ -174,13 +174,13 @@ Creates `torch.utils.data.DataLoader` for this object. All params are the
 params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
 
 **NB:** If you set **num_workers** != `0`, don't move the **ds** source to
-*CUDA*. The `torch` multiprocessing implementation can't bear it. Better,
+*CUDA*. The `torch` multiprocessing implementation can't handle it. Better,
 create several instances of `DataLoader` for **ds** (each with `workers=0`)
 and use them in parallel.
 
-The created `DataLoader` will return batches of the format (*\<`list` of
+The created `DataLoader` will return batches in the following format: (*\<`list` of
 indices of tokens>*, *\<length of the sentence>*). If you use `TokenDataset`
-as part of `FrameDataset`, you can set the param **with_lens** to `False` to
+as a part of `FrameDataset`, you can set the param **with_lens** to `False` to
 omit the lengths from the batches:
 
 ```python
@@ -191,7 +191,7 @@ fds.add('y', ds, with_lens=False)
 ### CharDataset
 
 Maps tokenized sentences to sequences of lists of indices of their tokens'
-chars.
+characters.
 
 ```python
 from junky.dataset import CharDataset
@@ -248,11 +248,11 @@ To re-initialize the `Dataset`, call
 ds.fit(sentences, unk_token=None, pad_token=None, extra_tokens=None,
        allowed_chars=None, exclude_chars=None)
 ```
-The method fits the `Dataset` model to **sentences**. All params here has the
+The method fits the `Dataset` model to **sentences**. All params here have the
 same meaning as in the constructor, and this method is invoked from the
 constructor. So, you need it only if you want to reuse already existing
 `Dataset` object for some new task with a different set of tokens. Really, you
-can just create a new object for that.
+should just create a new object for that.
 
 ```python
 idx = char_to_idx(char, skip_unk=False)
@@ -271,9 +271,9 @@ char = idx_to_char(idx, skip_unk=False, skip_pad=True):
 Returns the **token** by its index. If the **idx** is not present in the
 internal dict, returns **&lt;UNK&gt;** or empty string if it's not defined or
 **skip_unk** is `True`. If **skip_pad** is `True` (default), index of
-**&lt;PAD&gt;** will be replaced to empty string, too.
+**&lt;PAD&gt;** will be replaced by an empty string, too.
 
-**NB:** If you created the `Dataset` with **&lt;UNK&gt;**, this tokens is
+**NB:** If you created the `Dataset` with **&lt;UNK&gt;**, this token is
 present in the dictionary. So, if exactly its index will be met, the token
 will be returned by the method even with `skip_unk=True` params.
 Alternatively, with `skip_pad=True`, the method removes padding if the
@@ -286,7 +286,7 @@ Converts a token or a `list` of characters to the `list` of indices of its
 chars. If some characters are not present in the internal dict, we'll use the
 index of **&lt;UNK&gt;** for them, or empty strings if it's not defined or
 **skip_unk** is `True`. If **skip_pad** is `True`, padding indices will be
-replaced to empty string, too.
+replaced by an empty string, too.
 
 ```python
 token = ds.ids_to_token(idx, skip_unk=False, skip_pad=True, aslist=False)
@@ -302,19 +302,19 @@ result.
 ids = ds.transform_tokens(tokens, skip_unk=False)
 ```
 Converts a token or a sequence of tokens to the corresponding list or a
-sequence of lists of indices. If skip_unk is `True`, unknown tokens will be
+sequence of lists of indices. If **skip_unk** is `True`, unknown tokens will be
 skipped.
 
 ```python
 tokens = ds.reconstruct_tokens(ids, skip_unk=False, skip_pad=True)
 ```
 Converts a `list` of indices or a sequence of lists of indices to the
-corresponding token or a sequence of tokens. If skip_unk is `True`, unknown
+corresponding token or a sequence of tokens. If **skip_unk** is `True`, unknown
 indices will be skipped (or replaced to empty strings, if *aslist* is `True`).
-If *skip_pad* is `True`, padding indices also will be removed or replaced to
+If **skip_pad** is `True`, padding indices also will be removed or replaced to
 empty strings.
 
-If **aslist** is `True`, we want list of characters instead of tokens in the
+If **aslist** is `True`, we want a list of characters instead of tokens in the
 result.
 
 ```python
@@ -322,7 +322,7 @@ ds.transform(sentences, skip_unk=False, keep_empty=False, save=True,
              append=False)
 ```
 Converts tokenized **sentences** to the sequences of the lists of the indices
-corresponding to token's chars and adjust their format for
+corresponding to token's chars and adjusts their format for
 `torch.utils.data.Dataset`. If **skip_unk** is `True`, unknown chars will be
 skipped. If **keep_empty** is `False` (default), we'll remove tokens and
 sequences that have no data after converting.
@@ -347,7 +347,7 @@ indices will be skipped. If **skip_pad** is `True` (default), **&lt;PAD&gt;**
 tokens will be removed from the result. If **keep_empty** is `False`
 (default), we'll remove sentences that have no data after converting.
 
-If **aslist** is `True`, we want list of characters instead of tokens in the
+If **aslist** is `True`, we want a list of characters instead of tokens in the
 result.
 
 ```python
@@ -359,7 +359,7 @@ Fits the `Dataset` model to **sentences** and then transforms them. In
 sequence, calls the `.fit()` and the `.transform()` methods. All params are
 the params of those methods. Returns the return of the `.transform()`.
 
-Consider new object creation instead. Anyhow, before call that method, call
+Consider new object creation instead. Anyhow, before calling this method, call
 the doctor.
 
 ```python
@@ -367,7 +367,7 @@ o = ds.clone(with_data=True)
 ```
 Makes a deep copy of the `CharDataset` object. If **with_data** is `False`,
 the `Dataset` source in the new object will be empty. The model and all other
-attributes attributes will be copied.
+attributes will be copied.
 
 ```python
 ds.save(file_path, with_data=True)
@@ -395,13 +395,13 @@ Creates `torch.utils.data.DataLoader` for this object. All params are the
 params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
 
 **NB:** If you set **num_workers** != `0`, don't move the **ds** source to
-*CUDA*. The `torch` multiprocessing implementation can't bear it. Better,
+*CUDA*. The `torch` multiprocessing implementation can't handle it. Better,
 create several instances of `DataLoader` for **ds** (each with `workers=0`)
 and use them in parallel.
 
 The created `DataLoader` will return batches of the format (*\<`list` of
 `list` of indices of tokens' characters>, *\<length of the sentence>*,
-*\<`list` of lengths of tokens>*). If you use `CharDataset` as part of
+*\<`list` of lengths of tokens>*). If you use `CharDataset` as a part of
 `FrameDataset`, you can set the param **with_lens** to `False` to omit the
 lengths from the batches:
 
@@ -410,8 +410,8 @@ lengths from the batches:
 fds.add('x_ch', ds, with_lens=False)
 ```
 
-If you don't need the lengths of tokens, you can set to `False` the param
-**with_token_lens**.
+If you don't need the lengths of tokens, you can set the param
+**with_token_lens** to `False`.
 
 ### WordDataset
 
@@ -485,7 +485,7 @@ Generally, you don't need to change any attribute directly.
 vec = ds.word_to_vec(token, skip_unk=False)
 ```
 Converts a **token** to its **vector**. If the **token** is not present in the
-model, return vector of **&lt;UNK&gt;** token or `None` if it's not defined.
+model, returns a vector of **&lt;UNK&gt;** token or `None` if it's not defined.
 
 **NB:** If you created the `Dataset` with **&lt;UNK&gt;**, this token is
 present in the model. So, if exactly that token will be met, its vector
@@ -502,7 +502,7 @@ ds.transform(sentences, skip_unk=False, keep_empty=False, save=True,
              append=False)
 ```
 Converts tokenized **sentences** to the sequences of the corresponding vectors
-and adjust their format for `torch.utils.data.Dataset`. If **skip_unk** is
+and adjusts their format for `torch.utils.data.Dataset`. If **skip_unk** is
 `True`, unknown tokens will be skipped. If **keep_empty** is `False`
 (default), we'll remove sentences that have no data after converting.
 
@@ -521,7 +521,7 @@ o = ds.clone(with_data=True)
 ```
 Makes a deep copy of the `WordDataset` object. If **with_data** is `False`,
 the `Dataset` source in the new object will be empty. The model and all other
-attributes attributes will be copied. The `ds.emb_model` attribute is copied
+attributes will be copied. The `ds.emb_model` attribute is copied
 by link.
 
 ```python
@@ -529,14 +529,14 @@ emb_model = ds.save(file_path, with_data=True)
 ```
 Saves the `WordDataset` object to **file_path**. If **with_data** is `False`,
 the `Dataset` source of the saved object will be empty. All other attributes
-will be saved but `ds.emb_model` that is returned by the method for you saved
-it if need by its own method.
+will be saved, except `ds.emb_model` which is returned by the method.
+You can save it, if needed, using its own method.
 
 ```python
 ds = WordDataset.load(file_path, emb_model):
 ```
 Load the `WordDataset` object from **file_path**. You should specify
-**emb_model** that you used during object's creation (or received from the
+**emb_model** that you used during object creation (or received from the
 `.save()` method).
 
 ```python
@@ -553,12 +553,12 @@ Creates `torch.utils.data.DataLoader` for this object. All params are the
 params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
 
 **NB:** If you set **num_workers** != `0`, don't move the **ds** source to
-*CUDA*. The `torch` multiprocessing implementation can't bear it. Better,
+*CUDA*. The `torch` multiprocessing implementation can't handle it. Better,
 create several instances of `DataLoader` for **ds** (each with `workers=0`)
 and use them in parallel.
 
 The created `DataLoader` will return batches of the format (*<`list` of words'
-vectors>, *\<length of the sentence>*). If you use `WordDataset` as part of
+vectors>, *\<length of the sentence>*). If you use `WordDataset` as a part of
 `FrameDataset`, you can set the param **with_lens** to `False` to omit the
 lengths from the batches:
 
@@ -569,27 +569,25 @@ fds.add('x', ds, with_lens=False)
 
 ### BertDataset
 
-Maps tokenized sentences to sequences of their contextual words' vectors.
+Maps tokenized sentences to sequences of their contextual word vectors.
 
 ```python
 from junky.dataset import BertDataset
-ds = BertDataset(model, tokenizer, int_tensor_dtype=int64,
-                 sentences=None, max_len=None, batch_size=32, hidden_ids=0,
-                 aggregate_hiddens_op='mean', aggregate_subtokens_op='max',
-                 silent=False)
+ds = BertDataset(model, tokenizer, int_tensor_dtype=torch.int64, 
+				 sentences=None, **kwargs)
 ```
-`Dataset` process sentences of any length without cutting. If the length of
-subtokens in any sentence greater than **max_len**, we split the sentence with
-overlap, process all parts separately and then combine vectors of all parts to
-single vector' sequence. We make splits by word's borders, so, if any word
-contain number of subtokens that greater than *effective max_len*
+`Dataset` processes sentences of any length without cutting. If the length of
+subtokens in any sentence is greater than **max_len**, we split the sentence with
+overlap, process all parts separately and then combine vectors of all parts in a
+single sequence vector. We make splits by word's borders, so, if any word
+contains a number of subtokens that is greater than *effective max_len*
 (`max_len - 2`, taking into account `[CLS]` and `[SEP]` tokens), it will cause
 `RuntimeError`.
 
 In general mode, `BertDataset` replaces **max_len** with the length of the
 longest sentence in batch (if that length is less than **max_len**). Also, we
-sort all the **sentences** by size before processing them with **model**. All
-that speed the processing up drasticaly without quality loss, but that
+sort all the **sentences** by size before passing them to the **model**. By doing so,
+we speed up the processing drasticaly without quality loss, but that
 behavior can be changed (see *Attributes* section).
 
 Params:
@@ -597,7 +595,7 @@ Params:
 **model**: one of the token classification models from the
 [*transformers*](https://huggingface.co/transformers/index.html) package. It
 should be created with *config* containing `output_hidden_states=True`. NB:
-Don't forget to set **model** in the `eval` mode before use it with this
+Don't forget to set **model** in the `eval` mode before using it with this
 class.
 
 **tokenizer**: a tokenizer from the *transformers* package corresponding to
@@ -657,7 +655,7 @@ print(lens[0])
 
 `ds.int_tensor_dtype` (`torch.dtype`): type for int tensors.
 
-Generally, you don't need to change those attribute directly.
+Generally, you don't need to change those attributes directly.
 
 Next attributes define the overlap processing. They allow only manual
 changing.
@@ -669,24 +667,24 @@ start. We count it in words, so, if sentence has `9` words, the shift will be
 `max_len` if your `ds.overlap_shift` would be greater.
 
 `ds.overlap_border = 2`. The overlap is processed as follows. The left zone of
-width equals to `ds.overlap_border` is taken from the earlier part of the
+width equal to `ds.overlap_border` is taken from the earlier part of the
 sentence; the right zone - from the later. The zone between borders is
 calculated as weighted sum of both parts. The weights are proportional to
-the distance to the middle of the zone: earlier part has dominance left of the
-middle, later part has dominance right. In the very middle (if it's exist),
-both weights equal to `.5`. If you set `ds.overlap_border` high enough
+the distance to the middle of the zone: the beginning has dominance to the left 
+from the middle, the ending has dominance to the right. In the very middle (if it exists),
+both weights are equal to `.5`. If you set `ds.overlap_border` high enough
 (greater than `(max_len - shift) / 2`) or `None`, it will be set to the middle
-of the overlap zone. Thus, weighted algorithm will be dwindle.
+of the overlap zone. Thus, weighted algorithm will be dwindled.
 
 `ds.use_batch_max_len = True`: Do we want to use the length of the longest
 sentence in the batch instead of the `max_len` param of `.transform()`. We use
 it only if that length is less than `max_len`, and as result, with high
-**max_len**, we have substantial speed increasing without any change or
+**max_len**, we have a substantial speed increase without any quality change or
 resulting data.
 
 `ds.sort_dataset = True`: Do we want to sort the dataset before feeding it to
-`ds.model`. With high **max_len** it increase sped highly, and affects to
-resulting data only because of different sentences' grouping (inequality is
+`ds.model`. With high **max_len** it highly increases processing speed, and affects
+resulting data only because of different sentences' grouping (deviation is
 about `1e-7`).
 
 #### Methods
@@ -697,15 +695,15 @@ ds.transform(sentences, max_len=None, batch_size=None, hidden_ids=0,
              to=CPU, save=True, append=False, loglevel=1)
 ```
 Converts tokenized **sentences** to the sequences of the corresponding
-contextual vectors and adjust their format for `torch.utils.data.Dataset`.
+contextual vectors and adjusts their format for `torch.utils.data.Dataset`.
 
 **max_len** is a param for `ds.tokenizer`. We'll transform lines of any
 length, but the quality is higher if **max_len** is greater. `None` (default)
 or `0` means the maximum for the `ds.model` (usually, `512`).
 
-**batch_size** affects only on the execution time. Greater is faster, but big
+**batch_size** affects only the execution time. Greater is faster, but big
 **batch_size** may be cause of CUDA Memory Error. If `None` or `0`, we'll try
-to convert all **sentences** with one batch.
+to convert all **sentences** in one batch.
 
 **hidden_ids**: hidden score layers that we need to aggregate. Allowed `int`
 or `tuple(int)`. If `None`, we'll aggregate all the layers.
@@ -735,9 +733,9 @@ replaced. The param is used only if `save=True`.
 If **save** is `False`, the method returns the result of the transformation.
 Elsewise, `None` is returned.
 
-The result is depend on **aggregate_subtokens_op** param. If it is `None`,
-then for each word we keep in the result a tensor with stacked vectors for all
-its subtokens. Otherwise, if any **aggregate_subtokens_op** is used, each
+The result depends on **aggregate_subtokens_op** param. If it is `None`,
+then for each word we keep a tensor with stacked vectors for all
+its subtokens in the result. Otherwise, if any **aggregate_subtokens_op** is used, each
 sentence will be converted to exactly one tensor of shape \[*\<sentence
 length>*, *\<vector size>*].
 
@@ -760,11 +758,11 @@ you saved them if need by their own methods.
 ds = BertDataset.load(file_path, (model, tokenizer)):
 ```
 Load the `BertDataset` object from **file_path**. You should specify **model**
-and **tokenizer** that you used during object's creation (or received from the
+and **tokenizer** that you used during object creation (or received from the
 `.save()` method).
 
 **NB:** Really, without `ds.model` and `ds.tokenizer`, `BertDataset` is almost
-empty. It's easier to create the object from scratch then bother with all
+empty. It's easier to create the object from scratch, and then bother with all
 those `save` / `load` / `clone` actions.
 
 ```python
@@ -781,7 +779,7 @@ Creates `torch.utils.data.DataLoader` for this object. All params are the
 params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
 
 **NB:** If you set **num_workers** != `0`, don't move the **ds** source to
-*CUDA*. The `torch` multiprocessing implementation can't bear it. Better,
+*CUDA*. The `torch` multiprocessing implementation can't handle it. Better,
 create several instances of `DataLoader` for **ds** (each with `workers=0`)
 and use them in parallel.
 
@@ -796,8 +794,8 @@ batches:
 fds.add('x', ds, with_lens=False)
 ```
 
-If you don't need the lengths of tokens, you can set to `False` the param
-**with_token_lens**. Note, that you have it only if you invoked
+If you don't need the lengths of tokens, you can set the param
+**with_token_lens**  to `False`. Note, that you have it only if you invoked
 `.transform(save=True)` with `aggregate_subtokens_op=None` option.
 
 ### FrameDataset
@@ -854,7 +852,7 @@ Invokes `.transform()` methods for all nested `Dataset` objects.
 `.transform()` methods.
 
 **part_kwargs** is a `dict` of format: *{\<name>: kwargs, ...}*, where one can
-specify separate keyword args for `.transform()` metod of certain nested
+specify separate keyword args for `.transform()` method of certain nested
 `Dataset` objects.
 
 If **save** is `False`, we'll return the stacked result of objects' returns.
@@ -898,7 +896,7 @@ Creates `torch.utils.data.DataLoader` for this object. All params are the
 params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
 
 **NB:** If you set **num_workers** != `0`, don't move the **ds** source to
-*CUDA*. The `torch` multiprocessing implementation can't bear it. Better,
+*CUDA*. The `torch` multiprocessing implementation can't handle it. Better,
 create several instances of `DataLoader` for **ds** (each with `workers=0`)
 and use them in parallel.
 
