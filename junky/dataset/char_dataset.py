@@ -232,7 +232,8 @@ class CharDataset(BaseDataset):
         if with_token_lens:
             lens.append([tensor([len(x) for x in x[pos]], device=device,
                                  dtype=self.int_tensor_dtype) for x in batch])
-        x = pad_array_torch([x[pos] for x in batch], padding_value=self.pad,
+        batch = self._to([x[pos] for x in batch], CPU)
+        x = pad_array_torch(batch, padding_value=self.pad,
                             device=device, dtype=self.int_tensor_dtype)
         return (x, *lens) if lens else x
 
