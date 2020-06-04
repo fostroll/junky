@@ -197,8 +197,8 @@ chars.
 from junky.dataset import CharDataset
 ds = CharDataset(sentences, unk_token=None, pad_token=None,
                   extra_tokens=None, allowed_chars=None, exclude_chars=None,
-                  int_tensor_dtype=int64, min_len=None,
-                  transform=False, skip_unk=False, keep_empty=False)
+                  int_tensor_dtype=int64, transform=False, skip_unk=False,
+                  keep_empty=False)
 ```
 Params:
 
@@ -220,9 +220,6 @@ dict (further, **&lt;UNK&gt;**).
 **int_tensor_dtype** (`torch.dtype`, default `torch.int64`): type for int
 tensors. Don't change it.
 
-**min_len** (`int`): if specified, `collate_fn` of internal `DataLoader` will
-pad sentences in batch that are shorter than this value.
-
 **transform**: if `True`, invoke `.transform(sentences, save=True)` right
 after object creation.
 
@@ -241,9 +238,6 @@ after object creation.
 `ds.pad` (`int`): index of **&lt;PAD&gt;**.
 
 `ds.data` (`list([list([torch.Tensor([int])])])`): the source of `Dataset`.
-
-`ds.min_len` (`int`): if specified, `collate_fn` of internal `DataLoader` will
-pad sentences in batch that are shorter than this value.
 
 Generally, you don't need to change any attribute directly.
 

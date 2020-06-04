@@ -27,18 +27,15 @@ class CharDataset(BaseDataset):
         exclude_chars: if not None, all charactes from *exclude_chars* will
             be removed: str|list([str]).
         int_tensor_dtype: dtype for int tensors: torch.dtype.
-        min_len: if specified, `._collate()` will pad sentences in batch that
-            are shorter than `min_len`: int.
         transform: if ``True``, transform and save `sentences`.
         skip_unk, keep_empty: params for the `.transform()` method.
     """
     def __init__(self, sentences, unk_token=None, pad_token=None,
                  extra_tokens=None, allowed_chars=None, exclude_chars=None,
-                 int_tensor_dtype=int64, min_len=None,
-                 transform=False, skip_unk=False, keep_empty=False):
+                 int_tensor_dtype=int64, transform=False, skip_unk=False,
+                 keep_empty=False):
         super().__init__()
         self.int_tensor_dtype = int_tensor_dtype
-        self.min_len = min_len
         self.fit(sentences, unk_token=unk_token, pad_token=pad_token,
                  extra_tokens=extra_tokens, allowed_chars=allowed_chars,
                  exclude_chars=exclude_chars)
@@ -235,13 +232,8 @@ class CharDataset(BaseDataset):
         if with_token_lens:
             lens.append([tensor([len(x) for x in x[pos]], device=device,
                                  dtype=self.int_tensor_dtype) for x in batch])
-        if self.min_len is not None:
-            batch.append([tensor([self.pad], device=device,
-                                 dtype=self.int_tensor_dtype)] * self.min_len)
         x = pad_array_torch([x[pos] for x in batch], padding_value=self.pad,
                             device=device, dtype=self.int_tensor_dtype)
-        if self.min_len is not None:
-            x = x[:-1]
         return (x, *lens) if lens else x
 
     def _collate(self, batch):
@@ -260,12 +252,7 @@ class CharDataset(BaseDataset):
                       dtype=self.int_tensor_dtype)
         token_lens = [tensor([len(x) for x in x], device=device,
                              dtype=self.int_tensor_dtype) for x in batch]
-        if self.min_len is not None:
-            batch.append([tensor([self.pad], device=device,
-                                 dtype=self.int_tensor_dtype)] * self.min_len)
         batch = self._to(batch, CPU)
         x = pad_array_torch(batch, padding_value=self.pad,
                             device=device, dtype=self.int_tensor_dtype)
-        if self.min_len is not None:
-            x = x[:-1]
         return x, lens, token_lens
