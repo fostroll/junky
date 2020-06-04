@@ -97,14 +97,16 @@ class FrameDataset(BaseDataset):
         `.transform()` methods.
 
         *part_kwargs* is a `dict` of format: {<name>: kwargs, ...}, where one
-        can specify separate keyword args for `.transform()` metods of certain
+        can specify separate keyword args for `.transform()` metod of certain
         nested `Dataset` objects.
 
         If *save* is ``False``, we'll return the stacked result of objects'
         returns."""
-        data = tuple(y[0].transform(sentences, save=save, append=append,
-                                    **kwargs, **part_kwargs[x])
-                         for x, y in self.datasets.items())
+        data = tuple(
+            y[0].transform(sentences, save=save, append=append, **kwargs,
+                           **part_kwargs[x if x in part_kwargs else []])
+                for x, y in self.datasets.items()
+        )
         if not save:
             return tuple(data)
 

@@ -860,7 +860,7 @@ Invokes `.transform()` methods for all nested `Dataset` objects.
 `.transform()` methods.
 
 **part_kwargs** is a `dict` of format: *{\<name>: kwargs, ...}*, where one can
-specify separate keyword args for `.transform()` metods of certain nested
+specify separate keyword args for `.transform()` metod of certain nested
 `Dataset` objects.
 
 If **save** is `False`, we'll return the stacked result of objects' returns.
