@@ -130,8 +130,6 @@ def torch_autotrain(
         iter_name = t.name
 
         loaders = create_loaders_method() if create_loaders_method else None
-        if not isinstance(loaders, tuple):
-            loaders = [loaders]
 
         class local_model_score: value = -1.
         def backup_method(model, model_score):
