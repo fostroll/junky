@@ -211,9 +211,6 @@ def get_conllu_fields(corpus=None, fields=None, word2idx=None, unk_token=None,
     if fields is None:
         fields = []
 
-    if not silent:
-        clear_stderr()
-
     if isinstance(corpus, str):
         corpus = Conllu.load(corpus, **({'log_file': None} if silent else{}))
     elif callable(corpus):
