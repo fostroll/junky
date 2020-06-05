@@ -22,7 +22,11 @@ def clear_tqdm():
     if hasattr(tqdm, '_instances'):
         for instance in list(tqdm._instances):
             tqdm._decr_instances(instance)
-clear_strderr = clear_stdin = clear_tqdm
+def clear_stderr():
+    import sys
+    print('WARNING: clear_stderr() is deprecated and is going to be removed '
+          'in future releases. Use clear_tqdm() instead.', file=sys.stderr)
+    clear_tqdm()
 
 def make_word_embeddings(vocab, vectors=None,
                          pad_token=None, extra_tokens=None,
