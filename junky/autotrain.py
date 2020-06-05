@@ -418,11 +418,11 @@ def torch_autotrain(
         if model_name == best_model_name:
             best_model_params = kwargs
             if best_model_device:
-                best_model, _, _ = make_model_method(
+                best_model = make_model_method(
                     *deepcopy(make_model_args),
                     **deepcopy(make_model_kwargs),
                     **dict(deepcopy(kwargs))
-                )
+                )[0]
                 best_model = best_model.to(best_model_device)
                 best_model.load_state_dict(
                     torch.load(best_model_file_name,
