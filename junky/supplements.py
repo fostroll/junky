@@ -18,10 +18,11 @@ from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 
 
-def clear_stderr():
+def clear_tqdm():
     if hasattr(tqdm, '_instances'):
         for instance in list(tqdm._instances):
             tqdm._decr_instances(instance)
+clear_strderr = clear_stdin = clear_tqdm
 
 def make_word_embeddings(vocab, vectors=None,
                          pad_token=None, extra_tokens=None,
@@ -231,26 +232,36 @@ def get_conllu_fields(corpus=None, fields=None, word2idx=None, unk_token=None,
 
     return sents if fields else sents[0]
 
-
-def train(device, loaders, model, criterion, optimizer,
-          best_model_backup_method, log_prefix, train_dataset, test_dataset,
+def train(device, loaders, model, criterion, optimizer, scheduler,
+          best_model_backup_method, log_prefix, datasets=None,
           pad_collate=None, epochs=100, bad_epochs=8, batch_size=32,
           control_metric='accuracy', with_progress=True):
 
     assert control_metric in ['accuracy', 'f1', 'loss'], \
            "ERROR: unknown control_metric '{}' ".format(control_metric) \
          + "(only 'accuracy', 'f1' and 'loss' are available)"
+    assert loaders or datasets, \
+           'ERROR: You must pass a tuple of Dataloader or Dataset ' \
+           'instances for train and test goals'
 
     train_loader = loaders[0] if loaders else \
-                   DataLoader(train_dataset, batch_size=batch_size,
+                   datasets[0].create_loader(batch_size=batch_size,
+                                             shuffle=True, num_workers=0) \
+                       if callable(getattr(datasets[0],
+                                           'create_loader', None)) else \
+                   DataLoader(datasets[0], batch_size=batch_size,
                               shuffle=True, num_workers=0,
                               collate_fn=pad_collate if pad_collate else
-                              train_dataset.pad_collate)
+                              datasets[0].pad_collate)
     test_loader = loaders[1] if loaders else \
-                  DataLoader(test_dataset, batch_size=batch_size,
+                  datasets[1].create_loader(batch_size=batch_size,
+                                            shuffle=False, num_workers=0) \
+                      if callable(getattr(datasets[1],
+                                          'create_loader', None)) else \
+                  DataLoader(datasets[1], batch_size=batch_size,
                              shuffle=False, num_workers=0,
                              collate_fn=pad_collate if pad_collate else
-                             test_dataset.pad_collate)
+                             datasets[1].pad_collate)
 
     train_losses, test_losses = [], []
     best_scores = float('-inf')
@@ -262,7 +273,7 @@ def train(device, loaders, model, criterion, optimizer,
     bad_epochs_ = 0
 
     if with_progress:
-        clear_stderr()
+        clear_tqdm()
     print_indent = ' ' * len(log_prefix)
     for epoch in range(epochs):
         train_losses_ = []
@@ -344,6 +355,9 @@ def train(device, loaders, model, criterion, optimizer,
         precisions.append(precision)
         recalls.append(recall)
         f1s.append(f1)
+
+        if scheduler:
+            scheduler.step(accuracy) 
 
         print('{}Epoch {}: \n'.format(log_prefix, epoch + 1)
             + '{}Losses: train = {:.8f}, test = {:.8f}\n'

@@ -39,8 +39,8 @@ def torch_autotrain(
             *train_args, **train_kwargs
         ) -> <train statistics>
         device - one of *devices* that is assigned to train the model;
-        loaders - the return of *create_loaders_method* or () if
-            *create_loaders_method* is None (default);
+        loaders - the return of *create_loaders_method* or ``None`` if
+            *create_loaders_method* is ``None`` (default);
         other_train_args - params returned by *make_model_method* besides the
             model (if any). E.g.: optimizer, criterion, etc.;
         best_model_backup_method - the method that saves the best model over
@@ -129,7 +129,7 @@ def torch_autotrain(
             print('{} started: {}'.format(t.name, device))
         iter_name = t.name
 
-        loaders = create_loaders_method() if create_loaders_method else ()
+        loaders = create_loaders_method() if create_loaders_method else None
         if not isinstance(loaders, tuple):
             loaders = [loaders]
 
