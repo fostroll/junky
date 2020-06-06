@@ -236,7 +236,7 @@ def get_conllu_fields(corpus=None, fields=None, word2idx=None, unk_token=None,
 def train(device, loaders, model, criterion, optimizer, scheduler,
           best_model_backup_method, log_prefix, datasets=None,
           pad_collate=None, epochs=100, bad_epochs=8, batch_size=32,
-          control_metric='accuracy', with_progress=True):
+          control_metric='accuracy', best_score=None, with_progress=True):
 
     assert control_metric in ['accuracy', 'f1', 'loss'], \
            "ERROR: unknown control_metric '{}' ".format(control_metric) \
@@ -265,7 +265,8 @@ def train(device, loaders, model, criterion, optimizer, scheduler,
                              datasets[1].pad_collate)
 
     train_losses, test_losses = [], []
-    best_scores = float('-inf')
+    if best_score is None:
+        best_score = float('-inf')
     best_test_golds, best_test_preds = [], []
     accuracies = []
     precisions = []
@@ -368,15 +369,15 @@ def train(device, loaders, model, criterion, optimizer, scheduler,
             + '{}Test: recall = {:.8f}\n'.format(print_indent, recall)
             + '{}Test: f1_score = {:.8f}'.format(print_indent, f1))
 
-        scores = -mean_test_loss if control_metric == 'loss' else \
-                 accuracy if control_metric == 'accuracy' else \
-                 f1 if control_metric == 'f1' else \
-                 None
+        score = -mean_test_loss if control_metric == 'loss' else \
+                accuracy if control_metric == 'accuracy' else \
+                f1 if control_metric == 'f1' else \
+                None
 
-        if scores > best_scores:
-            best_scores = scores
+        if score > best_score:
+            best_score = score
             best_test_golds, best_test_preds = test_golds[:], test_preds[:]
-            best_model_backup_method(model, scores)
+            best_model_backup_method(model, score)
             bad_epochs_ = 0
         else:
             bad_epochs_ += 1
@@ -390,7 +391,7 @@ def train(device, loaders, model, criterion, optimizer, scheduler,
 
     return {'train_losses': train_losses,
             'test_losses': test_losses,
-            'best_scores': best_scores,
+            'best_score': best_score,
             'best_test_golds': best_test_golds,
             'best_test_preds': best_test_preds,
             'accuracies': accuracies,
