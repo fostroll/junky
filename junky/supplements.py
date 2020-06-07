@@ -361,9 +361,6 @@ def train(device, loaders, model, criterion, optimizer, scheduler,
         recalls.append(recall)
         f1s.append(f1)
 
-        if scheduler:
-            scheduler.step(accuracy) 
-
         print('{}Epoch {}: \n'.format(log_prefix, epoch + 1)
             + '{}Losses: train = {:.8f}, test = {:.8f}\n'
                   .format(print_indent, mean_train_loss, mean_test_loss)
@@ -376,6 +373,9 @@ def train(device, loaders, model, criterion, optimizer, scheduler,
                 accuracy if control_metric == 'accuracy' else \
                 f1 if control_metric == 'f1' else \
                 None
+
+        if scheduler:
+            scheduler.step(score) 
 
         if score > best_score:
             best_score = score
