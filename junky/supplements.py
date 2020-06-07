@@ -296,7 +296,7 @@ def train(device, loaders, model, criterion, optimizer, scheduler,
         for batch in train_loader:
             batch = to_device(batch)
             optimizer.zero_grad()
-            pred, gold = model(*batch[:-2]), batch[-2]
+            pred, gold = model(*batch[:-1]), batch[-1]
 
             batch_loss = []
             for i in range(pred.size(0)):
@@ -324,13 +324,13 @@ def train(device, loaders, model, criterion, optimizer, scheduler,
 
         model.eval()
         for batch in test_loader:
-            gold, gold_lens = batch[-2:]
+            gold, gold_lens = batch[-1], batch[1]
             [test_golds.extend(y_[:len_])
                  for y_, len_ in zip(gold.cpu().numpy(), gold_lens)]
 
             batch = to_device(batch)
             with torch.no_grad():           
-                pred, gold, gold_lens = model(*batch[:-2]), *batch[-2:]
+                pred = model(*batch[:-1])
 
             pred_values, pred_indices = pred.max(2)
 
