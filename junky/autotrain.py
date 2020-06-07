@@ -356,7 +356,7 @@ def torch_autotrain(
     print('=========')
     print()
 
-    class best_model_score: value = -1.
+    class best_model_score: value = float('-inf')
     class best_model_name: value = None
     stats = []
     params = {}
@@ -442,21 +442,25 @@ def torch_autotrain(
     print('==================')
     print('AUTOTRAIN FINISHED')
     print('==================')
-    print('best model name = {}'.format(best_model_name))
-    print('best model score = {}'.format(best_model_score))
-    head = 'best_model_params=('
-    print(head, end='')
-    for i, param in enumerate(best_model_params):
-        if i:
-            print(',\n' + ' ' * len(head), end='')
-        print(param, end='')
-    print(')')
-    if args_:
+    if best_model is None:
         print()
-        print('best_model = make_model({})'.format(args_))
-        print("best_model = best_model.to('{}')".format(best_model_device))
-        print("best_model.load_state_dict(torch.load('{}'))"
-                  .format(best_model_file_name))
+        print('WARNING: No models could surpass `best_score` given.')
+    else:
+        print('best model name = {}'.format(best_model_name))
+        print('best model score = {}'.format(best_model_score))
+        head = 'best_model_params=('
+        print(head, end='')
+        for i, param in enumerate(best_model_params):
+            if i:
+                print(',\n' + ' ' * len(head), end='')
+            print(param, end='')
+        print(')')
+        if args_:
+            print()
+            print('best_model = make_model({})'.format(args_))
+            print("best_model = best_model.to('{}')".format(best_model_device))
+            print("best_model.load_state_dict(torch.load('{}'))"
+                      .format(best_model_file_name))
 
     return best_model, best_model_name, best_model_score, best_model_params, \
            sorted(stats, key=lambda x: (-x[1], x[2]))
