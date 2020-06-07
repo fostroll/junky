@@ -396,6 +396,7 @@ def train(device, loaders, model, criterion, optimizer, scheduler,
                 print(('{}Maximum bad epochs exceeded. Process has stopped. '
                        'Best epoch: {}').format(log_prefix, best_epoch))
                 break
+        prev_score = score
 
         sys.stdout.flush()
 
