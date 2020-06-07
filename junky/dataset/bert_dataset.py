@@ -385,7 +385,7 @@ class BertDataset(BaseDataset):
                             start1 = over_pos_start + overlap_border
                             end1 = over_pos_end - overlap_border
                             overlap = end1 - start1
-                            half2 = int(overlap / 2)
+                            half2 = overlap // 2
                             half1 = overlap - half2
                             half = half1 + (1 if half1 == half2 else 0)
                             for k in range(half2):
@@ -404,7 +404,7 @@ class BertDataset(BaseDataset):
                                 ) / 2
                             end1 = token_starts[j][end1]
                         else:
-                            start2 = overlap - int(overlap / 2)
+                            start2 = overlap - overlap // 2
                             end1 = token_starts[j][over_pos_start + start2]
 
                         start2 = end1 - token_starts[j][over_pos_start]
