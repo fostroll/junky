@@ -104,7 +104,9 @@ class FrameDataset(BaseDataset):
         returns."""
         data = tuple(
             y[0].transform(sentences, save=save, append=append, **kwargs,
-                           **part_kwargs[x if x in part_kwargs else []])
+                           **(part_kwargs[x]
+                                  if part_kwargs and x in part_kwargs else
+                              {}))
                 for x, y in self.datasets.items()
         )
         if not save:
