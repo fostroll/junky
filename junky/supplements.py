@@ -264,9 +264,12 @@ def train(device, loaders, model, criterion, optimizer, scheduler,
                              collate_fn=pad_collate if pad_collate else
                              datasets[1].pad_collate)
 
-    train_losses, test_losses = [], []
+    best_epoch = None
     if best_score is None:
         best_score = float('-inf')
+    prev_score = best_score
+
+    train_losses, test_losses = [], []
     best_test_golds, best_test_preds = [], []
     accuracies = []
     precisions = []
@@ -376,15 +379,22 @@ def train(device, loaders, model, criterion, optimizer, scheduler,
 
         if score > best_score:
             best_score = score
+            best_epoch = epoch
             best_test_golds, best_test_preds = test_golds[:], test_preds[:]
             best_model_backup_method(model, score)
             bad_epochs_ = 0
         else:
-            bad_epochs_ += 1
-            print('{}BAD EPOCHS: {}'.format(log_prefix, bad_epochs_))
+            if score <= prev_score:
+                bad_epochs_ += 1
+            sgn = '==' if score == best_score else \
+                  '<< <' if score < prev_score else \
+                  '<< =' if score == prev_score else \
+                  '<< >'
+            print('{}BAD EPOCHS: {} ({})'
+                      .format(log_prefix, bad_epochs_, sgn))
             if bad_epochs_ >= bad_epochs:
-                print('{}Maximum bad epochs exceeded. Process has stopped'
-                          .format(log_prefix))
+                print(('{}Maximum bad epochs exceeded. Process has stopped. '
+                       'Best epoch: {}').format(log_prefix, best_epoch))
                 break
 
         sys.stdout.flush()
