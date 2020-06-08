@@ -166,7 +166,7 @@ class CharEmbeddingRNN(nn.Module):
             # нормализованные эмбеддинги символов в рамках каждого
             # слова (получим форму [N, S, E]). т.е., теперь у нас в x_
             # будут эмбеддинги слов
-            x = x_ch.view(*x_shape, -1).sum(-2)
+            x = x.view(*x_shape, -1).sum(-2)
 
         elif self.out_type in ['final_concat', 'final_mean']:
             ## если результат - конкатенация либо средние значения последних
