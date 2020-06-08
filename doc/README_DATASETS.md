@@ -402,7 +402,7 @@ and use them in parallel.
 The created `DataLoader` will return batches of the format (*\<`list` of
 `list` of indices of tokens' characters>, *\<length of the sentence>*,
 *\<`list` of lengths of tokens>*). If you use `CharDataset` as a part of
-`FrameDataset`, you can set the param **with_lens** to `False` to omit the
+`FrameDataset`, you can set the param **with_lens** to `False` to omit sequence
 lengths from the batches:
 
 ```python
@@ -786,7 +786,7 @@ and use them in parallel.
 The created `DataLoader` will return batches of the format (*<`list` of words'
 vectors>, *\<length of the sentence>*\[, *\<`list` of numbers subtokens in
 corresponding words>*]). If you use `BertDataset` as part of `FrameDataset`,
-you can set the param **with_lens** to `False` to omit the lengths from the
+you can set the param **with_lens** to `False` to omit sequence lengths from the
 batches:
 
 ```python
