@@ -386,10 +386,10 @@ def train(device, loaders, model, criterion, optimizer, scheduler,
         else:
             if score <= prev_score:
                 bad_epochs_ += 1
-            sgn = '==' if score == best_score else \
-                  '<< <' if score < prev_score else \
-                  '<< =' if score == prev_score else \
-                  '<< >'
+            sgn = '{} {}'.format('==' if score == best_score else '<<',
+                                 '<' if score < prev_score else
+                                 '=' if score == prev_score else
+                                 '>')
             print('{}BAD EPOCHS: {} ({})'
                       .format(log_prefix, bad_epochs_, sgn))
             if bad_epochs_ >= bad_epochs:
