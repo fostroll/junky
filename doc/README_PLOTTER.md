@@ -80,16 +80,11 @@ Params:
 
 **y_pred**:        prediction of the data, with shape (nsamples,)
 
-**n_classes**:     int: number of target classes. Is used to create index labels 
-as (range(n_classes)). If padding class was also used during train, and 
-`pad_index!=len(tag2index)`, i.e. is not the last element in tag2index, 
-add +1 to n_classes, so that `pad_index` will be ignored if not present in `y_pred`. 
-
 **pad_index**:     if not None and not present in y_pred, pad_index will not be 
 included in the plot.
 
-**ymap**:          dict: index -> tag, length == nclass. if not `None`, 
-map the labels & ys to s. if `None`, range(1, n_classes+1) is used for labels.
+**ymap**:          dict: index -> tag. if not `None`, 
+map the labels & ys to s. if `None`, range(1, len(set(y_true+y_pred) is used for labels.
 
 **figsize**:       tuple: the size of the figure plotted.
 
@@ -98,6 +93,11 @@ in the corpus: diagonal and/or axes. Up to all from ['diag', 'x', 'y'] can be ch
 Default = ['x', 'y'] (show total only on axes).
 
 **show_zeros**:    `bool`: whether to show zeros in the confusion matrix.
+
+**show_empty_tags**:    only active when when `ymap` is specified. 
+If `True`, all tags, including those that weren't met 
+neither in `y_true` or `y_pred` are displayed on the plot
+(filled with `0` in both axes). Default: `False`, 'empty' tags are skipped.
 
 **plot_title**:    `str`: plot title, default title - 'Confusion Matrix'.
 
