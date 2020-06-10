@@ -192,10 +192,10 @@ def make_token_dict(sentences, pad_token=None, extra_tokens=None):
 
 def get_conllu_fields(corpus=None, fields=None, word2idx=None, unk_token=None,
                       with_empty=False, silent=False):
-    """Split corpus in CONLL-U format to separate lists of tokens and tags.
+    """Split corpus in CoNLL-U format to separate lists of tokens and tags.
 
-    :param corpus: the corpus in CONLL-U or Parsed CONLL-U format.
-    :param fields: list of CONLL-U fields but 'FORM' to extract.
+    :param corpus: the corpus in CoNLL-U or Parsed CoNLL-U format.
+    :param fields: list of CoNLL-U fields but 'FORM' to extract.
     :type fields: list
     :param word2idx: Word to Index dict. If not None, all words not from dict
         will be skipped or replacet to *unk_token*
