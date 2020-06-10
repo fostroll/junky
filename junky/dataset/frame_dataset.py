@@ -80,6 +80,13 @@ class FrameDataset(BaseDataset):
         """
         return self.datasets[name][0], self.datasets[name][2]
 
+    def get_dataset(self, name):
+        """Get dataset with a specified *name*.
+
+        :return: dataset
+        """
+        return self.datasets[name][0]
+
     def list(self):
         """Get names of the nested datasets in order of their addition."""
         return tuple(self.datasets.keys())

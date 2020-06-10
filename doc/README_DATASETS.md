@@ -833,10 +833,15 @@ ds.remove(name)
 Removes `Dataset` with a specified **name** from `ds.datasets`.
 
 ```python
-ds_ = ds.get(name)
+ds_elem = ds.get(name)
 ```
 Returns `tuple(dataset, collate_kwargs)` for the `Dataset` with a specified
 **name**.
+
+```python
+ds_ = ds.get_dataset(name)
+```
+Returns the `Dataset` with a specified **name**.
 
 ```python
 ds_list = ds.list()
