@@ -105,9 +105,6 @@ def plot_confusion_matrix_test(y_true, y_pred,
             labels = ymap.values()
         
         if not show_empty_tags:
-#             labels = [ymap[i] if pad_index is not None and i != pad_index
-#                                          and pad_index not in y_pred
-#               for i in set(y_true+y_pred)]
 
             labels = [ymap[i] if pad_index is not None and i != pad_index
                                          and pad_index not in y_pred else
@@ -154,10 +151,11 @@ def plot_confusion_matrix_test(y_true, y_pred,
 
     fig, ax = plt.subplots(figsize=figsize)
     sns.heatmap(cm, annot=annot, fmt='', ax=ax)
-
+    plt.title(plot_title)
+    
     if save_name:
         plt.savefig(save_name, bbox_inches='tight')
-    plt.title(plot_title)
+    
     plt.show()
 
 def plot_metrics(metrics=[], 
