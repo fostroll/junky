@@ -219,7 +219,9 @@ def get_conllu_fields(corpus=None, fields=None, word2idx=None, unk_token=None,
 
     sents = tuple([] for _ in range(len(fields) + 1))
 
-    for sent, _ in corpus:
+    for sent in corpus:
+        if isinstance(sent, tuple):
+            sent = sent[0]
         for i, field in enumerate(zip(*[
             (x['FORM'] if not word2idx or x['FORM'] in word2idx else
              unk_token,
@@ -233,6 +235,19 @@ def get_conllu_fields(corpus=None, fields=None, word2idx=None, unk_token=None,
                 sents[i].append(field)
 
     return sents if fields else sents[0]
+
+def conllu_remove(corpus, remove=None):
+    for sent in corpus:
+        if remove:
+            if isinstance(sent, tuple):
+                sent = sent[0]
+            sent = [
+                x for x in sent if not [
+                    1 for f, v in remove.items() if x[f] in
+                        ([v] if isinstance(v, str) else v)
+                ]
+            ]
+        yield sent
 
 def extract_conllu_fields(corpus, fields=None, word2idx=None, unk_token=None,
                           with_empty=False, return_nones=False, silent=False):
@@ -265,7 +280,9 @@ def extract_conllu_fields(corpus, fields=None, word2idx=None, unk_token=None,
     sents = tuple([] for _ in range(len(fields) + 1))
     empties, nones = [], []
 
-    for i, (sent, _) in enumerate(corpus):
+    for i, sent in enumerate(corpus):
+        if isinstance(sent, tuple):
+            sent = sent[0]
         for j, field in enumerate(zip(*[
             (x['FORM'] if not word2idx or x['FORM'] in word2idx else
              unk_token,
@@ -301,7 +318,8 @@ def embed_conllu_fields(corpus, fields, values, empties=None, nones=None):
         for i, j in nones:
             values[i].insert(j, None)
     for sentence, vals in zip(corpus, values):
-        for token, val in zip(sentence[0], vals):
+        sent = sentence[0] if isinstance(sentence, tuple) else sentence
+        for token, val in zip(sent, vals):
             for field, val_ in [[fields, val]] \
                                    if isinstance(fields, str) else \
                                zip(fields, val):
