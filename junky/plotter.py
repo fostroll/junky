@@ -62,11 +62,11 @@ def plot_confusion_matrix_test(y_true, y_pred,
       
       y_pred:           label predictions, with shape (nsamples,)
       
-      pad_index:        if not None and not present in y_pred, pad_index 
+      pad_index:        if not `None` and not present in `y_pred`, `pad_index`
                         will not be included in the plot.      
                         
       ymap:             dict: index -> tag.
-                        if not `None`, map the labels & ys to s.
+                        if not `None`, map the predictions to their categorical labels.
                         if `None`, `range(1, len(set(y_true+y_pred))` 
                         is used for labels.
                         
@@ -75,7 +75,7 @@ def plot_confusion_matrix_test(y_true, y_pred,
       show_total:       list of `str`. Where to display total number of 
                         class occurrences in the corpus: diagonal and/or axes.
                         Up to all from `['diag', 'x', 'y']` can be chosen.
-                        Default = `['x', 'y']`.
+                        Default = `['x', 'y']` (horizontal and vertical axes respectively).
                         
       show_zeros:       bool: whether to show zeros in the confusion matrix.
       
@@ -83,6 +83,7 @@ def plot_confusion_matrix_test(y_true, y_pred,
                         If `True`, all tags, including those that weren't met 
                         neither in `y_true` or `y_pred` are displayed 
                         (filled with `0` in both axes). 
+                        NB! If `True`, `pad_idx` will also be displayed even if specified.
                         Default: `False`, 'empty' tags are skipped.
                         
       plot_title:       str: plot title, default title - 'Confusion Matrix'.
