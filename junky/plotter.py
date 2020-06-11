@@ -145,8 +145,8 @@ def plot_confusion_matrix(y_true, y_pred,
     total_labels = [str(i)+'\n'+str(n[0]) for i, n in zip(labels, cm_sum)]
     
     cm = pd.DataFrame(cm, 
-                      index=total_labels if 'y' in show_total else labels, 
-                      columns=total_labels if 'x' in show_total else labels)
+                      index=total_labels if show_total and 'y' in show_total else labels, 
+                      columns=total_labels if show_total and 'x' in show_total else labels)
     cm.index.name = 'Actual'
     cm.columns.name = 'Predicted'
 
