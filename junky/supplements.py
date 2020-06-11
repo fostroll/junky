@@ -233,6 +233,80 @@ def get_conllu_fields(corpus=None, fields=None, word2idx=None, unk_token=None,
 
     return sents if fields else sents[0]
 
+def extract_conllu_fields(corpus, fields=None, word2idx=None, unk_token=None,
+                          with_empty=False, return_nones=False, silent=False):
+    """Split corpus in CoNLL-U format to separate lists of tokens and tags.
+
+    :param corpus: the corpus in CoNLL-U or Parsed CoNLL-U format.
+    :param fields: list of CoNLL-U fields but 'FORM' to extract.
+    :type fields: list
+    :param word2idx: Word to Index dict. If not None, all words not from dict
+        will be skipped or replacet to *unk_token*
+    :type word2idx: dict({word: int})
+    :param unk_token: replacement for tokens that are not present in
+        *word2idx*.
+    :type unk_token: str
+    :param with_empty: don't skip empty sentences.
+    :param silent: suppress output.
+    :param return_nones: return indexes of filtered sentences and tokens
+    :return: splitted corpus
+    :rtype: tuple(list([list([str|OrderedDict])])), [ list([<empty sent idx]),
+            list([tuple(<empty token sent idx>, <empty token idx>)]) ]
+    """
+    if fields is None:
+        fields = []
+
+    if isinstance(corpus, str):
+        corpus = Conllu.load(corpus, **({'log_file': None} if silent else{}))
+    elif callable(corpus):
+        corpus = corpus()
+
+    sents = tuple([] for _ in range(len(fields) + 1))
+    empties, nones = [], []
+
+    for i, (sent, _) in enumerate(corpus):
+        for j, field in enumerate(zip(*[
+            (x['FORM'] if not word2idx or x['FORM'] in word2idx else
+             unk_token,
+             *[x[y] for y in fields])
+                 for x in sent
+                     if x['FORM'] and '-' not in x['ID']
+                                  and (not word2idx or x['FORM'] in word2idx
+                                                    or unk_token)
+        ])):
+            if field or with_empty:
+                sents[j].append(field)
+            else:
+                if return_nones:
+                    empties.append(i)
+                break
+
+        if return_nones:
+            for j, x in enumerate(sent):
+                if not(x['FORM'] and '-' not in x['ID']
+                                 and (not word2idx or x['FORM'] in word2idx
+                                                   or unk_token)):
+                    nones.append((i, j))
+
+    return (*sents, *((empties, nones) if return_nones else [])) \
+               if fields or return_nones else \
+           sents[0]
+
+def embed_conllu_fields(corpus, fields, values, empties=None, nones=None):
+    if empties:
+        for i in empties:
+            values.insert(i, [])
+    if nones:
+        for i, j in nones:
+            values[i].insert(j, None)
+    for sentence, vals in zip(corpus, values):
+        for token, val in zip(sentence[0], vals):
+            for field, val_ in [[fields, val]] \
+                                   if isinstance(fields, str) else \
+                               zip(fields, val):
+                token[fields] = val_
+        yield sentence
+
 def train(device, loaders, model, criterion, optimizer, scheduler,
           best_model_backup_method, log_prefix, datasets=None,
           pad_collate=None, epochs=100, bad_epochs=8, batch_size=32,
