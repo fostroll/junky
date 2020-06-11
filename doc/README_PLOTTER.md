@@ -91,6 +91,7 @@ If `None`, `range(1, len(set(y_true+y_pred)` is used for labels.
 **show_total**:    list of `str`. Where to display total number of class occurrences 
 in the corpus: diagonal and/or axes. Up to all from `['diag', 'x', 'y']` can be chosen.
 Default = `['x', 'y']` (horizontal and vertical axes respectively).
+If `None`, total values are not displayed on the plot.
 
 **show_zeros**:    `bool`: whether to show zeros in the confusion matrix.
 

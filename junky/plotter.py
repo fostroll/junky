@@ -76,6 +76,7 @@ def plot_confusion_matrix(y_true, y_pred,
                         class occurrences in the corpus: diagonal and/or axes.
                         Up to all from `['diag', 'x', 'y']` can be chosen.
                         Default = `['x', 'y']` (horizontal and vertical axes respectively).
+                        If `None`, total values are not displayed on the plot.
                         
       show_zeros:       bool: whether to show zeros in the confusion matrix.
       
