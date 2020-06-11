@@ -119,7 +119,7 @@ def plot_confusion_matrix(y_true, y_pred,
               for i in set(y_true+y_pred)]
     
     cm_sum = np.sum(cm, axis=1, keepdims=True)
-    cm_perc = np.divide(cm, cm_sum.astype(float)*100, where=cm_sum!=0)
+    cm_perc = np.divide(cm, cm_sum.astype(float), where=cm_sum!=0)*100
     
     
     annot = np.empty_like(cm).astype(str)
