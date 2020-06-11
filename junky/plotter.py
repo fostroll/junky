@@ -50,7 +50,7 @@ def plot_losses(train_losses, test_losses, accuracies=None,
         plt.savefig(save_name, bbox_inches='tight')
     plt.show()
 
-def plot_confusion_matrix_test(y_true, y_pred,
+def plot_confusion_matrix(y_true, y_pred,
                           pad_index=None, ymap=None, figsize=(20, 10),
                           show_total=['x', 'y'], show_zeros=True, show_empty_tags=False,
                           plot_title='Confusion Matrix', save_name=None):
