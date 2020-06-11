@@ -7,6 +7,7 @@
 Provides supplement methods to use in PyTorch pipeline.
 """
 from collections.abc import Iterable
+from corpuscula import Conllu
 from gensim.models import keyedvectors
 import junky
 import numpy as np
