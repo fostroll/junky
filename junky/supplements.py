@@ -310,7 +310,14 @@ def extract_conllu_fields(corpus, fields=None, word2idx=None, unk_token=None,
                if fields or return_nones else \
            sents[0]
 
-def embed_conllu_fields(corpus, fields, values, empties=None, nones=None):
+def embed_conllu_fields(corpus, fields, values, empties=None, nones=None,
+                        silent=False):
+
+    if isinstance(corpus, str):
+        corpus = Conllu.load(corpus, **({'log_file': None} if silent else{}))
+    elif callable(corpus):
+        corpus = corpus()
+
     if empties:
         for i in empties:
             values.insert(i, [])
