@@ -16,19 +16,26 @@ from matplotlib import pyplot as plt
 import seaborn as sns
 
 
-def plot_losses(train_losses, test_losses, accuracies=None,
-                plot_title='Train/Dev Loss', figsize=(7, 4),
+def plot_losses(train_losses=None, test_losses=None, accuracies=None,
+                plot_title='Train/Dev Loss', figsize=(7, 4), legend_loc='best',
                 legend_labels=['train', 'dev', '1 - acc'], save_name=None):
     """Plots train and dev losses obtained during training.
     The plot image is saved to disk.
     args:
       train_losses:   list of floats, train losses throughout epochs.
+                      If `None`, not plotted.
       test_losses:    list of floats, test losses throughout epochs.
+                      If `None`, not plotted.
       accuracies:     optional, list of floats, accuracies throughout epochs.
-                      Here, used to count (1 - accuracy). If `None`, not
-                      plotted.
+                      Here, used to count `(1 - accuracy)`. 
+                      If `None`, not plotted.
       plot_title:     plot title, `str`. Default value - 'Train/Dev Loss'.
       figsize:        the size of the figure plotted. Default size is `(5,3)`.
+      legend_loc:     location of the legend according to matplotlib.
+                      Default: 'best'. If invalid `legend_loc` is entered, 
+                      matplotlib will place the legend in the `best` location and
+                      show a warning with all possible valid loc definitions.
+      legend_labels:  set legend labels. Default: `['train', 'dev', '1 - acc']`
       save_name:      optional, if `None`, plot is not saved. 
                       Used as `fname` in `plt.savefig()`.
                       Default file extention is '.png', if other extention is needed, 
@@ -37,14 +44,17 @@ def plot_losses(train_losses, test_losses, accuracies=None,
     """
     mpl.style.use('default')
     plt.figure(figsize=figsize)
-    plt.plot([None] + train_losses)
-    plt.plot([None] + test_losses)
+    
+    if train_losses:
+        plt.plot([None] + train_losses)
+    if test_losses:
+        plt.plot([None] + test_losses)
     if accuracies is not None:
         plt.plot([None] + [1 - x for x in accuracies])
     plt.title(plot_title)
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
-    plt.legend(legend_labels, loc='upper right')
+    plt.legend(legend_labels, loc=legend_loc)
     plt.grid()
     if save_name is not None:
         plt.savefig(save_name, bbox_inches='tight')
@@ -160,7 +170,7 @@ def plot_confusion_matrix(y_true, y_pred,
     
     plt.show()
 
-def plot_metrics(metrics=[], 
+def plot_metrics(metrics=[], legend_loc='best',
                  labels=['accuracy', 'precision', 'recalls', 'f1_score'],
                  plot_title='Metrics', figsize=(7, 4), save_name=None):
     """Plots metrics obtained during training. 
@@ -168,7 +178,11 @@ def plot_metrics(metrics=[],
     The plot image is saved to disk.
     args:
       metrics:        tuple or list of metrics, where each metric is
-                      a list of floats, len(metric)==num_epochs
+                      a list of floats, len(metric)==num_epochs.
+      legend_loc:     location of the legend according to matplotlib.
+                      Default: 'best'. If invalid `legend_loc` is entered, 
+                      matplotlib will place the legend in the `best` location and
+                      show a warning with all possible valid loc definitions.
       labels:         list of str, labels for metrics plotted.
       figsize:        tuple: the size of the figure plotted.
       plot_title:     str: plot title, default title - 'Metrics'.
@@ -183,7 +197,7 @@ def plot_metrics(metrics=[],
     plt.title(plot_title)
     plt.xlabel('Epochs')
     plt.ylabel('Score')
-    plt.legend(labels, loc='lower right')
+    plt.legend(labels, loc=legend_loc)
     if save_name is not None:
         plt.savefig(save_name, bbox_inches='tight')
     plt.show()
