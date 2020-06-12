@@ -286,7 +286,10 @@ def extract_conllu_fields(corpus, fields=None, word2idx=None, unk_token=None,
         for j, field in enumerate(zip(*[
             (x['FORM'] if not word2idx or x['FORM'] in word2idx else
              unk_token,
-             *[x[y] for y in fields])
+             *[x[y[0]].get(y[1], y[2]) if len(y) >= 3 else
+               x[y[0]].get(y[1]) if len(y) == 2 else
+               x[y[0]]
+                   for y in [y.split(':') for y in fields]])
                  for x in sent
                      if x['FORM'] and '-' not in x['ID']
                                   and (not word2idx or x['FORM'] in word2idx
