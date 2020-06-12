@@ -9,7 +9,7 @@ The lib contains tools to plot useful statistics on trained *PyTorch* models.
 ```python
 import junky
 junky.plot_losses(train_losses, test_losses, accuracies=None, 
-                  plot_title='Train/Dev Loss', figsize=(7, 4), 
+                  plot_title='Train/Dev Loss', figsize=(7, 4), legend_loc='best',
                   legend_labels=['train', 'dev', '1 - acc'], save_name=None)
 ```
 
@@ -21,17 +21,24 @@ The plot image is saved to disk.
 Params:
 
 **train_losses**:   list of floats, train losses throughout epochs.
+If `None`, not plotted.
 
 **test_losses**:    list of floats, test losses throughout epochs.
+If `None`, not plotted.
 
 **accuracies**:     optional, list of floats, accuracies throughout epochs.
-Here, used to count (1 - accuracy). If `None`, not plotted.
+Here, used to count `(1 - accuracy)`. If `None`, not plotted.
 
 **plot_title**:     plot title, `str`. Default value - 'Train/Dev Loss'.
 
 **figsize**:        the size of the figure plotted. Default size is `(10,6)`.
 
-**legend_labels**:  Line labels to use on the plot. Default: `['train', 'dev', '1 - acc']`.
+**legend_loc**:     location of the legend according to matplotlib.
+Default: 'best'. If invalid `legend_loc` is entered, matplotlib will place 
+the legend in the `best` location and show a warning with all possible 
+valid loc definitions.
+
+**legend_labels**:  Labels to use on the legend. Default: `['train', 'dev', '1 - acc']`.
 
 **save_name**:      optional, if `None`, plot is not saved. 
 Used as `fname` in `plt.savefig()`. Default file extention is '.png', 
@@ -41,7 +48,7 @@ if other extention is needed, please specify extention in save_name as well.
 #### Plot Metrics
 
 ```python
-junky.plot_metrics(metrics=[], 
+junky.plot_metrics(metrics=[], legend_loc='best',
                    labels=['accuracy', 'precision', 'recalls', 'f1_score'],
                    plot_title='Metrics', figsize=(7, 4), save_name=None)
 ```
@@ -52,7 +59,12 @@ Custom metrics can also be plotted - specify them in `metrics` and assign them `
 Params:
 
 **metrics**:        tuple or list of metrics, where each metric is 
-a list of floats, `len(metric)==num_epochs`
+a list of floats, `len(metric)==num_epochs`.
+
+**legend_loc**:     location of the legend according to matplotlib.
+Default: 'best'. If invalid `legend_loc` is entered, matplotlib will place 
+the legend in the `best` location and show a warning with all possible 
+valid loc definitions.
 
 **labels**:         list of str, labels for metrics plotted.
 
@@ -66,10 +78,11 @@ If `None`, image is not saved to disk.
 #### Plot Confusion Matrix
 
 ```python
-junky.plot_confusion_matrix(y_true, y_pred, n_classes,
+junky.plot_confusion_matrix(y_true, y_pred, 
                             pad_index=None, ymap=None, figsize=(20, 10),
                             show_total=['x', 'y'], show_zeros=True,
-                            plot_title='Confusion Matrix', save_name=None)
+							show_empty_tags=False, plot_title='Confusion Matrix', 
+							save_name=None)
 ```
 Generate matrix plot of confusion matrix with pretty annotations.
 The plot image is saved to disk.
