@@ -333,7 +333,14 @@ def embed_conllu_fields(corpus, fields, values, empties=None, nones=None,
             for field, val_ in [[fields, val]] \
                                    if isinstance(fields, str) else \
                                zip(fields, val):
-                token[fields] = val_
+                field = field.split(':')
+                if len(field) >= 3:
+                    token[field[0]][field[1]] = \
+                        val_ if val_ != field[2] else None
+                elif len(field) == 2:
+                    token[field[0]][field[1]] = val_
+                else:
+                    token[field[0]] = val_
         yield sentence
 
 def train(device, loaders, model, criterion, optimizer, scheduler,

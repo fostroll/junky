@@ -96,9 +96,12 @@ class FrameDataset(BaseDataset):
         `torch.nn.Module` type."""
         [x[0].to(*args, **kwargs) for x in self.datasets.values()]
 
-    def transform(self, sentences, save=True, append=False, part_kwargs=None,
-                  **kwargs):
-        """Invoke `.transform()` methods for all nested `Dataset` objects.
+    def transform(self, sentences, names=None, save=True, append=False,
+                  part_kwargs=None, **kwargs):
+        """Invoke `.transform()` methods for nested `Dataset` objects.
+
+        *names* is a list of datasets `.transform()` methods of which will be
+        called.
 
         *save*, *append* and **kwargs will be transfered to any nested
         `.transform()` methods.
@@ -109,12 +112,17 @@ class FrameDataset(BaseDataset):
 
         If *save* is ``False``, we'll return the stacked result of objects'
         returns."""
+        if isinstance(names, str):
+            names = [names]
         data = tuple(
             y[0].transform(sentences, save=save, append=append, **kwargs,
                            **(part_kwargs[x]
                                   if part_kwargs and x in part_kwargs else
                               {}))
                 for x, y in self.datasets.items()
+                    if names is None
+                    or (isinstance(names, str) and x == names)
+                    or x in names
         )
         if not save:
             return tuple(data)
