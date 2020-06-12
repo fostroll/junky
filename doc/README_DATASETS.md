@@ -849,9 +849,13 @@ ds_list = ds.list()
 Returns names of the nested `Dataset` objects in order of their addition.
 
 ```python
-ds.transform(sentences, save=True, append=False, part_kwargs=None, **kwargs)
+ds.transform(sentences, names=None, save=True, append=False,
+             part_kwargs=None, **kwargs)
 ```
 Invokes `.transform()` methods for all nested `Dataset` objects.
+
+**names** is a `list` of datasets `.transform()` methods of which will be
+called.
 
 **save**, **append** and **\*\*kwargs** will be transfered to any nested
 `.transform()` methods.
