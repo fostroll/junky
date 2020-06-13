@@ -157,7 +157,7 @@ class TokenDataset(BaseDataset):
 
         :param pos: position of the data in *batch*.
         :type pos: int
-        :with_lens: return lentghs of data.
+        :with_lens: return lengths of data.
         :return: depends on keyword args.
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
         """

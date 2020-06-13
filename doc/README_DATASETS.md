@@ -800,7 +800,7 @@ If you don't need the lengths of tokens, you can set the param
 
 ### FrameDataset
 
-A frame for use several objects of `junky.dataset.*Dataset` conjointly. All
+A frame for use several objects of `junky.dataset.Dataset` conjointly. All
 the `Dataset` objects must have the data of equal length.
 
 ```python

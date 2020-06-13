@@ -425,7 +425,7 @@ def train(device, loaders, model, criterion, optimizer, scheduler,
                 progress_bar.set_postfix(
                     train_loss=np.mean(train_losses_[-500:])
                 )
-                progress_bar.update(batch[0].shape[0])
+                progress_bar.update(len(batch[0]))
 
         if with_progress:
             progress_bar.close()

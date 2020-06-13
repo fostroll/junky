@@ -214,7 +214,7 @@ class CharDataset(BaseDataset):
 
         :param pos: position of the data in *batch*.
         :type pos: int
-        :with_lens: return lentghs of data.
+        :with_lens: return lengths of data.
         :with_token_lens: return lengths of tokens of the data.
         :return: depends on keyword args.
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor,

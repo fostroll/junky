@@ -14,7 +14,7 @@ from torch.utils.data import DataLoader, Dataset
 
 class FrameDataset(BaseDataset):
     """
-    A frame for use several objects of `junky.dataset.*Dataset` conjointly.
+    A frame for use several objects of `junky.dataset.Dataset` conjointly.
     All the datasets must have the data of equal length.
     """
     def __init__(self):

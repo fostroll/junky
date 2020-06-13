@@ -357,15 +357,10 @@ class BertDataset(BaseDataset):
 
             with torch.no_grad():
                 hiddens = self.model(
-                    torch.cat(
-                        input_ids,
-                        dim=0
-                    ).to(device),
+                    torch.cat(input_ids, dim=0).to(device),
                     token_type_ids=None,
-                    attention_mask=torch.cat(
-                        attention_masks,
-                        dim=0
-                    ).to(device)
+                    attention_mask=torch.cat(attention_masks, dim=0)
+                                        .to(device)
                 )[-1]
 
                 hiddens = self._aggregate_hidden_states(
@@ -462,7 +457,7 @@ class BertDataset(BaseDataset):
 
         :param pos: position of the data in *batch*.
         :type pos: int
-        :with_lens: return lentghs of data.
+        :with_lens: return lengths of data.
         :with_token_lens: return lengths of tokens of the data.
         :return: depends on keyword args.
         :rtype: if the `.transform()` method was called with
