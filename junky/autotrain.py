@@ -100,8 +100,9 @@ def torch_autotrain(
     :param best_model_file_name: a name of the file to save the best model
         where. Default 'model.pt'.
     :type best_model_file_name: str
-    :param best_model_device: device to load the best model where. If None, we
-        won't load the best model in memory.
+    :param best_model_device: device to load the best model where. If None,
+        we'll leave it on the default device. If False, we won't load the best
+        model in memory.
     :return: tuple(best_model, best_model_name, best_model_score,
                    best_model_params, stats)
         best_model - the best model if best_model_device is not None,
@@ -417,7 +418,7 @@ def torch_autotrain(
     for model_name, _, kwargs, _ in stats:
         if model_name == best_model_name:
             best_model_params = kwargs
-            if best_model_device:
+            if best_model_device is not False:
                 best_model = make_model_method(
                     *deepcopy(make_model_args),
                     **deepcopy(make_model_kwargs),
