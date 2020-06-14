@@ -345,8 +345,9 @@ def embed_conllu_fields(corpus, fields, values, empties=None, nones=None,
 
 def train(device, loaders, model, criterion, optimizer, scheduler,
           best_model_backup_method, log_prefix, datasets=None,
-          pad_collate=None, epochs=100, bad_epochs=8, batch_size=32,
-          control_metric='accuracy', best_score=None, with_progress=True):
+          pad_collate=None, epochs=1000, bad_epochs=8, batch_size=32,
+          control_metric='accuracy', max_grad_norm=None, best_score=None,
+          with_progress=True):
 
     assert control_metric in ['accuracy', 'f1', 'loss'], \
            "ERROR: unknown control_metric '{}' ".format(control_metric) \
@@ -418,6 +419,11 @@ def train(device, loaders, model, criterion, optimizer, scheduler,
 
             loss = torch.mean(torch.stack(batch_loss)) 
             loss.backward()
+
+            if max_grad_norm:
+                torch.nn.utils.clip_grad_norm_(parameters=model.parameters(),
+                                               max_norm=max_grad_norm)
+
             optimizer.step()
             train_losses_.append(loss.item())
 
