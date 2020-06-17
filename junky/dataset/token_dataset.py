@@ -137,7 +137,7 @@ class TokenDataset(BaseDataset):
         removed. If *keep_empty* is ``False``, we'll remove sentences that
         have no data after converting."""
         return [[
-            t for t in s if keep_empty or t
+            t for t in s if keep_empty or t is not None
         ] for s in [
             self.reconstruct_tokens(s, skip_unk=skip_unk, skip_pad=skip_pad)
                 for s in sequences

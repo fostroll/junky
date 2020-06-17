@@ -191,7 +191,7 @@ class CharDataset(BaseDataset):
             tokens in the result.
         """
         return [[
-            [c for c in t if keep_empty or c] if aslist else t
+            [c for c in t if keep_empty or c is not None] if aslist else t
                 for t in s if keep_empty or t
         ] for s in [
             self.reconstruct_tokens(s, skip_unk=skip_unk, skip_pad=skip_pad,
