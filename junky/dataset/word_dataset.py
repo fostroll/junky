@@ -7,6 +7,7 @@
 Provides implementation of torch.utils.data.Dataset for word-level input.
 """
 from copy import deepcopy
+#from gensim.models.keyedvectors import FastTextKeyedVectors
 from junky import CPU, get_rand_vector, pad_sequences_with_tensor
 from junky.dataset.base_dataset import BaseDataset
 from torch import Tensor, float32, int64, tensor
@@ -51,6 +52,12 @@ class WordDataset(BaseDataset):
         self.float_tensor_dtype = float_tensor_dtype
         self.int_tensor_dtype = int_tensor_dtype
         self.extra_model = {
+            #t: emb_model[t]
+            #       if t in (emb_model.vocab
+            #                    if isinstance(emp_model,
+            #                                  FastTextKeyedVectors) else
+            #                emb_model) else
+            #   get_rand_vector((vec_size,), extra_vec_norm)
             t: get_rand_vector((vec_size,), extra_vec_norm)
                 for t in extra_tokens
         } if extra_tokens else \
