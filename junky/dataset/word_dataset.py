@@ -34,6 +34,11 @@ class WordDataset(BaseDataset):
             they will be transformed and saved.
         skip_unk, keep_empty: params for the `.transform()` method.
     """
+    @property
+    def vec_size(self):
+        return self.data[0].shape[-1] if self.data else \
+               self.model.config.hidden_size
+
     def __init__(self, emb_model, vec_size,
                  unk_token=None, unk_vec_norm=1.,
                  pad_token=None, pad_vec_norm=0.,
@@ -101,7 +106,8 @@ class WordDataset(BaseDataset):
 
         If *append* is ``True``, we'll append the converted sentences to the
         existing Dataset source. Elsewise (default), the existing Dataset
-        source will be replaced. The param is used only if *save*=True."""
+        source will be replaced. The param is used only if *save* is
+        ``True``."""
         data = [tensor([
             v for v in s if keep_empty or v is not None
         ], dtype=self.float_tensor_dtype) for s in [

@@ -147,7 +147,7 @@ class BertDataset(BaseDataset):
 
         If *append* is ``True``, we'll append the converted sentences to the
         existing Dataset source. Elsewise (default), the existing Dataset
-        source will be replaced. The param is used only if *save*=True.
+        source will be replaced. The param is used only if *save* is ``True``.
 
         *loglevel* can be set to `0`, `1` or `2`. `0` means no output.
 

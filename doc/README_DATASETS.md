@@ -115,7 +115,7 @@ If **save** is `True` (default), we'll keep the converted **sentences** as the
 
 If **append** is `True`, we'll append the converted sentences to the existing
 `Dataset` source. Elsewise (default), the existing `Dataset` source will be
-replaced. The param is used only if `save=True`.
+replaced. The param is used only if `save` is `True`.
 
 If **save** is `False`, the method returns the result of the transformation.
 Elsewise, `None` is returned.
@@ -332,7 +332,7 @@ If **save** is `True` (default), we'll keep the converted **sentences** as the
 
 If **append** is `True`, we'll append the converted sentences to the existing
 `Dataset` source. Elsewise (default), the existing `Dataset` source will be
-replaced. The param is used only if `save=True`.
+replaced. The param is used only if `save` is `True`.
 
 If **save** is `False`, the method returns the result of the transformation.
 Elsewise, `None` is returned.
@@ -511,7 +511,7 @@ If **save** is `True` (default), we'll keep the converted **sentences** as the
 
 If **append** is `True`, we'll append the converted sentences to the existing
 `Dataset` source. Elsewise (default), the existing `Dataset` source will be
-replaced. The param is used only if `save=True`.
+replaced. The param is used only if `save` is `True`.
 
 If **save** is `False`, the method returns the result of the transformation.
 Elsewise, `None` is returned.
@@ -574,7 +574,7 @@ Maps tokenized sentences to sequences of their contextual word vectors.
 ```python
 from junky.dataset import BertDataset
 ds = BertDataset(model, tokenizer, int_tensor_dtype=torch.int64, 
-				 sentences=None, **kwargs)
+                 sentences=None, **kwargs)
 ```
 `Dataset` processes sentences of any length without cutting. If the length of
 subtokens in any sentence is greater than **max_len**, we split the sentence with
@@ -726,7 +726,7 @@ If **save** is `True` (default), we'll keep the converted **sentences** as the
 
 If **append** is `True`, we'll append the converted sentences to the existing
 `Dataset` source. Elsewise (default), the existing `Dataset` source will be
-replaced. The param is used only if `save=True`.
+replaced. The param is used only if `save` is `True`.
 
 **loglevel** can be set to `0`, `1` or `2`. `0` means no output.
 
@@ -735,9 +735,9 @@ Elsewise, `None` is returned.
 
 The result depends on **aggregate_subtokens_op** param. If it is `None`,
 then for each word we keep a tensor with stacked vectors for all
-its subtokens in the result. Otherwise, if any **aggregate_subtokens_op** is used, each
-sentence will be converted to exactly one tensor of shape \[*\<sentence
-length>*, *\<vector size>*].
+its subtokens in the result. Otherwise, if any **aggregate_subtokens_op** is
+used, each sentence will be converted to exactly one tensor of shape
+\[*\<sentence length>*, *\<vector size>*].
 
 ```python
 o = ds.clone(with_data=True)
@@ -762,8 +762,8 @@ and **tokenizer** that you used during object creation (or received from the
 `.save()` method).
 
 **NB:** Really, without `ds.model` and `ds.tokenizer`, `BertDataset` is almost
-empty. It's easier to create the object from scratch, and then bother with all
-those `save` / `load` / `clone` actions.
+empty. It's easier to create the object from scratch, instead of bother with
+all those `save` / `load` / `clone` actions.
 
 ```python
 ds.to(*args, **kwargs):
@@ -889,6 +889,253 @@ have to do it by their own methods.
 
 ```python
 ds = FrameDataset.load(file_path, xtrn):
+```
+Load the `FrameDataset` object from **file_path**. Also, you need to pass to
+the method the **xtrn** object that you received from the `.save()` method.
+
+```python
+ds.to(*args, **kwargs):
+```
+Invokes `.to(*args, **kwargs)` methods of all nested `Dataset` objects .
+
+```python
+ds.create_loader(self, batch_size=32, shuffle=False, num_workers=0, **kwargs)
+```
+Creates `torch.utils.data.DataLoader` for this object. All params are the
+params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
+
+**NB:** If you set **num_workers** != `0`, don't move the **ds** source to
+*CUDA*. The `torch` multiprocessing implementation can't handle it. Better,
+create several instances of `DataLoader` for **ds** (each with `workers=0`)
+and use them in parallel.
+
+### DummyDataset
+
+Maps all data elements to the one particular object.
+
+```python
+from junky.dataset import DummyDataset
+ds = DummyDataset(output_obj=None, data=None)
+```
+Params:
+
+**output_obj**: the object that will be returned with every invoke. Default is
+`None`.
+
+**data**: an array-like object that support the `len(data)` method or just
+`int` value that is treated as the length of that object. If not `None`, it
+will be transformed and saved.
+
+#### Attributes
+
+`ds.size` (`int`): a length of the internal pseudo-array.
+
+`ds.value`: an object to return as internal pseudo-array element
+
+Generally, you don't need to change any attribute directly.
+
+#### Methods
+
+```python
+ds.transform(data, save=True, append=False)
+```
+Treats the length of **data** as the size of the internal data array. If
+**data** is of `int` type, just keeps that value as the size.
+
+If **save** is `True`, we'll keep the size as the size of the `Dataset`
+source.
+
+If **append** is `True`, we'll increase the size of the Dataset source by the
+size of **data**.
+
+```python
+o = ds.clone(with_data=True)
+```
+Makes a deep copy of the `DummyDataset` object. If **with_data** is `False`,
+the `Dataset` source in the new object will be empty.
+
+```python
+ds.save(file_path, with_data=True)
+```
+Saves the `DummyDataset` object to **file_path**. If **with_data** is `False`,
+the `Dataset` source of the saved object will be empty.
+
+```python
+ds = DummyDataset.load(file_path):
+```
+Load the `DummyDataset` object from **file_path**.
+
+**NB:** Really, `DummyDataset` without data empty. You can just recreate it
+anew when you need it instead of bother with all those `save` / `load` /
+`clone` actions.
+
+```python
+ds.create_loader(self, batch_size=32, shuffle=False, num_workers=0, **kwargs)
+```
+Creates `torch.utils.data.DataLoader` for this object. All params are the
+params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
+
+**NB:** If you set **num_workers** != `0`, don't move the **ds** source to
+*CUDA*. The `torch` multiprocessing implementation can't handle it. Better,
+create several instances of `DataLoader` for **ds** (each with `workers=0`)
+and use them in parallel.
+
+### LenDataset
+
+Maps array-like data to the lengths of its elements.
+
+```python
+from junky.dataset import LenDataset
+ds = LenDataset(data=None)
+```
+Params:
+
+**data**: an array-like object elements of which support the `len()` method.
+If not `None`, it will be transformed and saved.
+
+#### Attributes
+
+`ds.int_tensor_dtype` (`torch.dtype`): type for int tensors.
+
+`ds.data` (`list([torch.Tensor([int])])`): the source of `Dataset`.
+
+#### Methods
+
+```python
+ds.transform(data, save=True, append=False)
+```
+Store lengths of **data** rows as the internal data array.
+
+If **save** is ``True``, we'll keep the converted sentences as the `Dataset`
+source.
+
+If **append** is ``True``, we'll append the converted sentences to the
+existing `Dataset` source. Elsewise (default), the existing `Dataset` source
+will be replaced. The param is used only if **save** is ``True``.
+
+```python
+o = ds.clone(with_data=True)
+```
+Makes a deep copy of the `LenDataset` object. If **with_data** is `False`, the
+`Dataset` source in the new object will be empty.
+
+```python
+ds.save(file_path, with_data=True)
+```
+Saves the `LenDataset` object to **file_path**. If **with_data** is `False`,
+the `Dataset` source of the saved object will be empty.
+
+```python
+ds = LenDataset.load(file_path):
+```
+Load the `LenDataset` object from **file_path**.
+
+**NB:** Really, `LenDataset` without data empty. You can just recreate it anew
+when you need it instead of bother with all those `save` / `load` / `clone`
+actions.
+
+```python
+ds.create_loader(self, batch_size=32, shuffle=False, num_workers=0, **kwargs)
+```
+Creates `torch.utils.data.DataLoader` for this object. All params are the
+params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
+
+**NB:** If you set **num_workers** != `0`, don't move the **ds** source to
+*CUDA*. The `torch` multiprocessing implementation can't handle it. Better,
+create several instances of `DataLoader` for **ds** (each with `workers=0`)
+and use them in parallel.
+
+### WordCatDataset
+
+Concatenate outputs of datasets the sources of which are of `torch.Tensor`
+type (e.g., `WordDataset`, `BertDataset`, ...). **Importaint**: The sources
+of the datasets must be of equal shape by all dimensions except the last one
+which will be concatenated.
+
+```python
+from junky.dataset import WordCatDataset
+ds = WordCatDataset()
+```
+
+#### Attributes
+
+`ds.datasets` (`dict({str: junky.dataset.BaseDataset})`): the list of
+`Dataset` objects. Format: {name: `Dataset`}
+
+Generally, you don't need to change any attribute directly.
+
+#### Methods
+
+```python
+ds.add(name, dataset)
+```
+Adds **dataset** with a specified **name**.
+
+Param **collate_kwargs** is a keyword arguments for the **dataset**'s
+`._frame_collate()` method. Refer `help(dataset._frame_collate)` to learn
+what params the **dataset** has.
+
+```python
+ds.remove(name)
+```
+Removes `Dataset` with a specified **name** from `ds.datasets`.
+
+```python
+ds_elem = ds.get(name)
+```
+Returns `Dataset` with a specified **name**.
+
+```python
+ds_ = ds.get_dataset(name)
+```
+An alias for `ds.get(name)`.
+
+```python
+ds_list = ds.list()
+```
+Returns names of the nested `Dataset` objects in order of their addition.
+
+```python
+ds.transform(sentences, names=None, save=True, append=False,
+             part_kwargs=None, **kwargs)
+```
+Invokes `.transform()` methods for all nested `Dataset` objects.
+
+**names** is a `list` of datasets `.transform()` methods of which will be
+called.
+
+**save**, **append** and **\*\*kwargs** will be transfered to any nested
+`.transform()` methods.
+
+**part_kwargs** is a `dict` of format: *{\<name>: kwargs, ...}*, where one can
+specify separate keyword args for `.transform()` method of certain nested
+`Dataset` objects.
+
+If **save** is `False`, we'll return the stacked result of objects' returns.
+
+```python
+o = ds.clone(with_data=True)
+```
+Makes a deep copy of the `WordCatDataset` object. The **with_data** param is
+defined if the nested `Dataset` objects will be cloned with their data sources
+or without.
+
+**NB:** Some nested `Dataset` objects may contain objects that are copied by
+link (e.g., `emb_model` of `WordDataset`).
+
+```python
+xtrn = ds.save(file_path, with_data=True)
+```
+Saves the `WordCatDataset` object to **file_path**.  The **with_data** param is
+defined if the nested `Dataset` objects will be saved with their data sources
+or without.
+
+Returns a `tuple` of all objects that nested `Dataset` objects don't allow to
+save (e.g., `emb_model` in `WordDataset`). If you want to save them, too, you
+have to do it by their own methods.
+
+```python
+ds = WordCatDataset.load(file_path, xtrn):
 ```
 Load the `FrameDataset` object from **file_path**. Also, you need to pass to
 the method the **xtrn** object that you received from the `.save()` method.

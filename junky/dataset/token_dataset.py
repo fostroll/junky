@@ -114,7 +114,8 @@ class TokenDataset(BaseDataset):
 
         If *append* is ``True``, we'll append the converted sentences to the
         existing Dataset source. Elsewise (default), the existing Dataset
-        source will be replaced. The param is used only if *save*=True."""
+        source will be replaced. The param is used only if *save* is
+        ``True``."""
         data = [tensor([
             i for i in s if keep_empty or i is not None
         ], dtype=self.int_tensor_dtype) for s in [

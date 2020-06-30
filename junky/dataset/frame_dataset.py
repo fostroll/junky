@@ -7,9 +7,7 @@
 A frame for use several torch.utils.data.Dataset together.
 """
 from collections import OrderedDict
-from junky import kwargs
 from junky.dataset.base_dataset import BaseDataset
-from torch.utils.data import DataLoader, Dataset
 
 
 class FrameDataset(BaseDataset):
@@ -143,8 +141,6 @@ class FrameDataset(BaseDataset):
     def _collate(self, batch):
         """The method to use with torch.utils.data.DataLoader. It concatenates
         outputs of the added datasets in order of addition. All the dataset
-        must have the method `.frame_collate(batch, pos, **kwargs)`, where
-        *pos* is the first position of the corresponding dataset's data in the
-        batch.
-        """
+        must have the method `.frame_collate(batch, pos)`, where *pos* is the
+        first position of the corresponding dataset's data in the batch."""
         return self._frame_collate(batch, 0)
