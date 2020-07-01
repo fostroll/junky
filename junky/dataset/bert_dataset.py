@@ -70,7 +70,7 @@ class BertDataset(BaseDataset):
             self.transform(sentences, save=True, **kwargs)
 
     def _pull_xtrn(self):
-        xtrn = [self.model, self.tokenizer]
+        xtrn = self.model, self.tokenizer
         self.model, self.tokenizer = None, None
         return xtrn
 

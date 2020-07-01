@@ -137,3 +137,8 @@ is of `int` type.
 kwargs = junky.kwargs(**kwargs)
 ```
 Returns any keyword arguments as a `dict`.
+
+```python
+def kwargs_nonempty (**kwargs):
+```
+Return any keyword arguments with non-empty values as a `dict`.

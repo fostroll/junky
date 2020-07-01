@@ -6,7 +6,7 @@
 """
 Provides a bunch of utilities to use with PyTorch.
 """
-from collections import Iterable
+from collections.abc import Iterable
 import numpy as np
 import torch
 
@@ -300,3 +300,7 @@ def absmax_torch(tensors, dim=None):
 def kwargs (**kwargs):
     """Return any keyword arguments as a dict."""
     return kwargs
+
+def kwargs_nonempty (**kwargs):
+    """Return any keyword arguments with non-empty values as a dict."""
+    return {x: y for x, y in kwargs.items() if y}
