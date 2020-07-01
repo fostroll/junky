@@ -18,6 +18,8 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 
+LOG_FILE = sys.stdout
+
 
 def clear_tqdm():
     if hasattr(tqdm, '_instances'):
@@ -348,9 +350,9 @@ def embed_conllu_fields(corpus, fields, values, empties=None, nones=None,
 
 def train(device, loaders, model, criterion, optimizer, scheduler,
           best_model_backup_method, log_prefix, datasets=None,
-          pad_collate=None, epochs=1000, bad_epochs=8, batch_size=32,
-          control_metric='accuracy', max_grad_norm=None, best_score=None,
-          with_progress=True):
+          pad_collate=None, epochs=sys.maxsize, min_epochs=0, bad_epochs=5,
+          batch_size=32, control_metric='accuracy', max_grad_norm=None,
+          best_score=None, with_progress=True, log_file=LOG_FILE):
 
     assert control_metric in ['accuracy', 'f1', 'loss'], \
            "ERROR: unknown control_metric '{}' ".format(control_metric) \
@@ -378,6 +380,15 @@ def train(device, loaders, model, criterion, optimizer, scheduler,
                              collate_fn=pad_collate if pad_collate else
                              datasets[1].pad_collate)
 
+    if not callable(best_model_backup_method):
+        f = best_model_backup_method
+        def best_model_backup_method(model, model_score):
+            if log_file:
+                print('{}: new maximum score {:.8f}'
+                          .format(iter_name, model_score),
+                      end='', file=log_file)
+            torch.save(model, f, pickle_protocol=2)
+
     best_epoch = None
     if best_score is None:
         best_score = float('-inf')
@@ -398,8 +409,9 @@ def train(device, loaders, model, criterion, optimizer, scheduler,
         train_losses_ = []
 
         progress_bar = tqdm(total=len(train_loader.dataset),
-                            desc='Epoch {}'.format(epoch + 1)) \
-                           if with_progress else \
+                            desc='Epoch {}'.format(epoch + 1),
+                            file=log_file) \
+                           if with_progress and log_file else \
                        None
 
         def to_device(data):
@@ -480,13 +492,16 @@ def train(device, loaders, model, criterion, optimizer, scheduler,
         recalls.append(recall)
         f1s.append(f1)
 
-        print('{}Epoch {}: \n'.format(log_prefix, epoch + 1)
-            + '{}Losses: train = {:.8f}, test = {:.8f}\n'
-                  .format(print_indent, mean_train_loss, mean_test_loss)
-            + '{}Test: accuracy = {:.8f}\n'.format(print_indent, accuracy)
-            + '{}Test: precision = {:.8f}\n'.format(print_indent, precision)
-            + '{}Test: recall = {:.8f}\n'.format(print_indent, recall)
-            + '{}Test: f1_score = {:.8f}'.format(print_indent, f1))
+        if log_file:
+            print('{}Epoch {}: \n'.format(log_prefix, epoch + 1)
+                + '{}Losses: train = {:.8f}, test = {:.8f}\n'
+                      .format(print_indent, mean_train_loss, mean_test_loss)
+                + '{}Test: accuracy = {:.8f}\n'.format(print_indent, accuracy)
+                + '{}Test: precision = {:.8f}\n'
+                      .format(print_indent, precision)
+                + '{}Test: recall = {:.8f}\n'.format(print_indent, recall)
+                + '{}Test: f1_score = {:.8f}'.format(print_indent, f1),
+                  file=log_file)
 
         score = -mean_test_loss if control_metric == 'loss' else \
                 accuracy if control_metric == 'accuracy' else \
@@ -505,22 +520,28 @@ def train(device, loaders, model, criterion, optimizer, scheduler,
         else:
             if score <= prev_score:
                 bad_epochs_ += 1
-            sgn = '{} {}'.format('==' if score == best_score else '<<',
-                                 '<' if score < prev_score else
-                                 '=' if score == prev_score else
-                                 '>')
-            print('{}BAD EPOCHS: {} ({})'
-                      .format(log_prefix, bad_epochs_, sgn))
-            if bad_epochs_ >= bad_epochs:
-                print(('{}Maximum bad epochs exceeded. Process has stopped. '
-                       'Best epoch: {}').format(log_prefix, best_epoch))
+            if log_file:
+                sgn = '{} {}'.format('==' if score == best_score else '<<',
+                                     '<' if score < prev_score else
+                                     '=' if score == prev_score else
+                                     '>')
+                print('{}BAD EPOCHS: {} ({})'
+                          .format(log_prefix, bad_epochs_, sgn),
+                      file=log_file)
+            if bad_epochs_ >= bad_epochs and epoch + 1 >= min_epochs:
+                if log_file:
+                    print(('{}Maximum bad epochs exceeded. Process has '
+                           'stopped. Best epoch: {}')
+                              .format(log_prefix, best_epoch), file=log_file)
                 break
         prev_score = score
 
-        sys.stdout.flush()
+        if log_file:
+            log_file.flush()
 
     return {'train_losses': train_losses,
             'test_losses': test_losses,
+            'best_epoch': best_epoch,
             'best_score': best_score,
             'best_test_golds': best_test_golds,
             'best_test_preds': best_test_preds,

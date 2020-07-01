@@ -13,7 +13,7 @@ setup(
     long_description=open('README.md', 'rt', encoding='utf-8').read(),
     long_description_content_type='text/markdown',
     author='Sergei Ternovykh, Anastasiya Nikiforova',
-    author_email='fostroll@gmail.com, ',
+    author_email='fostroll@gmail.com, steysie@gmail.com',
     url='https://github.com/fostroll/junky',
     license='BSD',
 
