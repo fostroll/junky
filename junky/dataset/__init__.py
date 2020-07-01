@@ -11,9 +11,9 @@ from junky.dataset.len_dataset import *
 
 from junky.dataset.word_dataset import *
 from junky.dataset.bert_dataset import *
-from junky.dataset.word_cat_dataset import *
 
 from junky.dataset.char_dataset import *
 from junky.dataset.token_dataset import *
 
 from junky.dataset.frame_dataset import *
+from junky.dataset.word_cat_dataset import *
