@@ -25,7 +25,7 @@ class DummyDataset(BaseDataset):
         self.size = 0
         self.value = output_obj
         if data:
-            transform(data, save=True)
+            self.transform(data, save=True)
 
     def __len__(self):
         return self.size
