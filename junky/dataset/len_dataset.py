@@ -20,7 +20,7 @@ class LenDataset(BaseDataset):
     def __init__(self, data=None):
         super().__init__()
         if data:
-            trainsform(data, save=True)
+            transform(data, save=True)
 
     def transform(self, data, save=True, append=False):
         """Store lengths of *data* rows as the internal data array.

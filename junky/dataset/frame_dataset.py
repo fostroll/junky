@@ -65,7 +65,7 @@ class FrameDataset(BaseDataset):
                "ERROR: dataset '{}' was already added".format(name)
         assert len(dataset) > 0, "ERROR: can't add empty dataset"
         num_pos = len(dataset[0]) if isinstance(dataset[0], tuple) else 1
-        self.datasets[name] = [dataset, num_pos, collate_kwargs]
+        self.datasets[name] = dataset, num_pos, collate_kwargs
 
     def remove(self, name):
         """Remove dataset with a specified *name*."""

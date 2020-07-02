@@ -20,7 +20,7 @@ class WordCatDataset(FrameDataset):
     """
     @property
     def vec_size(self):
-        return sum(x.vec_size for x in self.datasets) if self.datasets else 0
+        return sum(x[0].vec_size for x in self.datasets) if self.datasets else 0
 
     def __getitem__(self, idx):
         """Returns a tuple of outputs of all added datasets in order of
@@ -38,21 +38,7 @@ class WordCatDataset(FrameDataset):
         """
         assert name not in self.datasets, \
                "ERROR: dataset '{}' was already added".format(name)
-        self.datasets[name] = dataset
-
-    def get(self, name):
-        """Get dataset with a specified *name*.
-
-        :return: dataset, collate_kwargs
-        """
-        return self.datasets[name]
-
-    def get_dataset(self, name):
-        """Get dataset with a specified *name*.
-
-        :return: dataset
-        """
-        return self.get(name)
+        self.datasets[name] = dataset,
 
     def _frame_collate(self, batch, pos, with_lens=True):
         """The method to use with junky.dataset.FrameDataset.
@@ -63,7 +49,7 @@ class WordCatDataset(FrameDataset):
         :return: depends on keyword args.
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
         """
-        vec_sizes = [x.vec_size for x in self.datasets]
+        vec_sizes = [x[0].vec_size for x in self.datasets]
         if vec_sizes:
             vec_sizes[0] = (0, vec_sizes[0])
         vec_sizes = list(accumulate(vec_sizes, lambda x, y: (x[1], x[1] + y)))
