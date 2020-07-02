@@ -463,11 +463,11 @@ def train(device, loaders, model, criterion, optimizer, scheduler,
         if test_loader:
             model.eval()
             for batch in test_loader:
+                batch = to_device(batch)
                 gold, gold_lens = batch[-1], batch[1]
                 [test_golds.extend(y_[:len_])
                      for y_, len_ in zip(gold.cpu().numpy(), gold_lens)]
 
-                batch = to_device(batch)
                 with torch.no_grad():           
                     pred = model(*batch[:-1])
 
