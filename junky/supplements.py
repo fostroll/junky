@@ -387,9 +387,8 @@ def train(device, loaders, model, criterion, optimizer, scheduler,
         f = best_model_backup_method
         def best_model_backup_method(model, model_score):
             if log_file:
-                print('{}: new maximum score {:.8f}'
-                          .format(iter_name, model_score),
-                      end='', file=log_file)
+                print('new maximum score {:.8f}'.format(model_score), end='',
+                      file=log_file)
             torch.save(model, f, pickle_protocol=2)
 
     best_epoch = None
