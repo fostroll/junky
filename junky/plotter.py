@@ -27,24 +27,24 @@ def plot_losses(train_losses=None, test_losses=None, accuracies=None,
       test_losses:    list of floats, test losses throughout epochs.
                       If `None`, not plotted.
       accuracies:     optional, list of floats, accuracies throughout epochs.
-                      Here, used to count `(1 - accuracy)`. 
+                      Here, used to count `(1 - accuracy)`.
                       If `None`, not plotted.
       plot_title:     plot title, `str`. Default value - 'Train/Dev Loss'.
       figsize:        the size of the figure plotted. Default size is `(5,3)`.
       legend_loc:     location of the legend according to matplotlib.
-                      Default: 'best'. If invalid `legend_loc` is entered, 
+                      Default: 'best'. If invalid `legend_loc` is entered,
                       matplotlib will place the legend in the `best` location and
                       show a warning with all possible valid loc definitions.
       legend_labels:  set legend labels. Default: `['train', 'dev', '1 - acc']`
-      save_name:      optional, if `None`, plot is not saved. 
+      save_name:      optional, if `None`, plot is not saved.
                       Used as `fname` in `plt.savefig()`.
-                      Default file extention is '.png', if other extention is needed, 
-                      please specify extention in save_name as well. 
+                      Default file extention is '.png', if other extention is needed,
+                      please specify extention in save_name as well.
                       Example: save_name='plot.pdf'
     """
     mpl.style.use('default')
     plt.figure(figsize=figsize)
-    
+
     if train_losses:
         plt.plot([None] + train_losses)
     if test_losses:
@@ -67,47 +67,47 @@ def plot_confusion_matrix(y_true, y_pred,
     """
     Generate matrix plot of confusion matrix with pretty annotations.
     The plot image is saved to disk.
-    args: 
+    args:
       y_true:           true labels of the data, with shape (nsamples,)
-      
+
       y_pred:           label predictions, with shape (nsamples,)
-      
+
       pad_index:        if not `None` and not present in `y_pred`, `pad_index`
-                        will not be included in the plot.      
-                        
+                        will not be included in the plot.
+
       ymap:             dict: index -> tag.
                         if not `None`, map the predictions to their categorical labels.
-                        if `None`, `range(1, len(set(y_true+y_pred))` 
+                        if `None`, `range(1, len(set(y_true+y_pred))`
                         is used for labels.
-                        
+
       figsize:          tuple: the size of the figure plotted.
-      
-      show_total:       list of `str`. Where to display total number of 
+
+      show_total:       list of `str`. Where to display total number of
                         class occurrences in the corpus: diagonal and/or axes.
                         Up to all from `['diag', 'x', 'y']` can be chosen.
                         Default = `['x', 'y']` (horizontal and vertical axes respectively).
                         If `None`, total values are not displayed on the plot.
-                        
+
       show_zeros:       bool: whether to show zeros in the confusion matrix.
-      
-      show_empty_tags:  only active when when `ymap` is specified. 
-                        If `True`, all tags, including those that weren't met 
-                        neither in `y_true` or `y_pred` are displayed 
-                        (filled with `0` in both axes). 
+
+      show_empty_tags:  only active when when `ymap` is specified.
+                        If `True`, all tags, including those that weren't met
+                        neither in `y_true` or `y_pred` are displayed
+                        (filled with `0` in both axes).
                         NB! If `True`, `pad_idx` will also be displayed even if specified.
                         Default: `False`, 'empty' tags are skipped.
-                        
+
       plot_title:       str: plot title, default title - 'Confusion Matrix'.
-      
-      save_name:        str: filename of figure file to save. 
+
+      save_name:        str: filename of figure file to save.
                         if `None`, image is not saved to disk.
     """
     # if pad_index is not None and does not exist in y_pred, it's excluded
     # from labels
     mpl.style.use('default')
-    
+
     cm = confusion_matrix(y_true, y_pred)
-    
+
     if ymap:
         if show_empty_tags:
             for i in ymap.keys():
@@ -115,24 +115,24 @@ def plot_confusion_matrix(y_true, y_pred,
                     cm = np.insert(cm, i, 0, axis=0)
                     cm = np.insert(cm, i, 0, axis=1)
             labels = ymap.values()
-        
+
         if not show_empty_tags:
 
             labels = [ymap[i] if pad_index is not None and i != pad_index
                                          and pad_index not in y_pred else
                       ymap[i]
                       for i in set(y_true+y_pred)]
-        
+
     else:
         labels = [i if pad_index is not None and i != pad_index
                                          and pad_index not in y_pred else
               i
               for i in set(y_true+y_pred)]
-    
+
     cm_sum = np.sum(cm, axis=1, keepdims=True)
     cm_perc = np.divide(cm, cm_sum.astype(float), where=cm_sum!=0)*100
-    
-    
+
+
     annot = np.empty_like(cm).astype(str)
     nrows, ncols = cm.shape
     for i in range(nrows):
@@ -152,11 +152,11 @@ def plot_confusion_matrix(y_true, y_pred,
                     annot[i, j] = ''
             else:
                 annot[i, j] = '%.2f%%\n%d' % (p, c)
-    
+
     total_labels = [str(i)+'\n'+str(n[0]) for i, n in zip(labels, cm_sum)]
-    
-    cm = pd.DataFrame(cm, 
-                      index=total_labels if show_total and 'y' in show_total else labels, 
+
+    cm = pd.DataFrame(cm,
+                      index=total_labels if show_total and 'y' in show_total else labels,
                       columns=total_labels if show_total and 'x' in show_total else labels)
     cm.index.name = 'Actual'
     cm.columns.name = 'Predicted'
@@ -164,29 +164,29 @@ def plot_confusion_matrix(y_true, y_pred,
     fig, ax = plt.subplots(figsize=figsize)
     sns.heatmap(cm, annot=annot, fmt='', ax=ax)
     plt.title(plot_title)
-    
+
     if save_name:
         plt.savefig(save_name, bbox_inches='tight')
-    
+
     plt.show()
 
 def plot_metrics(metrics=[], legend_loc='best',
                  labels=['accuracy', 'precision', 'recalls', 'f1_score'],
                  plot_title='Metrics', figsize=(7, 4), save_name=None):
-    """Plots metrics obtained during training. 
+    """Plots metrics obtained during training.
     Default: ['accuracy', 'precision', 'recalls', 'f1_score'].
     The plot image is saved to disk.
     args:
       metrics:        tuple or list of metrics, where each metric is
                       a list of floats, len(metric)==num_epochs.
       legend_loc:     location of the legend according to matplotlib.
-                      Default: 'best'. If invalid `legend_loc` is entered, 
+                      Default: 'best'. If invalid `legend_loc` is entered,
                       matplotlib will place the legend in the `best` location and
                       show a warning with all possible valid loc definitions.
       labels:         list of str, labels for metrics plotted.
       figsize:        tuple: the size of the figure plotted.
       plot_title:     str: plot title, default title - 'Metrics'.
-      save_name:      str: filename of figure file to save. 
+      save_name:      str: filename of figure file to save.
                       if `None`, image is not saved to disk.
     """
     mpl.style.use('default')

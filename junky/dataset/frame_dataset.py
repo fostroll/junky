@@ -90,7 +90,7 @@ class FrameDataset(BaseDataset):
         return tuple(self.datasets.keys())
 
     def to(self, *args, **kwargs):
-        """Invoke the `.to()` method for all object of `torch.Tensor` or 
+        """Invoke the `.to()` method for all object of `torch.Tensor` or
         `torch.nn.Module` type."""
         [x[0].to(*args, **kwargs) for x in self.datasets.values()]
 

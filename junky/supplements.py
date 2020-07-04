@@ -408,7 +408,9 @@ def train(device, loaders, model, criterion, optimizer, scheduler,
     if with_progress:
         clear_tqdm()
     print_indent = ' ' * len(log_prefix)
+    print_str = ''
     for epoch in range(epochs):
+        print_str = '{}Epoch {}: \n'.format(log_prefix, epoch + 1)
         train_losses_ = []
 
         progress_bar = tqdm(total=len(train_loader.dataset),
@@ -435,7 +437,7 @@ def train(device, loaders, model, criterion, optimizer, scheduler,
                 tmp_loss = criterion(pred[i], gold[i])
                 batch_loss.append(tmp_loss)
 
-            loss = torch.mean(torch.stack(batch_loss)) 
+            loss = torch.mean(torch.stack(batch_loss))
             loss.backward()
 
             if max_grad_norm:
@@ -456,6 +458,8 @@ def train(device, loaders, model, criterion, optimizer, scheduler,
 
         mean_train_loss = np.mean(train_losses_)
         train_losses.append(mean_train_loss)
+        print_str += '{}Losses: train = {:.8f}' \
+                         .format(print_indent, mean_train_loss)
 
         test_losses_, test_golds, test_preds = [], [], []
 
@@ -467,7 +471,7 @@ def train(device, loaders, model, criterion, optimizer, scheduler,
                 [test_golds.extend(y_[:len_])
                      for y_, len_ in zip(gold.cpu().numpy(), gold_lens)]
 
-                with torch.no_grad():           
+                with torch.no_grad():
                     pred = model(*batch[:-1])
 
                 pred_values, pred_indices = pred.max(2)
@@ -504,49 +508,55 @@ def train(device, loaders, model, criterion, optimizer, scheduler,
                     f1 if control_metric == 'f1' else \
                     None
 
+            print_str += \
+                ', test = {:.8f}\n'.format(mean_test_loss) \
+              + '{}Losses: train = {:.8f}, test = {:.8f}\n' \
+                    .format(print_indent, mean_train_loss, mean_test_loss) \
+              + '{}Test: accuracy = {:.8f}\n'.format(print_indent, accuracy) \
+              + '{}Test: precision = {:.8f}\n' \
+                    .format(print_indent, precision) \
+              + '{}Test: recall = {:.8f}\n'.format(print_indent, recall) \
+              + '{}Test: f1_score = {:.8f}'.format(print_indent, f1)
+
+            need_backup = False
             if score > best_score:
+                need_backup = True
                 best_score = score
                 best_epoch = epoch
                 best_test_golds, best_test_preds = test_golds[:], test_preds[:]
-                best_model_backup_method(model, score)
                 bad_epochs_ = 0
             else:
                 if score <= prev_score:
                     bad_epochs_ += 1
-                if log_file:
-                    sgn = '{} {}'.format('==' if score == best_score else '<<',
-                                         '<' if score < prev_score else
-                                         '=' if score == prev_score else
-                                         '>')
-                    print('{}BAD EPOCHS: {} ({})'
-                              .format(log_prefix, bad_epochs_, sgn),
-                          file=log_file)
+                sgn = '{} {}'.format('==' if score == best_score else '<<',
+                                     '<' if score < prev_score else
+                                     '=' if score == prev_score else
+                                     '>')
+                print_str += '{}BAD EPOCHS: {} ({})' \
+                                 .format(log_prefix, bad_epochs_, sgn)
                 if bad_epochs_ >= bad_epochs and epoch + 1 >= min_epochs:
-                    if log_file:
-                        print(('{}Maximum bad epochs exceeded. Process has '
-                               'stopped. Best epoch: {}')
-                                  .format(log_prefix, best_epoch), file=log_file)
+                    print_str += (
+                        '{}Maximum bad epochs exceeded. Process has been '
+                        'stopped. Best epoch: {}'
+                    ).format(log_prefix, best_epoch)
                     break
 
-        if scheduler:
-            if score is not None:
-                scheduler.step(score)
-            else:
-                scheduler.step()
+            if log_file:
+                print(print_str, file=log_file)
+                log_file.flush()
+            if need_backup:
+                best_model_backup_method(model, score)
 
-        prev_score = score
+            if scheduler:
+                if score is not None:
+                    scheduler.step(score)
+                else:
+                    scheduler.step()
+
+            prev_score = score
 
         if log_file:
-            print('{}Epoch {}: \n'.format(log_prefix, epoch + 1) + (
-                  '{}Losses: train = {:.8f}, test = {:.8f}\n'
-                      .format(print_indent, mean_train_loss, mean_test_loss)
-                + '{}Test: accuracy = {:.8f}\n'.format(print_indent, accuracy)
-                + '{}Test: precision = {:.8f}\n'
-                      .format(print_indent, precision)
-                + '{}Test: recall = {:.8f}\n'.format(print_indent, recall)
-                + '{}Test: f1_score = {:.8f}'.format(print_indent, f1)
-            ) if test_loader else '', file=log_file)
-
+            print(print_str, file=log_file)
             log_file.flush()
 
     return {'train_losses': train_losses,

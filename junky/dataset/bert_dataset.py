@@ -504,7 +504,7 @@ class BertDataset(BaseDataset):
                 tuple(list([torch.tensor]), lens:torch.tensor,
                       token_lens:list([torch.tensor]))
             otherwise: tuple(list([torch.tensor]), lens:torch.tensor)
-        
+
         """
         device = CPU
         pad = 0.

@@ -161,7 +161,7 @@ def enforce_reproducibility(seed=None):
     if seed:
         # Sets seed manually for both CPU and CUDA
         torch.manual_seed(seed)
-        # For atomic operations there is currently 
+        # For atomic operations there is currently
         # no simple way to enforce determinism, as
         # the order of parallel operations is not known.
         #

@@ -95,7 +95,7 @@ class BaseDataset(Dataset):
         return o
 
     def to(self, *args, **kwargs):
-        """Invoke the `.to()` method for all object of `torch.Tensor` or 
+        """Invoke the `.to()` method for all object of `torch.Tensor` or
         `torch.nn.Module` type."""
         self.data = self._to(self.data, *args, **kwargs)
 
