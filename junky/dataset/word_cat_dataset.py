@@ -7,7 +7,6 @@
 Concatenate outputs of datasets the sources of which are of `torch.Tensor`
 type.
 """
-from collections import OrderedDict
 from itertools import accumulate
 from junky.dataset import FrameDataset
 import torch
@@ -20,7 +19,9 @@ class WordCatDataset(FrameDataset):
     """
     @property
     def vec_size(self):
-        return sum(x[0].vec_size for x in self.datasets) if self.datasets else 0
+        return sum(x[0].vec_size for x in self.datasets) \
+                   if self.datasets else \
+               0
 
     def __getitem__(self, idx):
         """Returns a tuple of outputs of all added datasets in order of
