@@ -409,12 +409,12 @@ def train(device, loaders, model, criterion, optimizer, scheduler,
         clear_tqdm()
     print_indent = ' ' * len(log_prefix)
     print_str = ''
-    for epoch in range(epochs):
-        print_str = '{}Epoch {}: \n'.format(log_prefix, epoch + 1)
+    for epoch in range(1, epochs + 1):
+        print_str = '{}Epoch {}: \n'.format(log_prefix, epoch)
         train_losses_ = []
 
         progress_bar = tqdm(total=len(train_loader.dataset),
-                            desc='Epoch {}'.format(epoch + 1),
+                            desc='Epoch {}'.format(epoch),
                             file=log_file) \
                            if with_progress and log_file else \
                        None
@@ -532,7 +532,7 @@ def train(device, loaders, model, criterion, optimizer, scheduler,
                                      '>')
                 print_str += '\n{}BAD EPOCHS: {} ({})' \
                                  .format(log_prefix, bad_epochs_, sgn)
-                if bad_epochs_ >= bad_epochs and epoch + 1 >= min_epochs:
+                if bad_epochs_ >= bad_epochs and epoch >= min_epochs:
                     print_str += (
                         '\n{}Maximum bad epochs exceeded. Process has been '
                         'stopped. Best epoch: {}'
