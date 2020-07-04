@@ -510,8 +510,6 @@ def train(device, loaders, model, criterion, optimizer, scheduler,
 
             print_str += \
                 ', test = {:.8f}\n'.format(mean_test_loss) \
-              + '{}Losses: train = {:.8f}, test = {:.8f}\n' \
-                    .format(print_indent, mean_train_loss, mean_test_loss) \
               + '{}Test: accuracy = {:.8f}\n'.format(print_indent, accuracy) \
               + '{}Test: precision = {:.8f}\n' \
                     .format(print_indent, precision) \
@@ -555,9 +553,9 @@ def train(device, loaders, model, criterion, optimizer, scheduler,
 
             prev_score = score
 
-        if log_file:
-            print(print_str, file=log_file)
-            log_file.flush()
+    if log_file:
+        print(print_str, file=log_file)
+        log_file.flush()
 
     return {'train_losses': train_losses,
             'test_losses': test_losses,
