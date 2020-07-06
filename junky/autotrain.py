@@ -34,9 +34,8 @@ def torch_autotrain(
         fit_kwargs - params that are constructed from *make_model_fit_params*.
     :param train_method: method to train and validate the model.
     :type train_method: callable(
-            device, loaders, model, *other_train_args,
-            best_model_backup_method, log_prefix,
-            *train_args, **train_kwargs
+            loaders, model, *other_train_args, best_model_backup_method,
+            *train_args, log_prefix='', **train_kwargs
         ) -> <train statistics>
         device - one of *devices* that is assigned to train the model;
         loaders - the return of *create_loaders_method* or ``None`` if
@@ -195,8 +194,8 @@ def torch_autotrain(
                 print('\n' + iter_name, 'model:', model,
                       next(model.parameters()).device,'\n')
             stat = train_method(
-                device, loaders, model, *other_train_args, backup_method,
-                '{}: '.format(iter_name), *train_args, **train_kwargs
+                loaders, model, *other_train_args, backup_method, *train_args,
+                log_prefix='{}: '.format(iter_name), **train_kwargs
             )
             with lock:
                 stats.append((iter_name, local_model_score.value, kwargs,

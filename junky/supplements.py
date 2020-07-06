@@ -348,8 +348,8 @@ def embed_conllu_fields(corpus, fields, values, empties=None, nones=None,
                     token[field[0]] = val_
         yield sentence
 
-def train(device, loaders, model, criterion, optimizer, scheduler,
-          best_model_backup_method, log_prefix, datasets=None,
+def train(loaders, model, criterion, optimizer, scheduler,
+          best_model_backup_method, log_prefix='', datasets=None,
           pad_collate=None, epochs=sys.maxsize, min_epochs=0, bad_epochs=5,
           batch_size=32, control_metric='accuracy', max_grad_norm=None,
           best_score=None, with_progress=True, log_file=LOG_FILE):
@@ -391,6 +391,14 @@ def train(device, loaders, model, criterion, optimizer, scheduler,
                       file=log_file)
             torch.save(model, f, pickle_protocol=2)
 
+    device = next(model.parameters()).device or junky.CPU
+    def to_device(data):
+        if isinstance(data, torch.Tensor):
+            data = data.to(device)
+        elif isinstance(data, Iterable):
+            data = type(data)(to_device(x) for x in data)
+        return data
+
     best_epoch = None
     if best_score is None:
         best_score = float('-inf')
@@ -418,13 +426,6 @@ def train(device, loaders, model, criterion, optimizer, scheduler,
                             file=log_file) \
                            if with_progress and log_file else \
                        None
-
-        def to_device(data):
-            if isinstance(data, torch.Tensor):
-                data = data.to(device)
-            elif isinstance(data, Iterable):
-                data = type(data)(to_device(x) for x in data)
-            return data
 
         model.train()
         for batch in train_loader:
