@@ -115,6 +115,6 @@ class BaseDataset(Dataset):
                       **kwargs):
         """Create `DataLoader` for this object. All params are the params of
         `DataLoader`. Only *dataset* and *collate_fn* can't be changed."""
-        return DataLoader(self, batch_size=batch_size,
+        return DataLoader(self, batch_size=batch_size or len(self),
                           shuffle=shuffle, num_workers=num_workers,
                           collate_fn=self._collate, **kwargs)
