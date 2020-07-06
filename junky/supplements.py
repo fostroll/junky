@@ -260,7 +260,7 @@ def extract_conllu_fields(corpus, fields=None, word2idx=None, unk_token=None,
 
     :param corpus: the corpus in CoNLL-U or Parsed CoNLL-U format.
     :param fields: list of CoNLL-U fields but 'FORM' to extract.
-    :type fields: list
+    :type fields: list|str
     :param word2idx: Word to Index dict. If not None, all words not from dict
         will be skipped or replacet to *unk_token*
     :type word2idx: dict({word: int})
@@ -276,6 +276,8 @@ def extract_conllu_fields(corpus, fields=None, word2idx=None, unk_token=None,
     """
     if fields is None:
         fields = []
+    elif isinstance(fields, str):
+        fields = [fields]
 
     if isinstance(corpus, str):
         corpus = Conllu.load(corpus, **({'log_file': None} if silent else{}))
