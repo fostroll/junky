@@ -444,7 +444,7 @@ def torch_autotrain(
     print('==================')
     if best_model_name is None:
         print()
-        print('WARNING: No models could surpass `best_score` given.')
+        print('WARNING: No models could surpass `best_score` given')
     else:
         print('best model name = {}'.format(best_model_name))
         print('best model score = {}'.format(best_model_score))
