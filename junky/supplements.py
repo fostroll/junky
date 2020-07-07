@@ -379,7 +379,7 @@ def train(loaders, model, criterion, optimizer, scheduler,
                       if loaders and len(loaders) > 1 and loaders[1] else \
                   datasets[1].create_loader(batch_size=batch_size,
                                             shuffle=False, num_workers=0) \
-                      if datasets and len(datasets) > 1 and dataset[1] \
+                      if datasets and len(datasets) > 1 and datasets[1] \
                                   and callable(
                                       getattr(datasets[1],
                                               'create_loader', None)
