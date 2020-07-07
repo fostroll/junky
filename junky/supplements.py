@@ -323,6 +323,8 @@ def extract_conllu_fields(corpus, fields=None, word2idx=None, unk_token=None,
 
 def embed_conllu_fields(corpus, fields, values, empties=None, nones=None,
                         silent=False):
+    if isinstance(fields, str):
+        fields = [fields]
 
     if isinstance(corpus, str):
         corpus = Conllu.load(corpus, **({'log_file': None} if silent else{}))
