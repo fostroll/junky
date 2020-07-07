@@ -9,6 +9,7 @@ Provides supplement methods to use in PyTorch pipeline.
 from collections.abc import Iterable
 from corpuscula import Conllu
 from gensim.models import keyedvectors
+import itertools
 import junky
 import numpy as np
 from sklearn.metrics import accuracy_score, f1_score, precision_score, \
@@ -352,7 +353,7 @@ def embed_conllu_fields(corpus, fields, values, empties=None, nones=None,
 
 def train(loaders, model, criterion, optimizer, scheduler,
           best_model_backup_method, log_prefix='', datasets=None,
-          pad_collate=None, epochs=sys.maxsize, min_epochs=0, bad_epochs=5,
+          pad_collate=None, epochs=None, min_epochs=0, bad_epochs=5,
           batch_size=32, control_metric='accuracy', max_grad_norm=None,
           best_score=None, with_progress=True, log_file=LOG_FILE):
 
@@ -372,18 +373,24 @@ def train(loaders, model, criterion, optimizer, scheduler,
                               shuffle=True, num_workers=0,
                               collate_fn=pad_collate if pad_collate else
                               datasets[0].pad_collate)
-    test_loader = loaders[1] if loaders and len(loaders) > 1 else \
+    test_loader = loaders[1] \
+                      if loaders and len(loaders) > 1 and loaders[1] else \
                   datasets[1].create_loader(batch_size=batch_size,
                                             shuffle=False, num_workers=0) \
-                      if datasets and len(datasets) > 1 \
-                     and callable(getattr(datasets[1],
-                                          'create_loader', None)) else \
+                      if datasets and len(datasets) > 1 and dataset[1] \
+                                  and callable(
+                                      getattr(datasets[1],
+                                              'create_loader', None)
+                                  ) else \
                   DataLoader(datasets[1], batch_size=batch_size,
                              shuffle=False, num_workers=0,
                              collate_fn=pad_collate if pad_collate else
                              datasets[1].pad_collate) \
-                      if datasets and len(datasets) > 1 else \
+                      if datasets and len(datasets) > 1 and datasets[1] else \
                   None
+    assert test_loader or epochs, \
+           'ERROR: At least one of the params `loaders[1]`, `dataset[1]` or '
+           '`epochs` must be not None'
 
     if not callable(best_model_backup_method):
         f = best_model_backup_method
@@ -419,7 +426,7 @@ def train(loaders, model, criterion, optimizer, scheduler,
         clear_tqdm()
     print_indent = ' ' * len(log_prefix)
     print_str = ''
-    for epoch in range(1, epochs + 1):
+    for epoch in range(1, epochs + 1) if epochs else itertools.count(start=1):
         print_str = '{}Epoch {}: \n'.format(log_prefix, epoch)
         train_losses_ = []
 
