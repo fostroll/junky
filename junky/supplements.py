@@ -389,8 +389,8 @@ def train(loaders, model, criterion, optimizer, scheduler,
                       if datasets and len(datasets) > 1 and datasets[1] else \
                   None
     assert test_loader or epochs, \
-           'ERROR: At least one of the params `loaders[1]`, `dataset[1]` or '
-           '`epochs` must be not None'
+           'ERROR: At least one of the params `loaders[1]`, `dataset[1]` ' \
+           'or `epochs` must be not None'
 
     if not callable(best_model_backup_method):
         f = best_model_backup_method
