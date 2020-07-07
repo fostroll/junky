@@ -141,4 +141,12 @@ Returns any keyword arguments as a `dict`.
 ```python
 def kwargs_nonempty (**kwargs):
 ```
-Return any keyword arguments with non-empty values as a `dict`.
+Returns any keyword arguments with non-empty values as a `dict`.
+
+```python
+def get_func_params(func, func_locals):
+```
+Returns params of **func** as `args` and `kwargs` arrays.
+
+Method is called inside **func**; **func_locals** is an output of the
+`locals()` call inside **func**.
