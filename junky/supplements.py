@@ -353,6 +353,15 @@ def embed_conllu_fields(corpus, fields, values, empties=None, nones=None,
                     token[field[0]] = val_
         yield sentence
 
+def to_device(data, device):
+    if isinstance(data, torch.Tensor):
+        data = data.to(device)
+    elif isinstance(data, torch.Module):
+        data.to(device)
+    elif isinstance(data, Iterable):
+        data = type(data)(to_device(x, device) for x in data)
+    return data
+
 def train(loaders, model, criterion, optimizer, scheduler,
           best_model_backup_method, log_prefix='', datasets=None,
           pad_collate=None, epochs=None, min_epochs=0, bad_epochs=5,
@@ -403,12 +412,6 @@ def train(loaders, model, criterion, optimizer, scheduler,
             torch.save(model, f, pickle_protocol=2)
 
     device = next(model.parameters()).device or junky.CPU
-    def to_device(data):
-        if isinstance(data, torch.Tensor):
-            data = data.to(device)
-        elif isinstance(data, Iterable):
-            data = type(data)(to_device(x) for x in data)
-        return data
 
     best_epoch = None
     if best_score is None:
@@ -440,7 +443,7 @@ def train(loaders, model, criterion, optimizer, scheduler,
 
         model.train()
         for batch in train_loader:
-            batch = to_device(batch)
+            batch = to_device(batch, device)
             optimizer.zero_grad()
             pred, gold = model(*batch[:-1]), batch[-1]
 
@@ -478,7 +481,7 @@ def train(loaders, model, criterion, optimizer, scheduler,
         if test_loader:
             model.eval()
             for batch in test_loader:
-                batch = to_device(batch)
+                batch = to_device(batch, device)
                 gold, gold_lens = batch[-1], batch[1]
                 [test_golds.extend(y_[:len_])
                      for y_, len_ in zip(gold.cpu().numpy(), gold_lens)]
