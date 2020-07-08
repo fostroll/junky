@@ -150,3 +150,5 @@ Returns params of **func** as `args` and `kwargs` arrays.
 
 Method is called inside **func**; **func_locals** is an output of the
 `locals()` call inside **func**.
+
+If **keep_self** is `True`, don't remove `self` variable from `args`.

@@ -305,12 +305,14 @@ def kwargs_nonempty (**kwargs):
     """Return any keyword arguments with non-empty values as a dict."""
     return {x: y for x, y in kwargs.items() if y}
 
-def get_func_params(func, func_locals):
-    """Return params of *func* as args and kwargs arrays. Method is called
-    inside *func*; **func_locals** is an output of the locals() call inside
-    *func*."""
+def get_func_params(func, func_locals, keep_self=False):
+    """Return params of *func* as `args` and `kwargs` arrays. Method is called
+    inside *func*; *func_locals* is an output of the locals() call inside
+    *func*.
+    
+    If *keep_self* is ``True``, don't remove `self` variable from `args`."""
     all_args = func.__code__.co_varnames[:func.__code__.co_argcount]
     n_kwargs = len(func.__defaults__)
-    args = [func_locals[x] for x in all_args[:-n_kwargs]]
+    args = [func_locals[x] for x in all_args[:-n_kwargs] if x != 'self' or keep_self]
     kwargs = {x: func_locals[x] for x in all_args[-n_kwargs:]}
     return args, kwargs
