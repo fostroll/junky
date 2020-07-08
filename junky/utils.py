@@ -316,11 +316,3 @@ def get_func_params(func, func_locals, keep_self=False):
     args = [func_locals[x] for x in all_args[:-n_kwargs] if x != 'self' or keep_self]
     kwargs = {x: func_locals[x] for x in all_args[-n_kwargs:]}
     return args, kwargs
-
-def to_device(data, device):
-    """Move *data* to *device*""".
-    if isinstance(data, torch.Tensor):
-        data = data.to(device)
-    elif isinstance(data, Iterable):
-        data = type(data)(to_device(x) for x in data)
-    return data
