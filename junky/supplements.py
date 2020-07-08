@@ -356,7 +356,7 @@ def embed_conllu_fields(corpus, fields, values, empties=None, nones=None,
 def to_device(data, device):
     if isinstance(data, torch.Tensor):
         data = data.to(device)
-    elif isinstance(data, torch.Module):
+    elif isinstance(data, torch.nn.Module):
         data.to(device)
     elif isinstance(data, Iterable):
         data = type(data)(to_device(x, device) for x in data)
