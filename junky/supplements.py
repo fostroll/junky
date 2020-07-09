@@ -343,8 +343,8 @@ def embed_conllu_fields(corpus, fields, values, empties=None, nones=None,
                                zip(fields, val):
                 field = field.split(':')
                 if len(field) >= 3:
-                    token[field[0]][field[1]] = \
-                        val_ if val_ != field[2] else None
+                    if val_ != field[2]:
+                        token[field[0]][field[1]] = val_
                 elif len(field) == 2:
                     token[field[0]][field[1]] = val_
                 else:
