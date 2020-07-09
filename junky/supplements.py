@@ -345,6 +345,8 @@ def embed_conllu_fields(corpus, fields, values, empties=None, nones=None,
                 if len(field) >= 3:
                     if val_ != field[2]:
                         token[field[0]][field[1]] = val_
+                    else:
+                        token[field[0]].pop(field[1], None)
                 elif len(field) == 2:
                     token[field[0]][field[1]] = val_
                 else:
