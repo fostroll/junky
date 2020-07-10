@@ -192,8 +192,15 @@ On the inference stage you don't have to use the combination of
 `.transform(sentences, save=True)` and `.create_loader(shuffle=False)`
 methods. Actually, you shouldn't use it because it's not thread-safe. For
 to read batches sequentially use:
+    def transform_collate(self, sentences, batch_size=32,
+                          transform_kwargs=None, collate_kwargs=None,
+                          loglevel=0):
+        """Sequentially makes batches from **sentences** and call
+        `.transform(batch, save=False, **transform_kwargs)` and
+        `._collate(batch, **collate_kwargs)` methods for them."""
 ```python
-loader = transform_collate(sentences, batch_size=32, transform_kwargs=None)
+loader = transform_collate(sentences, batch_size=32, transform_kwargs=None,
+                           collate_kwargs=None, loglevel=0)
 ```
 
 ### CharDataset
@@ -426,7 +433,8 @@ On the inference stage you don't have to use the combination of
 methods. Actually, you shouldn't use it because it's not thread-safe. For
 to read batches sequentially use:
 ```python
-loader = transform_collate(sentences, batch_size=32, transform_kwargs=None)
+loader = transform_collate(sentences, batch_size=32, transform_kwargs=None,
+                           collate_kwargs=None, loglevel=0)
 ```
 
 ### WordDataset
@@ -588,7 +596,8 @@ On the inference stage you don't have to use the combination of
 methods. Actually, you shouldn't use it because it's not thread-safe. For
 to read batches sequentially use:
 ```python
-loader = transform_collate(sentences, batch_size=32, transform_kwargs=None)
+loader = transform_collate(sentences, batch_size=32, transform_kwargs=None,
+                           collate_kwargs=None, loglevel=0)
 ```
 
 ### BertDataset
@@ -827,7 +836,8 @@ On the inference stage you don't have to use the combination of
 methods. Actually, you shouldn't use it because it's not thread-safe. For
 to read batches sequentially use:
 ```python
-loader = transform_collate(sentences, batch_size=32, transform_kwargs=None)
+loader = transform_collate(sentences, batch_size=32, transform_kwargs=None,
+                           collate_kwargs=None, loglevel=0)
 ```
 
 ### FrameDataset
@@ -947,7 +957,8 @@ On the inference stage you don't have to use the combination of
 methods. Actually, you shouldn't use it because it's not thread-safe. For
 to read batches sequentially use:
 ```python
-loader = transform_collate(sentences, batch_size=32, transform_kwargs=None)
+loader = transform_collate(sentences, batch_size=32, transform_kwargs=None,
+                           collate_kwargs=None, loglevel=0)
 ```
 
 ### DummyDataset
@@ -1027,7 +1038,8 @@ On the inference stage you don't have to use the combination of
 methods. Actually, you shouldn't use it because it's not thread-safe. For
 to read batches sequentially use:
 ```python
-loader = transform_collate(sentences, batch_size=32, transform_kwargs=None)
+loader = transform_collate(sentences, batch_size=32, transform_kwargs=None,
+                           collate_kwargs=None, loglevel=0)
 ```
 
 ### LenDataset
@@ -1101,7 +1113,8 @@ On the inference stage you don't have to use the combination of
 methods. Actually, you shouldn't use it because it's not thread-safe. For
 to read batches sequentially use:
 ```python
-loader = transform_collate(sentences, batch_size=32, transform_kwargs=None)
+loader = transform_collate(sentences, batch_size=32, transform_kwargs=None,
+                           collate_kwargs=None, loglevel=0)
 ```
 
 ### WordCatDataset
@@ -1221,7 +1234,8 @@ On the inference stage you don't have to use the combination of
 methods. Actually, you shouldn't use it because it's not thread-safe. For
 to read batches sequentially use:
 ```python
-loader = transform_collate(sentences, batch_size=32, transform_kwargs=None)
+loader = transform_collate(sentences, batch_size=32, transform_kwargs=None,
+                           collate_kwargs=None, loglevel=0)
 ```
 
 ### Examples

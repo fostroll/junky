@@ -11,9 +11,9 @@ from junky import CPU, absmax_torch, pad_array_torch, \
 from junky.dataset.base_dataset import BaseDataset
 import sys
 from time import time
-from tqdm import tqdm
 import torch
 from torch import Tensor, tensor
+from tqdm import tqdm
 
 
 # from collections import Iterable
@@ -190,7 +190,7 @@ class BertDataset(BaseDataset):
                     (max_len_ * self.overlap_shift), 1))
 
         _src = sentences
-        if loglevel == 2:
+        if loglevel >= 2:
             print('Tokenizing')
             _src = tqdm(_src, file=sys.stdout)
         time0 = time()

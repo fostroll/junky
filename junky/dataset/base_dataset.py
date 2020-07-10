@@ -11,6 +11,7 @@ import pickle
 from torch import Tensor
 from torch.nn import Module
 from torch.utils.data import DataLoader, Dataset
+from tqdm import tqdm
 
 
 class BaseDataset(Dataset):
@@ -124,7 +125,8 @@ class BaseDataset(Dataset):
                           collate_fn=self._collate, **kwargs)
 
     def transform_collate(self, sentences, batch_size=32,
-                          transform_kwargs=None, collate_kwargs=None):
+                          transform_kwargs=None, collate_kwargs=None,
+                          loglevel=0):
         """Sequentially makes batches from **sentences** and call
         `.transform(batch, save=False, **transform_kwargs)` and
         `._collate(batch, **collate_kwargs)` methods for them."""
@@ -133,7 +135,11 @@ class BaseDataset(Dataset):
         if collate_kwargs is None:
             collate_kwargs = {}
         batch = []
-        for sentence in sentences:
+        _src = sentences
+        if loglevel >= 1:
+            print('Processing corpus')
+            _src = tqdm(_src, file=sys.stdout)
+        for sentence in _src:
             batch.append(sentence)
             if len(batch) == batch_size:
                 res = self.transform(batch, **transform_kwargs, save=False)
