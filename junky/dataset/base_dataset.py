@@ -134,11 +134,11 @@ class BaseDataset(Dataset):
         for sentence in sentences:
             batch.append(sentence)
             if len(batch) == batch_size:
-                yield self._collate(tuple(*self.transform(
+                yield self._collate(list(zip(*self.transform(
                     batch, **transform_kwargs, save=False
-                )))
+                ))))
                 batch = []
         if batch:
-            yield self._collate(tuple(*self.transform(
+            yield self._collate(list(zip(*self.transform(
                 batch, **transform_kwargs, save=False
-            )))
+            ))))
