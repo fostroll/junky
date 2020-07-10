@@ -162,6 +162,6 @@ class TokenDataset(BaseDataset):
         """
         device = batch[0].get_device() if batch[0].is_cuda else CPU
         lens = [tensor([len(x) for x in batch], device=device,
-                       dtype=self.int_tensor_dtype) if with_lens else []
+                       dtype=self.int_tensor_dtype)] if with_lens else []
         x = pad_sequence(batch, batch_first=True, padding_value=self.pad)
         return (x, *lens) if lens else x
