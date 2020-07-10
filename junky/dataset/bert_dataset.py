@@ -451,7 +451,7 @@ class BertDataset(BaseDataset):
         else:
             return data
 
-    def _collate(self, batch):
+    def _collate(self, batch, with_lens=True, with_token_lens=True):
         """The method to use with `torch.utils.data.DataLoader` and
         `.transform_collate()`.
 

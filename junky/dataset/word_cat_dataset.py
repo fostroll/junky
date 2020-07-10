@@ -65,10 +65,3 @@ class WordCatDataset(FrameDataset):
             lens = []
         x = torch.cat(x, dim=-1)
         return (x, *lens) if lens else x
-
-    def _collate(self, batch):
-        """The method to use with torch.utils.data.DataLoader. It concatenates
-        outputs of the added datasets in order of addition. All the dataset
-        must have the method `.frame_collate(batch, pos)`, where *pos* is the
-        first position of the corresponding dataset's data in the batch."""
-        return self._frame_collate(batch, 0)

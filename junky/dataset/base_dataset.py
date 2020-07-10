@@ -124,6 +124,7 @@ class BaseDataset(Dataset):
 
     def transform_collate(self, sentences, batch_size=32,
                           transform_kwargs=None, collate_kwargs=None):
+        """"""
         if transform_kwargs is None:
             transform_kwargs = {}
         if collate_kwargs is None:
@@ -132,7 +133,8 @@ class BaseDataset(Dataset):
         for sentence in sentences:
             batch.append(sentence)
             if len(batch) == batch_size:
-                yield self._collate(self.transform(batch, **transform_kwargs),
+                yield self._collate(self.transform(batch, **transform_kwargs,
+                                                   save=False),
                                     **collate_kwargs)
                 batch = []
         if batch:
