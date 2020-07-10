@@ -130,6 +130,8 @@ class BaseDataset(Dataset):
         `._collate(batch, **collate_kwargs)` methods for them."""
         if transform_kwargs is None:
             transform_kwargs = {}
+        if collate_kwargs is None:
+            collate_kwargs = {}
         batch = []
         for sentence in sentences:
             batch.append(sentence)
