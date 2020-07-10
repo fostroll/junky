@@ -124,10 +124,10 @@ class BaseDataset(Dataset):
                           collate_fn=self._collate, **kwargs)
 
     def transform_collate(self, sentences, batch_size=32,
-                          transform_kwargs=None):
+                          transform_kwargs=None, **collate_kwargs=None):
         """Sequentially makes batches from **sentences** and call
         `.transform(batch, save=False, **transform_kwargs)` and
-        `._collate(batch)` methods for them."""
+        `._collate(batch, **collate_kwargs)` methods for them."""
         if transform_kwargs is None:
             transform_kwargs = {}
         batch = []
@@ -136,7 +136,7 @@ class BaseDataset(Dataset):
             if len(batch) == batch_size:
                 yield self._collate(list(zip(*self.transform(
                     batch, **transform_kwargs, save=False
-                ))))
+                ))), **collate_kwargs)
                 batch = []
         if batch:
             yield self._collate(list(zip(*self.transform(

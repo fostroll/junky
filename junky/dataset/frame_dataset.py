@@ -119,29 +119,31 @@ class FrameDataset(BaseDataset):
                               {}))
                 for x, y in self.datasets.items()
                     if names is None
-                    or (isinstance(names, str) and x == names)
                     or x in names
         )
         if not save:
-            return tuple(data)
+            return data
 
-    def _frame_collate(self, batch, pos):
+    def _frame_collate(self, batch, pos, names=None):
         """The method to use with junky.dataset.FrameDataset.
 
         :param pos: position of the data in *batch*.
         :type pos: int
         """
+        if isinstance(names, str):
+            names = [names]
         res = []
-        for ds, num_pos, kwargs in self.datasets.values():
-            res_ = ds._frame_collate(batch, pos, **kwargs)
-            res += res_ if isinstance(res_, tuple) else [res_]
-            pos += num_pos
+        for name, (ds, num_pos, kwargs) in self.datasets.items():
+            if names is None or name in names:
+                res_ = ds._frame_collate(batch, pos, **kwargs)
+                res += res_ if isinstance(res_, tuple) else [res_]
+                pos += num_pos
         return tuple(res)
 
-    def _collate(self, batch):
+    def _collate(self, batch, names=None):
         """The method to use with `torch.utils.data.DataLoader` and
         `.transform_collate()`. It concatenates outputs of the added datasets
         in order of addition. All the dataset must have the method
         `.frame_collate(batch, pos)`, where *pos* is the first position of the
         corresponding dataset's data in the batch."""
-        return self._frame_collate(batch, 0)
+        return self._frame_collate(batch, 0, names=names)
