@@ -127,11 +127,9 @@ class BaseDataset(Dataset):
                           transform_kwargs=None):
         """Sequentially makes batches from **sentences** and call
         `.transform(batch, save=False, **transform_kwargs)` and
-        `._collate(batch, **collate_kwargs)` for them."""
+        `._collate(batch)` methods for them."""
         if transform_kwargs is None:
             transform_kwargs = {}
-        if collate_kwargs is None:
-            collate_kwargs = {}
         batch = []
         for sentence in sentences:
             batch.append(sentence)
