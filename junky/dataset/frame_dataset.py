@@ -138,10 +138,10 @@ class FrameDataset(BaseDataset):
             pos += num_pos
         return tuple(res)
 
-    def _collate(self, batch, **kwargs):
+    def _collate(self, batch):
         """The method to use with `torch.utils.data.DataLoader` and
         `.transform_collate()`. It concatenates outputs of the added datasets
         in order of addition. All the dataset must have the method
         `.frame_collate(batch, pos)`, where *pos* is the first position of the
         corresponding dataset's data in the batch."""
-        return self._frame_collate(batch, 0, **kwargs)
+        return self._frame_collate(batch, 0)

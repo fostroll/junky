@@ -168,7 +168,8 @@ source that have `torch.Tensor` or `torch.nn.Model` type. All the params will
 be transferred as is.
 
 ```python
-ds.create_loader(batch_size=32, shuffle=False, num_workers=0, **kwargs)
+loader = ds.create_loader(batch_size=32, shuffle=False, num_workers=0,
+                          **kwargs)
 ```
 Creates `torch.utils.data.DataLoader` for this object. All params are the
 params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
@@ -187,17 +188,13 @@ omit the lengths from the batches:
 fds.add('y', ds, with_lens=False)
 ```
 
+On the inference stage you don't have to use the combination of
+`.transform(sentences, save=True)` and `.create_loader(shuffle=False)`
+methods. Actually, you shouldn't use it because it's not thread-safe. For
+to read batches sequentially use:
 ```python
-transform_collate(sentences, batch_size=32,
-                  transform_kwargs=None, collate_kwargs=None)
+loader = transform_collate(sentences, batch_size=32, transform_kwargs=None)
 ```
-Sequentially makes batches from **sentences** and call
-`.transform(batch, save=False, **transform_kwargs)` and
-`._collate(batch, **collate_kwargs)` for them.
-
-This method should be used on the inference stage instead of combination of
-`.transform(sentences, save=True)` method and then reading data with
-`DataLoader`, since the latter process is not thread-safe.
 
 ### CharDataset
 
@@ -400,7 +397,8 @@ source that have `torch.Tensor` or `torch.nn.Model` type. All the params will
 be transferred as is.
 
 ```python
-ds.create_loader(batch_size=32, shuffle=False, num_workers=0, **kwargs)
+loader = ds.create_loader(batch_size=32, shuffle=False, num_workers=0,
+                          **kwargs)
 ```
 Creates `torch.utils.data.DataLoader` for this object. All params are the
 params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
@@ -423,17 +421,13 @@ fds.add('x_ch', ds, with_lens=False)
 If you don't need the lengths of tokens, you can set the param
 **with_token_lens** to `False`.
 
+On the inference stage you don't have to use the combination of
+`.transform(sentences, save=True)` and `.create_loader(shuffle=False)`
+methods. Actually, you shouldn't use it because it's not thread-safe. For
+to read batches sequentially use:
 ```python
-transform_collate(sentences, batch_size=32,
-                  transform_kwargs=None, collate_kwargs=None)
+loader = transform_collate(sentences, batch_size=32, transform_kwargs=None)
 ```
-Sequentially makes batches from **sentences** and call
-`.transform(batch, save=False, **transform_kwargs)` and
-`._collate(batch, **collate_kwargs)` for them.
-
-This method should be used on the inference stage instead of combination of
-`.transform(sentences, save=True)` method and then reading data with
-`DataLoader`, since the latter process is not thread-safe.
 
 ### WordDataset
 
@@ -569,7 +563,8 @@ source that have `torch.Tensor` or `torch.nn.Model` type. All the params will
 be transferred as is.
 
 ```python
-ds.create_loader(batch_size=32, shuffle=False, num_workers=0, **kwargs)
+loader = ds.create_loader(batch_size=32, shuffle=False, num_workers=0,
+                          **kwargs)
 ```
 Creates `torch.utils.data.DataLoader` for this object. All params are the
 params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
@@ -588,17 +583,13 @@ lengths from the batches:
 fds.add('x', ds, with_lens=False)
 ```
 
+On the inference stage you don't have to use the combination of
+`.transform(sentences, save=True)` and `.create_loader(shuffle=False)`
+methods. Actually, you shouldn't use it because it's not thread-safe. For
+to read batches sequentially use:
 ```python
-transform_collate(sentences, batch_size=32,
-                  transform_kwargs=None, collate_kwargs=None)
+loader = transform_collate(sentences, batch_size=32, transform_kwargs=None)
 ```
-Sequentially makes batches from **sentences** and call
-`.transform(batch, save=False, **transform_kwargs)` and
-`._collate(batch, **collate_kwargs)` for them.
-
-This method should be used on the inference stage instead of combination of
-`.transform(sentences, save=True)` method and then reading data with
-`DataLoader`, since the latter process is not thread-safe.
 
 ### BertDataset
 
@@ -806,7 +797,8 @@ source that have `torch.Tensor` or `torch.nn.Model` type. All the params will
 be transferred as is.
 
 ```python
-ds.create_loader(batch_size=32, shuffle=False, num_workers=0, **kwargs)
+loader = ds.create_loader(batch_size=32, shuffle=False, num_workers=0,
+         **kwargs)
 ```
 Creates `torch.utils.data.DataLoader` for this object. All params are the
 params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
@@ -830,17 +822,13 @@ If you don't need the lengths of tokens, you can set the param
 **with_token_lens**  to `False`. Note, that you have it only if you invoked
 `.transform(save=True)` with `aggregate_subtokens_op=None` option.
 
+On the inference stage you don't have to use the combination of
+`.transform(sentences, save=True)` and `.create_loader(shuffle=False)`
+methods. Actually, you shouldn't use it because it's not thread-safe. For
+to read batches sequentially use:
 ```python
-transform_collate(sentences, batch_size=32,
-                  transform_kwargs=None, collate_kwargs=None)
+loader = transform_collate(sentences, batch_size=32, transform_kwargs=None)
 ```
-Sequentially makes batches from **sentences** and call
-`.transform(batch, save=False, **transform_kwargs)` and
-`._collate(batch, **collate_kwargs)` for them.
-
-This method should be used on the inference stage instead of combination of
-`.transform(sentences, save=True)` method and then reading data with
-`DataLoader`, since the latter process is not thread-safe.
 
 ### FrameDataset
 
@@ -943,7 +931,8 @@ ds.to(*args, **kwargs):
 Invokes `.to(*args, **kwargs)` methods of all nested `Dataset` objects .
 
 ```python
-ds.create_loader(batch_size=32, shuffle=False, num_workers=0, **kwargs)
+loader = ds.create_loader(batch_size=32, shuffle=False, num_workers=0,
+                          **kwargs)
 ```
 Creates `torch.utils.data.DataLoader` for this object. All params are the
 params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
@@ -953,17 +942,13 @@ params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
 create several instances of `DataLoader` for **ds** (each with `workers=0`)
 and use them in parallel.
 
+On the inference stage you don't have to use the combination of
+`.transform(sentences, save=True)` and `.create_loader(shuffle=False)`
+methods. Actually, you shouldn't use it because it's not thread-safe. For
+to read batches sequentially use:
 ```python
-transform_collate(sentences, batch_size=32,
-                  transform_kwargs=None, collate_kwargs=None)
+loader = transform_collate(sentences, batch_size=32, transform_kwargs=None)
 ```
-Sequentially makes batches from **sentences** and call
-`.transform(batch, save=False, **transform_kwargs)` and
-`._collate(batch, **collate_kwargs)` for them.
-
-This method should be used on the inference stage instead of combination of
-`.transform(sentences, save=True)` method and then reading data with
-`DataLoader`, since the latter process is not thread-safe.
 
 ### DummyDataset
 
@@ -1026,7 +1011,8 @@ anew when you need it instead of bother with all those `save` / `load` /
 `clone` actions.
 
 ```python
-ds.create_loader(batch_size=32, shuffle=False, num_workers=0, **kwargs)
+loader = ds.create_loader(batch_size=32, shuffle=False, num_workers=0,
+                          **kwargs)
 ```
 Creates `torch.utils.data.DataLoader` for this object. All params are the
 params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
@@ -1036,29 +1022,13 @@ params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
 create several instances of `DataLoader` for **ds** (each with `workers=0`)
 and use them in parallel.
 
+On the inference stage you don't have to use the combination of
+`.transform(sentences, save=True)` and `.create_loader(shuffle=False)`
+methods. Actually, you shouldn't use it because it's not thread-safe. For
+to read batches sequentially use:
 ```python
-transform_collate(sentences, batch_size=32,
-                  transform_kwargs=None, collate_kwargs=None)
+loader = transform_collate(sentences, batch_size=32, transform_kwargs=None)
 ```
-Sequentially makes batches from **sentences** and call
-`.transform(batch, save=False, **transform_kwargs)` and
-`._collate(batch, **collate_kwargs)` for them.
-
-This method should be used on the inference stage instead of combination of
-`.transform(sentences, save=True)` method and then reading data with
-`DataLoader`, since the latter process is not thread-safe.
-
-```python
-transform_collate(sentences, batch_size=32,
-                  transform_kwargs=None, collate_kwargs=None)
-```
-Sequentially makes batches from **sentences** and call
-`.transform(batch, save=False, **transform_kwargs)` and
-`._collate(batch, **collate_kwargs)` for them.
-
-This method should be used on the inference stage instead of combination of
-`.transform(sentences, save=True)` method and then reading data with
-`DataLoader`, since the latter process is not thread-safe.
 
 ### LenDataset
 
@@ -1115,7 +1085,8 @@ when you need it instead of bother with all those `save` / `load` / `clone`
 actions.
 
 ```python
-ds.create_loader(batch_size=32, shuffle=False, num_workers=0, **kwargs)
+loader = ds.create_loader(batch_size=32, shuffle=False, num_workers=0,
+                          **kwargs)
 ```
 Creates `torch.utils.data.DataLoader` for this object. All params are the
 params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
@@ -1125,17 +1096,13 @@ params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
 create several instances of `DataLoader` for **ds** (each with `workers=0`)
 and use them in parallel.
 
+On the inference stage you don't have to use the combination of
+`.transform(sentences, save=True)` and `.create_loader(shuffle=False)`
+methods. Actually, you shouldn't use it because it's not thread-safe. For
+to read batches sequentially use:
 ```python
-transform_collate(sentences, batch_size=32,
-                  transform_kwargs=None, collate_kwargs=None)
+loader = transform_collate(sentences, batch_size=32, transform_kwargs=None)
 ```
-Sequentially makes batches from **sentences** and call
-`.transform(batch, save=False, **transform_kwargs)` and
-`._collate(batch, **collate_kwargs)` for them.
-
-This method should be used on the inference stage instead of combination of
-`.transform(sentences, save=True)` method and then reading data with
-`DataLoader`, since the latter process is not thread-safe.
 
 ### WordCatDataset
 
@@ -1238,7 +1205,8 @@ ds.to(*args, **kwargs):
 Invokes `.to(*args, **kwargs)` methods of all nested `Dataset` objects .
 
 ```python
-ds.create_loader(batch_size=32, shuffle=False, num_workers=0, **kwargs)
+loader = ds.create_loader(batch_size=32, shuffle=False, num_workers=0,
+                          **kwargs)
 ```
 Creates `torch.utils.data.DataLoader` for this object. All params are the
 params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
@@ -1247,6 +1215,14 @@ params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
 *CUDA*. The `torch` multiprocessing implementation can't handle it. Better,
 create several instances of `DataLoader` for **ds** (each with `workers=0`)
 and use them in parallel.
+
+On the inference stage you don't have to use the combination of
+`.transform(sentences, save=True)` and `.create_loader(shuffle=False)`
+methods. Actually, you shouldn't use it because it's not thread-safe. For
+to read batches sequentially use:
+```python
+loader = transform_collate(sentences, batch_size=32, transform_kwargs=None)
+```
 
 ### Examples
 
