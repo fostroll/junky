@@ -226,7 +226,7 @@ class CharDataset(BaseDataset):
                     device = x[0].get_device()
                 break
         lens = [tensor([len(x) for x in batch], device=device,
-                       dtype=self.int_tensor_dtype) if with_lens else []
+                       dtype=self.int_tensor_dtype)] if with_lens else []
         if with_token_lens:
             lens.append([tensor([len(x) for x in x], device=device,
                                 dtype=self.int_tensor_dtype) for x in batch])
