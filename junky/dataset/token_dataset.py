@@ -147,35 +147,21 @@ class TokenDataset(BaseDataset):
     def fit_transform(self, sentences, unk_token=None, pad_token=None,
                       extra_tokens=None, skip_unk=False, keep_empty=False,
                       save=True):
-        """Just a serial execution `fit()` and `transform()` methods."""
+        """Just a serial execution `.fit()` and `.transform()` methods."""
         self.fit(sentences, unk_token=unk_token, pad_token=pad_token,
                  extra_tokens=extra_tokens)
         return self.transform(sentences, skip_unk=skip_unk,
                               keep_empty=keep_empty, save=save)
 
-    def _frame_collate(self, batch, pos, with_lens=True):
-        """The method to use with junky.dataset.FrameDataset.
+    def _collate(self, batch, with_lens=True):
+        """The method to use with `DataLoader` and `.transform_collate()`.
 
-        :param pos: position of the data in *batch*.
-        :type pos: int
         :with_lens: return lengths of data.
         :return: depends on keyword args.
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
         """
-        device = batch[0][pos].get_device() if batch[0][pos].is_cuda else CPU
-        lens = [tensor([len(x[pos]) for x in batch], device=device,
-                       dtype=self.int_tensor_dtype)] if with_lens else []
-        x = pad_sequence([x[pos] for x in batch], batch_first=True,
-                         padding_value=self.pad)
-        return (x, *lens) if lens else x
-
-    def _collate(self, batch):
-        """The method to use with torch.utils.data.DataLoader
-
-        :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
-        """
         device = batch[0].get_device() if batch[0].is_cuda else CPU
-        lens = tensor([len(x) for x in batch], device=device,
-                      dtype=self.int_tensor_dtype)
+        lens = [tensor([len(x) for x in batch], device=device,
+                       dtype=self.int_tensor_dtype) if with_lens else []
         x = pad_sequence(batch, batch_first=True, padding_value=self.pad)
-        return x, lens
+        return (x, *lens) if lens else x

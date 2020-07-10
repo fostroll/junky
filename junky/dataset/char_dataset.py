@@ -203,44 +203,19 @@ class CharDataset(BaseDataset):
     def fit_transform(self, sentences, unk_token=None, pad_token=None,
                       extra_tokens=None, skip_unk=False, keep_empty=False,
                       save=True):
-        """Just a serial execution `fit()` and `transform()` methods."""
+        """Just a serial execution `.fit()` and `.transform()` methods."""
         self.fit(sentences, unk_token=unk_token, pad_token=pad_token,
                  extra_tokens=extra_tokens)
         return self.transform(sentences, skip_unk=skip_unk,
                               keep_empty=keep_empty, save=save)
 
-    def _frame_collate(self, batch, pos, with_lens=True,
-                       with_token_lens=True):
-        """The method to use with junky.dataset.FrameDataset.
+    def _collate(self, batch, with_lens=True, with_token_lens=True):
+        """The method to use with `torch.utils.data.DataLoader` and
+        `.transform_collate()`.
 
-        :param pos: position of the data in *batch*.
-        :type pos: int
         :with_lens: return lengths of data.
         :with_token_lens: return lengths of tokens of the data.
         :return: depends on keyword args.
-        :rtype: tuple(list([torch.tensor]), lens:torch.tensor,
-                      token_lens:list([torch.tensor]))
-        """
-        device = CPU
-        for x in batch:
-            x_ = x[pos]
-            if x_:
-                if x_[0].is_cuda:
-                    device = x_[0].get_device()
-                break
-        lens = [tensor([len(x[pos]) for x in batch], device=device,
-                       dtype=self.int_tensor_dtype)] if with_lens else []
-        if with_token_lens:
-            lens.append([tensor([len(x) for x in x[pos]], device=device,
-                                 dtype=self.int_tensor_dtype) for x in batch])
-        batch = self._to([x[pos] for x in batch], CPU)
-        x = pad_array_torch(batch, padding_value=self.pad,
-                            device=device, dtype=self.int_tensor_dtype)
-        return (x, *lens) if lens else x
-
-    def _collate(self, batch):
-        """The method to use with torch.utils.data.DataLoader
-
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor,
                       token_lens:list([torch.tensor]))
         """
@@ -250,11 +225,12 @@ class CharDataset(BaseDataset):
                 if x[0].is_cuda:
                     device = x[0].get_device()
                 break
-        lens = tensor([len(x) for x in batch], device=device,
-                      dtype=self.int_tensor_dtype)
-        token_lens = [tensor([len(x) for x in x], device=device,
-                             dtype=self.int_tensor_dtype) for x in batch]
+        lens = [tensor([len(x) for x in batch], device=device,
+                       dtype=self.int_tensor_dtype) if with_lens else []
+        if with_token_lens:
+            lens.append([tensor([len(x) for x in x], device=device,
+                                dtype=self.int_tensor_dtype) for x in batch])
         batch = self._to(batch, CPU)
         x = pad_array_torch(batch, padding_value=self.pad,
                             device=device, dtype=self.int_tensor_dtype)
-        return x, lens, token_lens
+        return (x, *lens) if lens else x

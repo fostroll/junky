@@ -129,29 +129,16 @@ class WordDataset(BaseDataset):
         else:
             return data
 
-    def _frame_collate(self, batch, pos, with_lens=True):
-        """The method to use with `junky.dataset.FrameDataset`.
+    def _collate(self, batch, with_lens=True):
+        """The method to use with `torch.utils.data.DataLoader` and
+        `.transform_collate()`.
 
-        :param pos: position of the data in *batch*.
-        :type pos: int
         :with_lens: return lengths of data.
         :return: depends on keyword args.
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
         """
-        device = batch[0][pos].get_device() if batch[0][pos].is_cuda else CPU
-        lens = [tensor([len(x[pos]) for x in batch], device=device,
-                       dtype=self.int_tensor_dtype)] if with_lens else []
-        x = pad_sequences_with_tensor([x[pos] for x in batch],
-                                      padding_tensor=self.pad_tensor)
-        return (x, *lens) if lens else x
-
-    def _collate(self, batch):
-        """The method to use with `DataLoader`.
-
-        :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
-        """
         device = batch[0].get_device() if batch[0].is_cuda else CPU
-        lens = tensor([len(x) for x in batch], device=device,
-                      dtype=self.int_tensor_dtype)
+        lens = [tensor([len(x) for x in batch], device=device,
+                       dtype=self.int_tensor_dtype)] if with_lens else []
         x = pad_sequences_with_tensor(batch, padding_tensor=self.pad_tensor)
-        return x, lens
+        return (x, *lens) if lens else x

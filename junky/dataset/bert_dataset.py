@@ -451,54 +451,13 @@ class BertDataset(BaseDataset):
         else:
             return data
 
-    def _frame_collate(self, batch, pos, with_lens=True,
-                       with_token_lens=True):
-        """The method to use with `junky.dataset.FrameDataset`.
+    def _collate(self, batch):
+        """The method to use with `torch.utils.data.DataLoader` and
+        `.transform_collate()`.
 
-        :param pos: position of the data in *batch*.
-        :type pos: int
         :with_lens: return lengths of data.
         :with_token_lens: return lengths of tokens of the data.
         :return: depends on keyword args.
-        :rtype: if the `.transform()` method was called with
-            *aggregate_subtokens_op*=None:
-                tuple(list([torch.tensor]), lens:torch.tensor,
-                      token_lens:list([torch.tensor]))
-            otherwise: tuple(list([torch.tensor]), lens:torch.tensor)
-        """
-        device = CPU
-        pad = 0.
-
-        if isinstance(batch[0][pos], Tensor):
-            if batch[0][pos].is_cuda:
-                device = batch[0][pos].get_device()
-            lens = [tensor([len(x[pos]) for x in batch], device=device,
-                           dtype=self.int_tensor_dtype)] if with_lens else []
-            x = pad_sequences_with_tensor([x[pos] for x in batch],
-                                          padding_tensor=pad)
-
-        else:
-            for x in batch:
-                x_ = x[pos]
-                if x_:
-                    if x_[0].is_cuda:
-                        device = x_[0].get_device()
-                        tensor_dtype = x_[0].dtype
-                    break
-            lens = [tensor([len(x[pos]) for x in batch], device=device,
-                           dtype=self.int_tensor_dtype)] if with_lens else []
-            if with_token_lens:
-                lens.append([tensor([len(x) for x in x[pos]], device=device,
-                                    dtype=self.int_tensor_dtype)
-                                 for x in batch])
-            x = pad_array_torch([x[pos] for x in batch], padding_value=pad,
-                                device=device, dtype=tensor_dtype)
-
-        return (x, *lens) if lens else x
-
-    def _collate(self, batch):
-        """The method to use with `DataLoader`.
-
         :rtype: if the `.transform()` method was called with
             *aggregate_subtokens_op*=None:
                 tuple(list([torch.tensor]), lens:torch.tensor,
@@ -513,7 +472,7 @@ class BertDataset(BaseDataset):
             if batch[0].is_cuda:
                 device = batch[0].get_device()
             lens = [tensor([len(x) for x in batch], device=device,
-                           dtype=self.int_tensor_dtype)]
+                           dtype=self.int_tensor_dtype)] if with_lens else []
             x = pad_sequences_with_tensor(batch, padding_tensor=pad)
 
         else:
@@ -524,9 +483,11 @@ class BertDataset(BaseDataset):
                         tensor_dtype = x[0].dtype
                     break
             lens = [tensor([len(x) for x in batch], device=device,
-                           dtype=self.int_tensor_dtype)]
-            lens.append([tensor([len(x) for x in x], device=device,
-                                dtype=self.int_tensor_dtype) for x in batch])
+                           dtype=self.int_tensor_dtype)] if with_lens else []
+            if with_token_lens:
+                lens.append([tensor([len(x) for x in x], device=device,
+                                    dtype=self.int_tensor_dtype)
+                                 for x in batch])
             x = pad_array_torch(batch, padding_value=pad,
                                 device=device, dtype=tensor_dtype)
 

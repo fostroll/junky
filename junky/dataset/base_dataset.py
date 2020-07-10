@@ -99,13 +99,16 @@ class BaseDataset(Dataset):
         `torch.nn.Module` type."""
         self.data = self._to(self.data, *args, **kwargs)
 
-    def _frame_collate(self, batch, pos):
-        """The stub method to use with `junky.dataset.FrameDataset`.
+    def _frame_collate(self, batch, pos, **kwargs):
+        """The method to use with `junky.dataset.FrameDataset`.
 
         :param pos: position of the data in *batch*.
         :type pos: int
+        :param **kwargs: params for _collate().
+        :return: depends on keyword args.
+        :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
         """
-        return [x[pos] for x in batch]
+        return self._collate([x[pos] for x in batch], **kwargs)
 
     def _collate(self, batch):
         """The stub method to use with `DataLoader`."""
@@ -118,3 +121,20 @@ class BaseDataset(Dataset):
         return DataLoader(self, batch_size=batch_size or len(self),
                           shuffle=shuffle, num_workers=num_workers,
                           collate_fn=self._collate, **kwargs)
+
+    def transform_collate(self, sentences, batch_size=32,
+                          transform_kwargs=None, collate_kwargs=None):
+        if transform_kwargs is None:
+            transform_kwargs = {}
+        if collate_kwargs is None:
+            collate_kwargs = {}
+        batch = []
+        for sentence in sentences:
+            batch.append(sentence)
+            if len(batch) == batch_size:
+                yield self._collate(self.transform(batch, **transform_kwargs),
+                                    **collate_kwargs)
+                batch = []
+        if batch:
+            yield self._collate(self.transform(batch, **transform_kwargs),
+                                **collate_kwargs)
