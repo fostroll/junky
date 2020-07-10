@@ -111,7 +111,8 @@ class BaseDataset(Dataset):
         return self._collate([x[pos] for x in batch], **kwargs)
 
     def _collate(self, batch):
-        """The stub method to use with `DataLoader`."""
+        """The stub method to use with `DataLoader` and
+        `.transform_collate()`."""
         return batch
 
     def create_loader(self, batch_size=32, shuffle=False, num_workers=0,
@@ -124,7 +125,9 @@ class BaseDataset(Dataset):
 
     def transform_collate(self, sentences, batch_size=32,
                           transform_kwargs=None, collate_kwargs=None):
-        """"""
+        """Sequentially makes batches from **sentences** and call
+        `.transform(batch, save=False, **transform_kwargs)` and
+        `._collate(batch, **collate_kwargs)` for them."""
         if transform_kwargs is None:
             transform_kwargs = {}
         if collate_kwargs is None:
