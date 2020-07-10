@@ -142,6 +142,6 @@ class BaseDataset(Dataset):
                                     res), **collate_kwargs)
                 batch = []
         if batch:
-            yield self._collate(list(zip(*self.transform(
-                batch, **transform_kwargs, save=False
-            ))), **collate_kwargs)
+            yield self._collate(list(zip(*res)
+                                    if isinstance(res, tuple) else
+                                res), **collate_kwargs)
