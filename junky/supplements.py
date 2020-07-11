@@ -552,7 +552,7 @@ def train(loaders, model, criterion, optimizer, scheduler,
                                   'has been stopped. ').format(log_prefix) \
                                + ('No models could surpass `best_score` given'
                                       if best_epoch is None else
-                                  'Best score {} (on the epoch {})'
+                                  'Best score {} (on epoch {})'
                                       .format(best_score, best_epoch))
                     break
 
