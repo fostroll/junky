@@ -195,7 +195,8 @@ class BertDataset(BaseDataset):
             _src = tqdm(_src, file=sys.stdout)
         time0 = time()
         # tokenize each token separately by the BERT tokenizer
-        tokenized_sentences = [[self.tokenizer.tokenize(x) for x in x]
+        tokenized_sentences = [[self.tokenizer.tokenize(x) or ['[UNK]']
+                                    for x in x]
                                    for x in _src]
         if time() - time0 < 2 and loglevel == 1:
             loglevel = 0
