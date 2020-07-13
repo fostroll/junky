@@ -41,6 +41,13 @@ class WordCatDataset(FrameDataset):
                "ERROR: dataset '{}' was already added".format(name)
         self.datasets[name] = dataset,
 
+    def get(self, name):
+        """Get dataset with a specified *name*.
+
+        :return: tuple(dataset,)
+        """
+        return self.datasets[name][0],
+
     def _frame_collate(self, batch, pos, with_lens=True):
         """The method to use with junky.dataset.FrameDataset.
 
@@ -65,3 +72,11 @@ class WordCatDataset(FrameDataset):
             lens = []
         x = torch.cat(x, dim=-1)
         return (x, *lens) if lens else x
+
+    def _collate(self, batch):
+        """The method to use with `torch.utils.data.DataLoader` and
+        `.transform_collate()`. It concatenates outputs of the added datasets
+        in order of addition. All the dataset must have the method
+        `.frame_collate(batch, pos)`, where *pos* is the first position of the
+        corresponding dataset's data in the batch."""
+        return self._frame_collate(batch, 0)
