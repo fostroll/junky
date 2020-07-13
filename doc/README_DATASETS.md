@@ -1057,8 +1057,6 @@ If not `None`, it will be transformed and saved.
 
 #### Attributes
 
-`ds.int_tensor_dtype` (`torch.dtype`): type for int tensors.
-
 `ds.data` (`list([torch.Tensor([int])])`): the source of `Dataset`.
 
 #### Methods

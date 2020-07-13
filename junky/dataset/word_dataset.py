@@ -35,10 +35,12 @@ class WordDataset(BaseDataset):
             they will be transformed and saved.
         skip_unk, keep_empty: params for the `.transform()` method.
     """
-    @property
-    def vec_size(self):
-        return self.data[0].shape[-1] if self.data else \
-               self.model.config.hidden_size
+    #@property
+    #def vec_size(self):
+    #    return self.data[0].shape[-1] if self.data else \
+    #           self.emb_model.vec_size
+    #               if hasattr(self.emb_model, 'vec_size') else \
+    #           self.emb_model.config.hidden_size
 
     def __init__(self, emb_model, vec_size,
                  unk_token=None, unk_vec_norm=1.,
