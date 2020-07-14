@@ -315,7 +315,7 @@ def extract_conllu_fields(corpus, fields=None, word2idx=None, unk_token=None,
                 if not(x['FORM'] and '-' not in x['ID']
                                  and (not word2idx or x['FORM'] in word2idx
                                                    or unk_token)):
-                    nones.append((i, j, x))
+                    nones.append((i, j))
 
     return (*sents, *((empties, nones) if return_nones else [])) \
                if fields or return_nones else \
@@ -333,8 +333,8 @@ def embed_conllu_fields(corpus, fields, values, empties=None, nones=None,
         for i in empties:
             values.insert(i, [])
     if nones:
-        for i, j, x in nones:
-            values[i].insert(j, x)
+        for i, j in nones:
+            values[i].insert(j, None)
     for sentence, vals in zip(corpus, values):
         sent = sentence[0] if isinstance(sentence, tuple) else sentence
         for token, val in zip(sent, vals):
@@ -342,15 +342,14 @@ def embed_conllu_fields(corpus, fields, values, empties=None, nones=None,
                                    if isinstance(fields, str) else \
                                zip(fields, val):
                 field = field.split(':')
-                if len(field) >= 3:
-                    if val_ != field[2]:
-                        token[field[0]][field[1]] = val_
+                if val_ is not None:
+                    if len(field) >= 2:
+                        if len(field) >= 3 and val_ == field[2]:
+                            token[field[0]].pop(field[1], None)
+                        else:
+                            token[field[0]][field[1]] = val_
                     else:
-                        token[field[0]].pop(field[1], None)
-                elif len(field) == 2:
-                    token[field[0]][field[1]] = val_
-                else:
-                    token[field[0]] = val_
+                        token[field[0]] = val_
         yield sentence
 
 def to_device(data, device):
