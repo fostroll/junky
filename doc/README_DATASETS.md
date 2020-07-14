@@ -190,8 +190,8 @@ fds.add('y', ds, with_lens=False)
 
 On the inference stage you don't have to use the combination of
 `.transform(sentences, save=True)` and `.create_loader(shuffle=False)`
-methods. Actually, you shouldn't use it because it's not thread-safe. For
-to read batches sequentially use:
+methods. Actually, you shouldn't use it because it's not thread-safe. 
+To read batches sequentially use:
     def transform_collate(self, sentences, batch_size=32,
                           transform_kwargs=None, collate_kwargs=None,
                           loglevel=0):
@@ -199,7 +199,7 @@ to read batches sequentially use:
         `.transform(batch, save=False, **transform_kwargs)` and
         `._collate(batch, **collate_kwargs)` methods for them."""
 ```python
-loader = transform_collate(sentences, batch_size=32, transform_kwargs=None,
+loader = ds.transform_collate(sentences, batch_size=32, transform_kwargs=None,
                            collate_kwargs=None, loglevel=0)
 ```
 
@@ -430,10 +430,10 @@ If you don't need the lengths of tokens, you can set the param
 
 On the inference stage you don't have to use the combination of
 `.transform(sentences, save=True)` and `.create_loader(shuffle=False)`
-methods. Actually, you shouldn't use it because it's not thread-safe. For
-to read batches sequentially use:
+methods. Actually, you shouldn't use it because it's not thread-safe. 
+To read batches sequentially use:
 ```python
-loader = transform_collate(sentences, batch_size=32, transform_kwargs=None,
+loader = ds.transform_collate(sentences, batch_size=32, transform_kwargs=None,
                            collate_kwargs=None, loglevel=0)
 ```
 
@@ -593,10 +593,10 @@ fds.add('x', ds, with_lens=False)
 
 On the inference stage you don't have to use the combination of
 `.transform(sentences, save=True)` and `.create_loader(shuffle=False)`
-methods. Actually, you shouldn't use it because it's not thread-safe. For
-to read batches sequentially use:
+methods. Actually, you shouldn't use it because it's not thread-safe. 
+To read batches sequentially use:
 ```python
-loader = transform_collate(sentences, batch_size=32, transform_kwargs=None,
+loader = ds.transform_collate(sentences, batch_size=32, transform_kwargs=None,
                            collate_kwargs=None, loglevel=0)
 ```
 
@@ -833,10 +833,10 @@ If you don't need the lengths of tokens, you can set the param
 
 On the inference stage you don't have to use the combination of
 `.transform(sentences, save=True)` and `.create_loader(shuffle=False)`
-methods. Actually, you shouldn't use it because it's not thread-safe. For
-to read batches sequentially use:
+methods. Actually, you shouldn't use it because it's not thread-safe. 
+To read batches sequentially use:
 ```python
-loader = transform_collate(sentences, batch_size=32, transform_kwargs=None,
+loader = ds.transform_collate(sentences, batch_size=32, transform_kwargs=None,
                            collate_kwargs=None, loglevel=0)
 ```
 
@@ -954,10 +954,9 @@ and use them in parallel.
 
 On the inference stage you don't have to use the combination of
 `.transform(sentences, save=True)` and `.create_loader(shuffle=False)`
-methods. Actually, you shouldn't use it because it's not thread-safe. For
-to read batches sequentially use:
+methods. Actually, you shouldn't use it because it's not thread-safe. To read batches sequentially use:
 ```python
-loader = transform_collate(sentences, batch_size=32, transform_kwargs=None,
+loader = ds.transform_collate(sentences, batch_size=32, transform_kwargs=None,
                            collate_kwargs=None, loglevel=0)
 ```
 
@@ -1035,10 +1034,10 @@ and use them in parallel.
 
 On the inference stage you don't have to use the combination of
 `.transform(sentences, save=True)` and `.create_loader(shuffle=False)`
-methods. Actually, you shouldn't use it because it's not thread-safe. For
-to read batches sequentially use:
+methods. Actually, you shouldn't use it because it's not thread-safe. 
+To read batches sequentially use:
 ```python
-loader = transform_collate(sentences, batch_size=32, transform_kwargs=None,
+loader = ds.transform_collate(sentences, batch_size=32, transform_kwargs=None,
                            collate_kwargs=None, loglevel=0)
 ```
 
@@ -1108,10 +1107,10 @@ and use them in parallel.
 
 On the inference stage you don't have to use the combination of
 `.transform(sentences, save=True)` and `.create_loader(shuffle=False)`
-methods. Actually, you shouldn't use it because it's not thread-safe. For
-to read batches sequentially use:
+methods. Actually, you shouldn't use it because it's not thread-safe. 
+To read batches sequentially use:
 ```python
-loader = transform_collate(sentences, batch_size=32, transform_kwargs=None,
+loader = ds.transform_collate(sentences, batch_size=32, transform_kwargs=None,
                            collate_kwargs=None, loglevel=0)
 ```
 
@@ -1229,10 +1228,10 @@ and use them in parallel.
 
 On the inference stage you don't have to use the combination of
 `.transform(sentences, save=True)` and `.create_loader(shuffle=False)`
-methods. Actually, you shouldn't use it because it's not thread-safe. For
-to read batches sequentially use:
+methods. Actually, you shouldn't use it because it's not thread-safe. 
+To read batches sequentially use:
 ```python
-loader = transform_collate(sentences, batch_size=32, transform_kwargs=None,
+loader = ds.transform_collate(sentences, batch_size=32, transform_kwargs=None,
                            collate_kwargs=None, loglevel=0)
 ```
 
