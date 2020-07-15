@@ -75,6 +75,7 @@ class WordDataset(BaseDataset):
             self.pad_tensor = tensor(self.pad, dtype=float_tensor_dtype)
         else:
             self.pad = None
+            self.pad_tensor = None
         if sentences:
             self.transform(sentences, skip_unk=skip_unk,
                            keep_empty=keep_empty, save=True)
@@ -142,5 +143,6 @@ class WordDataset(BaseDataset):
         device = batch[0].get_device() if batch[0].is_cuda else CPU
         lens = [tensor([len(x) for x in batch], device=device,
                        dtype=self.int_tensor_dtype)] if with_lens else []
-        x = pad_sequences_with_tensor(batch, padding_tensor=self.pad_tensor)
+        x = tensor(batch) if self.pad_tensor is None else \
+            pad_sequences_with_tensor(batch, padding_tensor=self.pad_tensor)
         return (x, *lens) if lens else x
