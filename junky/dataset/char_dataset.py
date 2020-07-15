@@ -219,6 +219,9 @@ class CharDataset(BaseDataset):
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor,
                       token_lens:list([torch.tensor]))
         """
+        assert self.pad is not None, \
+               ('ERROR: pad_token must be defined if you want to use {} in '
+                'DataLoader').format(self.__class__.__name__)
         device = CPU
         for x in batch:
             if x:

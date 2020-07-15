@@ -140,9 +140,11 @@ class WordDataset(BaseDataset):
         :return: depends on keyword args.
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
         """
+        assert self.pad_tensor is not None, \
+               ('ERROR: pad_token must be defined if you want to use {} in '
+                'DataLoader').format(self.__class__.__name__)
         device = batch[0].get_device() if batch[0].is_cuda else CPU
         lens = [tensor([len(x) for x in batch], device=device,
                        dtype=self.int_tensor_dtype)] if with_lens else []
-        x = tensor(batch) if self.pad_tensor is None else \
-            pad_sequences_with_tensor(batch, padding_tensor=self.pad_tensor)
+        x = pad_sequences_with_tensor(batch, padding_tensor=self.pad_tensor)
         return (x, *lens) if lens else x
