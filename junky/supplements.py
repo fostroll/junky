@@ -18,6 +18,7 @@ import sys
 import torch
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
+import warnings
 
 LOG_FILE = sys.stdout
 
@@ -27,9 +28,9 @@ def clear_tqdm():
         for instance in list(tqdm._instances):
             tqdm._decr_instances(instance)
 def clear_stderr():
-    import sys
-    print('WARNING: clear_stderr() is deprecated and is going to be removed '
-          'in future releases. Use clear_tqdm() instead.', file=sys.stderr)
+    warnings.warn('clear_stderr() is deprecated and is going to be removed '
+                  'in future releases. Use clear_tqdm() instead.',
+                  DeprecationWarning)
     clear_tqdm()
 
 def make_word_embeddings(vocab, vectors=None,
@@ -58,6 +59,10 @@ def make_word_embeddings(vocab, vectors=None,
     :rtype: tuple(dict({word: int}), int, list([int])|None,
         torch.nn.Embedding)
     """
+    warnings.warn('make_word_embeddings() is deprecated and is going to be '
+                  'removed in future releases. Use '
+                  'junky.datasets.TokenDataset class instead.',
+                  DeprecationWarning)
     assert vectors is None or len(vocab) == vectors.shape[0], \
            'ERROR: vocab and vectors must be of equal size'
     assert vectors is None or vectors.shape[0] != 0, \
