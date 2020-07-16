@@ -62,9 +62,10 @@ class WordCatDataset(FrameDataset):
             vec_sizes[0] = (0, vec_sizes[0])
         vec_sizes = list(accumulate(vec_sizes, lambda x, y: (x[1], x[1] + y)))
 
-        x = [y._frame_collate([x[pos][..., z[0]:z[1]] for x in batch], 0,
+        x = [y[0]._frame_collate([x[pos][..., z[0]:z[1]] for x in batch], 0,
                               with_lens=with_lens and i == 0)
-                 for i, (y, z) in enumerate(zip(self.datasets, vec_sizes))]
+                 for i, (y, z) in enumerate(zip(self.datasets.values(),
+                                            vec_sizes))]
         if with_lens:
             lens = x[0][1]
             x[0] = x[0][0]
