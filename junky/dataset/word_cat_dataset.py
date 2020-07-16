@@ -57,7 +57,7 @@ class WordCatDataset(FrameDataset):
         :return: depends on keyword args.
         :rtype: tuple(list([torch.tensor]), lens:torch.tensor)
         """
-        vec_sizes = [x[0].vec_size for x in self.datasets]
+        vec_sizes = [x[0].vec_size for x in self.datasets.values()]
         if vec_sizes:
             vec_sizes[0] = (0, vec_sizes[0])
         vec_sizes = list(accumulate(vec_sizes, lambda x, y: (x[1], x[1] + y)))
