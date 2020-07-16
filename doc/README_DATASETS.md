@@ -746,9 +746,9 @@ or `tuple(int)`. If `None`, we'll aggregate all the layers.
 the absolute values of the compared items (*absmax* method).
 
 **aggregate_subtokens_op**: how to aggregate subtokens vectors to form only
-one vector for each input word. The ops allowed: `None`, `'max'`, `'mean'`,
-`'sum'`. For `'max'` method we take into account the absolute values of the
-compared items (`absmax` method).
+one vector for each input word. The ops allowed: `None`, `'first'`, `'last'`,
+`'max'`, `'mean'`, `'sum'`. For `'max'` method we take into account the
+absolute values of the compared items (`absmax` method).
 
 If you want to get the result placed on some exact device, specify the device
 with **to** param. If **to** is `None`, the data will be placed to the very

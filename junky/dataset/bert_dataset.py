@@ -91,6 +91,10 @@ class BertDataset(BaseDataset):
 
             if aggregate_op == 'cat':
                 hiddens = torch.cat(hiddens, dim=-1)
+            elif aggregate_op == 'first':
+                hiddens = hiddens[0]
+            elif aggregate_op == 'last':
+                hiddens = hiddens[-1]
             elif aggregate_op == 'max':
                 hiddens = absmax_torch(hiddens, dim=0)
             elif aggregate_op == 'mean':
@@ -135,8 +139,9 @@ class BertDataset(BaseDataset):
 
         *aggregate_subtokens_op*: how to aggregate subtokens vectors to form
             only one vector for each input token. The ops allowed: ``None``,
-            'max', 'mean', 'sum'. For 'max' method we take into account the
-            absolute values of the compared items (absmax method).
+            'first', 'last', 'max', 'mean', 'sum'. For 'max' method we take
+            into account the absolute values of the compared items (absmax
+            method).
 
         If you want to get the result placed on some exact device, specify the
         device with *to* param. If *to* is ``None`` (defautl), data will be
@@ -166,7 +171,7 @@ class BertDataset(BaseDataset):
         assert aggregate_hiddens_op in valid_ops, \
                'ERROR: unknown aggregate_hidden_op (choose one of {})' \
                    .format(valid_ops)
-        valid_ops = [None, 'max', 'mean', 'sum']
+        valid_ops = [None, 'first', 'last', 'max', 'mean', 'sum']
         assert aggregate_subtokens_op in valid_ops, \
                'ERROR: unknown aggregate_subtokens_op (choose one of {})' \
                    .format(valid_ops)
