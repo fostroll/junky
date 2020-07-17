@@ -410,7 +410,7 @@ def train(loaders, model, criterion, optimizer, scheduler,
     if not callable(best_model_backup_method):
         f = best_model_backup_method
         def best_model_backup_method(model, model_score):
-            if log_file:
+            if log_file and model_score is not None:
                 print('new maximum score {:.8f}'.format(model_score), end='',
                       file=log_file)
             torch.save(model, f, pickle_protocol=2)
@@ -482,6 +482,7 @@ def train(loaders, model, criterion, optimizer, scheduler,
 
         test_losses_, test_golds, test_preds = [], [], []
 
+        need_backup = True
         if test_loader:
             model.eval()
             for batch in test_loader:
@@ -535,14 +536,13 @@ def train(loaders, model, criterion, optimizer, scheduler,
               + '{}Test: recall = {:.8f}\n'.format(print_indent, recall) \
               + '{}Test: f1_score = {:.8f}'.format(print_indent, f1)
 
-            need_backup = False
             if score > best_score:
-                need_backup = True
                 best_score = score
                 best_epoch = epoch
                 best_test_golds, best_test_preds = test_golds[:], test_preds[:]
                 bad_epochs_ = 0
             else:
+                need_backup = False
                 if score <= prev_score:
                     bad_epochs_ += 1
                 sgn = '{} {}'.format('==' if score == best_score else '<<',
@@ -563,16 +563,30 @@ def train(loaders, model, criterion, optimizer, scheduler,
             if log_file:
                 print(print_str, file=log_file)
                 log_file.flush()
-            if need_backup:
-                best_model_backup_method(model, score)
-
-            if scheduler:
-                if score is not None:
-                    scheduler.step(score)
-                else:
-                    scheduler.step()
 
             prev_score = score
+
+        if need_backup:
+            best_model_backup_method(model, score)
+
+        if scheduler:
+            if score is None:
+                try:
+                    scheduler.step()
+                except TypeError:
+                    scheduler.step(mean_train_loss)
+                    warnings.warn(
+                        ('The test score is None' if test_loader else
+                         'No test loader or dataset is defined, but the '
+                         'scheduler expects (presumably) a test score value')
+                      + '. The mean train loss have been used instead',
+                        RuntimeWarning
+                    )
+            else:
+                try:
+                    scheduler.step(score)
+                except TypeError:
+                    scheduler.step()
 
     if log_file:
         print(print_str, file=log_file)
