@@ -354,9 +354,12 @@ def embed_conllu_fields(corpus, fields, values, empties=None, nones=None,
                             if field[1]:
                                 token[field[0]].pop(field[1], None)
                             else:
-                                token[field[0]] = field[2]
+                                token[field[0]] = None
                         else:
-                            token[field[0]][field[1]] = val_
+                            if field[1]:
+                                token[field[0]][field[1]] = val_
+                            else:
+                                token[field[0]] = val_
                     else:
                         token[field[0]] = val_
         yield sentence
