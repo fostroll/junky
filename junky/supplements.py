@@ -299,8 +299,9 @@ def extract_conllu_fields(corpus, fields=None, word2idx=None, unk_token=None,
         for j, field in enumerate(zip(*[
             (x['FORM'] if not word2idx or x['FORM'] in word2idx else
              unk_token,
-             *[x[y[0]].get(y[1], y[2]) if len(y) >= 3 else
+             *[x[y[0]].get(y[1], y[2]) if len(y) >= 3 and y[2] else
                x[y[0]].get(y[1]) if len(y) == 2 else
+               x[y[0]] or y[2] if len(y) >= 3 else
                x[y[0]]
                    for y in [y.split(':') for y in fields]])
                  for x in sent
@@ -350,7 +351,10 @@ def embed_conllu_fields(corpus, fields, values, empties=None, nones=None,
                 if val_ is not None:
                     if len(field) >= 2:
                         if len(field) >= 3 and val_ == field[2]:
-                            token[field[0]].pop(field[1], None)
+                            if field[1]:
+                                token[field[0]].pop(field[1], None)
+                            else:
+                                token[field[0]] = field[2]
                         else:
                             token[field[0]][field[1]] = val_
                     else:
