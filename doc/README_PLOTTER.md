@@ -10,7 +10,7 @@ The lib contains tools to plot useful statistics on trained *PyTorch* models.
 2. [Plot Metrics](#metrics)
 3. [Plot Confusion Matrix](#confusion)
 
-#### Plot Losses <a name="loss"></a>
+### Plot Losses <a name="loss"></a>
 
 ```python
 import junky
@@ -51,7 +51,7 @@ Used as `fname` in `plt.savefig()`. Default file extention is '.png',
 if other extention is needed, please specify extention in save_name as well. 
 *Example*: ``save_name='plot.pdf'``
 
-#### Plot Metrics <a name="metrics"></a>
+### Plot Metrics <a name="metrics"></a>
 
 ```python
 junky.plot_metrics(metrics=[], legend_loc='best',
@@ -81,7 +81,7 @@ valid loc definitions.
 **save_name**:      `str`: filename of figure file to save. 
 If `None`, image is not saved to disk.
 
-#### Plot Confusion Matrix <a name="confusion"></a>
+### Plot Confusion Matrix <a name="confusion"></a>
 
 ```python
 junky.plot_confusion_matrix(y_true, y_pred, 
