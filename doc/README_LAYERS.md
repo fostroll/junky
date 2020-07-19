@@ -12,8 +12,6 @@ The lib contains several layers to use in *PyTorch* models.
 4. [HighwayNetwork](#highway)
 5. [Highway biLSTM](#hi_bilstm)
 
-___
-
 ### Masking <a name="masking"></a>
 
 ```python

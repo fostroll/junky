@@ -10,8 +10,6 @@ The lib contains tools to plot useful statistics on trained *PyTorch* models.
 2. [Plot Metrics](#metrics)
 3. [Plot Confusion Matrix](#confusion)
 
-___
-
 #### Plot Losses <a name="loss"></a>
 
 ```python
