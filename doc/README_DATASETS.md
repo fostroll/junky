@@ -5,7 +5,20 @@
 The lib contains a few descendants of `torch.utils.data.Dataset` that can be
 used together with *PyTorch* models.
 
-### TokenDataset
+### Table of Contents
+
+1. [TokenDataset](#token)
+2. [CharDataset](#char)
+3. [WordDataset](#word)
+4. [BertDataset](#bert)
+5. [FrameDataset](#frame)
+6. [DummyDataset](#dummy)
+7. [LenDataset](#len)
+8. [WordCatDataset](#wordcat)
+9. [Examples](#examples)
+
+
+### TokenDataset  <a name="token"></a>
 
 Maps tokenized sentences to sequences of their tokens' indices.
 
@@ -203,7 +216,7 @@ loader = ds.transform_collate(sentences, batch_size=32, transform_kwargs=None,
                            collate_kwargs=None, loglevel=0)
 ```
 
-### CharDataset
+### CharDataset <a name="char"></a>
 
 Maps tokenized sentences to sequences of lists of indices of their tokens'
 characters.
@@ -437,7 +450,7 @@ loader = ds.transform_collate(sentences, batch_size=32, transform_kwargs=None,
                            collate_kwargs=None, loglevel=0)
 ```
 
-### WordDataset
+### WordDataset <a name="word"></a>
 
 Maps tokenized sentences to sequences of their words' vectors.
 
@@ -600,7 +613,7 @@ loader = ds.transform_collate(sentences, batch_size=32, transform_kwargs=None,
                            collate_kwargs=None, loglevel=0)
 ```
 
-### BertDataset
+### BertDataset <a name="bert"></a>
 
 Maps tokenized sentences to sequences of their contextual word vectors.
 
@@ -840,7 +853,7 @@ loader = ds.transform_collate(sentences, batch_size=32, transform_kwargs=None,
                            collate_kwargs=None, loglevel=0)
 ```
 
-### FrameDataset
+### FrameDataset <a name="frame"></a>
 
 A frame for use several objects of `junky.dataset.Dataset` conjointly. All
 the `Dataset` objects must have the data of equal length.
@@ -960,7 +973,7 @@ loader = ds.transform_collate(sentences, batch_size=32, transform_kwargs=None,
                            collate_kwargs=None, loglevel=0)
 ```
 
-### DummyDataset
+### DummyDataset <a name="dummy"></a>
 
 Maps all data elements to the one particular object.
 
@@ -1041,7 +1054,7 @@ loader = ds.transform_collate(sentences, batch_size=32, transform_kwargs=None,
                            collate_kwargs=None, loglevel=0)
 ```
 
-### LenDataset
+### LenDataset <a name="len"></a>
 
 Maps array-like data to the lengths of its elements.
 
@@ -1114,7 +1127,7 @@ loader = ds.transform_collate(sentences, batch_size=32, transform_kwargs=None,
                            collate_kwargs=None, loglevel=0)
 ```
 
-### WordCatDataset
+### WordCatDataset <a name="wordcat"></a>
 
 Concatenate outputs of datasets the sources of which are of `torch.Tensor`
 type (e.g., `WordDataset`, `BertDataset`, ...). **Importaint**: The sources
@@ -1235,7 +1248,7 @@ loader = ds.transform_collate(sentences, batch_size=32, transform_kwargs=None,
                            collate_kwargs=None, loglevel=0)
 ```
 
-### Examples
+### Examples <a name="examples"></a>
 
 Let us suppose that we have sets of data for training (**train** and
 **train_labels**), validation (**dev**, **dev_labels**) and testing
