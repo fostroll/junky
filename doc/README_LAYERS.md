@@ -4,7 +4,17 @@
 
 The lib contains several layers to use in *PyTorch* models.
 
-### Masking
+### Table of Contents
+
+1. [Masking](#masking)
+2. [CharEmbeddingRNN](#char_rnn)
+3. [CharEmbeddingCNN](#char_cnn)
+4. [HighwayNetwork](#highway)
+5. [Highway biLSTM](#hi_bilstm)
+
+___
+
+### Masking <a name="masking"></a>
 
 ```python
 import junky
@@ -82,7 +92,7 @@ tensor([[[-0.4479, -0.8719, -1.0129, -1.5431],
          [ 1.3610, -0.1528, -1.7044, -0.4466]]])
 ```
 
-### CharEmbeddingRNN
+### CharEmbeddingRNN <a name="char_rnn"></a>
 
 ```python
 layer = junky.CharEmbeddingRNN(alphabet_size, emb_layer=None, emb_dim=300,
@@ -128,7 +138,7 @@ Used in masking & packing/unpacking sequences for *LSTM*.
 eliminating all words of len = `0`. After *LSTM* layer, initial dimensions are
 restored using the same mask.
 
-### CharEmbeddingCNN
+### CharEmbeddingCNN <a name="char_cnn"></a>
 
 ```python
 layer = junky.CharEmbeddingCNN(alphabet_size, emb_layer=None, emb_dim=300, emb_dropout=0.0,
@@ -166,7 +176,7 @@ layers.
 - Output: :math:`(N, S, E)` where `N`, `S` are the same shape as the input and
 :math:`E = \text{emb_dim}`.
 
-### HighwayNetwork
+### HighwayNetwork <a name="highway"></a>
 
 ```python
 layer = junky.HighwayNetwork(
@@ -254,7 +264,7 @@ If **x_hw** is `None`, we adopt **x_hw = x**.
 
 **\*U_args** and **\*\*U_kwargs** are params for **U_layer** if it needs ones.
 
-### Highway biLSTM
+### Highway biLSTM <a name="hi_bilstm"></a>
 
 ```python
 layer = junky.HighwayBiLSTM(hw_num_layers, lstm_hidden_dim, lstm_num_layers, 

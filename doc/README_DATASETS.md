@@ -17,6 +17,7 @@ used together with *PyTorch* models.
 8. [WordCatDataset](#wordcat)
 9. [Examples](#examples)
 
+___
 
 ### TokenDataset  <a name="token"></a>
 
