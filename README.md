@@ -1,4 +1,4 @@
-<h2 align="center">junky lib: PyTorch utilities</h2>
+<h2 align="center">junky lib: Layers, datasets and utilities for PyTorch</h2>
 
 [![PyPI Version](https://img.shields.io/pypi/v/junky?color=blue)](https://pypi.org/project/junky/)
 [![Python Version](https://img.shields.io/pypi/pyversions/junky?color=blue)](https://www.python.org/)
