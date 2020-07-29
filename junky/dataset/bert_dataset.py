@@ -311,25 +311,6 @@ class BertDataset(BaseDataset):
 
         splitted_sent_lens = [len(x) for x in tokenized_sentences]
 
-#         a = []
-#         print()
-#         print('overmap', overmap)
-#         print()
-#         for i, sent in enumerate(tokenized_sentences):
-#             if i in overmap:
-#                 j, pos = overmap[i]
-#                 start = token_starts[j][pos]
-#                 print('j', j, 'pos', pos, 'start', start)
-#                 print(a[j], len(a[j]))
-#                 print('   ', sent, len(sent))
-#                 a[j][start:] = sent
-#                 print('   ', a[j], len(a[j]))
-#                 print()
-#             else:
-#                 a.append(sent)
-#         print('\nRESTORE:')
-#         print_list(a)
-
         if not batch_size:
             batch_size = num_sents
 
@@ -338,8 +319,8 @@ class BertDataset(BaseDataset):
         if loglevel:
             print('Vectorizing')
             _src = tqdm(_src, file=sys.stdout)
-        for batch_i in _src:
 
+        for batch_i in _src:
             batch_max_len = min(
                 max(splitted_sent_lens[batch_i:batch_i + batch_size]) + 2,
                 max_len
