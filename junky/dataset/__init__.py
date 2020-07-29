@@ -8,6 +8,7 @@ Provides implementagions of torch.utils.data.Dataset for different purposes.
 """
 from junky.dataset.dummy_dataset import *
 from junky.dataset.len_dataset import *
+from junky.dataset.label_dataset import *
 
 from junky.dataset.word_dataset import *
 from junky.dataset.bert_dataset import *
