@@ -69,8 +69,9 @@ class LabelDataset(BaseDataset):
         padding index will be replaced to empty string, too."""
         if isinstance(idx, Tensor):
             idx = idx.tolist()
-        return self.reconstruct_dict[idx] if idx in self.reconstruct_dict else
-               '' if skip_unk or self.unk is None else
+        return self.reconstruct_dict[idx] \
+                   if idx in self.reconstruct_dict else \
+               '' if skip_unk or self.unk is None else \
                self.reconstruct_dict[self.unk]
 
     def transform(self, labels, skip_unk=False, keep_empty=False,
