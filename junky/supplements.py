@@ -499,23 +499,26 @@ def train(loaders, model, criterion, optimizer, scheduler,
             for batch in test_loader:
                 batch = to_device(batch, device)
                 gold, gold_lens = batch[-1], batch[1]
-                [test_golds.extend(y_[:len_])
-                     for y_, len_ in zip(gold.cpu().numpy(), gold_lens)]
 
                 with torch.no_grad():
                     pred = model(*batch[:-1])
 
-                pred_values, pred_indices = pred.max(2)
+                pred_indices = pred.argmax(-1)
 
-                [test_preds.extend(y_[:len_])
-                     for y_, len_ in zip(pred_indices.cpu().numpy(), gold_lens)]
-
-                batch_loss = []
-                for i in range(pred.size(0)):
-                    loss_ = criterion(pred[i], gold[i])
-                    batch_loss.append(loss_)
-
-                loss = torch.mean(torch.stack(batch_loss))
+                if len(pred.shape) == 2:
+                    test_golds.extend(gold.cpu().numpy())
+                    test_preds.extend(pred_indices.cpu().numpy())
+                    loss_ = criterion(pred, gold)
+                else:
+                    [test_golds.extend(y_[:len_])
+                         for y_, len_ in zip(gold.cpu().numpy(), gold_lens)]
+                    [test_preds.extend(y_[:len_])
+                         for y_, len_ in zip(pred_indices.cpu().numpy(), gold_lens)]
+                    batch_loss = []
+                    for i in range(pred.size(0)):
+                        loss_ = criterion(pred[i], gold[i])
+                        batch_loss.append(loss_)
+                    loss = torch.mean(torch.stack(batch_loss))
                 test_losses_.append(loss.item())
 
             mean_test_loss = np.mean(test_losses_)
