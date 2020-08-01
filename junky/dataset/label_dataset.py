@@ -58,7 +58,7 @@ class LabelDataset(BaseDataset):
         internal dict, return index of unk token or None if it's not
         defined."""
         return self.transform_dict[label] \
-                   if token in self.transform_dict else \
+                   if label in self.transform_dict else \
                self.unk if not skip_unk and self.unk is not None else \
                None
 
