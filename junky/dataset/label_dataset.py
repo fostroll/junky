@@ -88,8 +88,9 @@ class LabelDataset(BaseDataset):
         existing Dataset source. Elsewise (default), the existing Dataset
         source will be replaced. The param is used only if *save* is
         ``True``."""
-        data = tensor([i for i in self.label_to_idx(l, skip_unk=skip_unk)
-                         for l in labels if keep_empty or i is not None],
+        data = tensor([i for i in (self.label_to_idx(l, skip_unk=skip_unk)
+                                       for l in labels)
+                           if keep_empty or i is not None],
                       dtype=self.int_tensor_dtype)
         if save:
             if append:
@@ -106,8 +107,9 @@ class LabelDataset(BaseDataset):
         indices will be skipped. If *skip_pad* is ``True``, padding will be
         removed. If *keep_empty* is ``False``, we'll remove sentences that
         have no data after converting."""
-        return [l for l in self.idx_to_label(i, skip_unk=skip_unk)
-                  for i in ids if keep_empty or l]
+        return [l for l in (self.idx_to_label(i, skip_unk=skip_unk)
+                                for i in ids)
+                    if keep_empty or l]
 
     def fit_transform(self, labels, unk_token=None, extra_tokens=None,
                       skip_unk=False, keep_empty=False, save=True):
