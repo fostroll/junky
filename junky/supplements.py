@@ -460,7 +460,7 @@ def train(loaders, model, criterion, optimizer, scheduler,
             optimizer.zero_grad()
             pred, gold = model(*batch[:-1]), batch[-1]
 
-            if len(pred.shape == 2):
+            if len(pred.shape) == 2:
                 batch_loss = criterion(pred, gold)
             else:
                 batch_loss = []
