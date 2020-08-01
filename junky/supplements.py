@@ -460,10 +460,13 @@ def train(loaders, model, criterion, optimizer, scheduler,
             optimizer.zero_grad()
             pred, gold = model(*batch[:-1]), batch[-1]
 
-            batch_loss = []
-            for i in range(pred.size(0)):
-                tmp_loss = criterion(pred[i], gold[i])
-                batch_loss.append(tmp_loss)
+            if len(pred.shape == 2):
+                batch_loss = criterion(pred, gold)
+            else:
+                batch_loss = []
+                for i in range(pred.size(0)):
+                    tmp_loss = criterion(pred[i], gold[i])
+                    batch_loss.append(tmp_loss)
 
             loss = torch.mean(torch.stack(batch_loss))
             loss.backward()

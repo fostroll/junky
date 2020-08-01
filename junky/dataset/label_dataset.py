@@ -100,8 +100,7 @@ class LabelDataset(BaseDataset):
         else:
             return data
 
-    def reconstruct(self, ids, skip_unk=False, skip_pad=True,
-                    keep_empty=False):
+    def reconstruct(self, ids, skip_unk=False, keep_empty=False):
         """Convert *sequences* of indices in Dataset format to the sentences
         of the corresponding tokens. If *skip_unk* is ``True``, unknown
         indices will be skipped. If *skip_pad* is ``True``, padding will be
@@ -117,3 +116,6 @@ class LabelDataset(BaseDataset):
         self.fit(labels, unk_token=unk_token, extra_tokens=extra_tokens)
         return self.transform(labels, skip_unk=skip_unk,
                               keep_empty=keep_empty, save=save)
+
+    def _collate(self, batch):
+        return tensor(batch, dtype=self.int_tensor_dtype)
