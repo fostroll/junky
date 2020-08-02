@@ -409,7 +409,7 @@ class BertDataset(BaseDataset):
 
         _src = num_subtokens
         if loglevel:
-            print('Adjusting')
+            print('Reordering')
             _src = tqdm(_src, file=sys.stdout)
         for i, token_lens in enumerate(_src):
             token_lens = num_subtokens[i]
