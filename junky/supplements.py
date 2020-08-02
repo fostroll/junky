@@ -460,16 +460,7 @@ def train(loaders, model, criterion, optimizer, scheduler,
             optimizer.zero_grad()
             pred, gold = model(*batch[:-1]), batch[-1]
 
-            if len(pred.shape) == 2:
-                loss = criterion(pred, gold)
-            else:
-#                 batch_loss = []
-#                 for i in range(pred.size(0)):
-#                     tmp_loss = criterion(pred[i], gold[i])
-#                     batch_loss.append(tmp_loss)
-#                 loss = torch.mean(torch.stack(batch_loss))
-                loss = criterion(pred.flatten(end_dim=1), gold.view(-1))
-
+            loss = criterion(pred.flatten(end_dim=-2), gold.flatten(end_dim=-1))
             loss.backward()
 
             if max_grad_norm:
@@ -510,7 +501,6 @@ def train(loaders, model, criterion, optimizer, scheduler,
                 if len(pred.shape) == 2:
                     test_golds.extend(gold.cpu().numpy())
                     test_preds.extend(pred_indices.cpu().numpy())
-                    loss_ = criterion(pred, gold)
                 else:
                     [test_golds.extend(y_[:len_])
                          for y_, len_ in zip(gold.cpu().numpy(),
@@ -518,13 +508,8 @@ def train(loaders, model, criterion, optimizer, scheduler,
                     [test_preds.extend(y_[:len_])
                          for y_, len_ in zip(pred_indices.cpu().numpy(),
                                              gold_lens)]
-#                     batch_loss = []
-#                     for i in range(pred.size(0)):
-#                         loss_ = criterion(pred[i], gold[i])
-#                         batch_loss.append(loss_)
-#                     loss = torch.mean(torch.stack(batch_loss))
-                    loss = criterion(pred.flatten(end_dim=1), gold.view(-1))
 
+                loss = criterion(pred.flatten(end_dim=-2), gold.flatten(end_dim=-1))
                 test_losses_.append(loss.item())
 
             mean_test_loss = np.mean(test_losses_)
