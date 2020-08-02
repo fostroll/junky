@@ -468,7 +468,6 @@ def train(loaders, model, criterion, optimizer, scheduler,
 #                     tmp_loss = criterion(pred[i], gold[i])
 #                     batch_loss.append(tmp_loss)
 #                 loss = torch.mean(torch.stack(batch_loss))
-
                 loss = criterion(pred.flatten(end_dim=1), gold.view(-1))
                 
             loss.backward()
@@ -517,11 +516,12 @@ def train(loaders, model, criterion, optimizer, scheduler,
                          for y_, len_ in zip(gold.cpu().numpy(), gold_lens)]
                     [test_preds.extend(y_[:len_])
                          for y_, len_ in zip(pred_indices.cpu().numpy(), gold_lens)]
-                    batch_loss = []
-                    for i in range(pred.size(0)):
-                        loss_ = criterion(pred[i], gold[i])
-                        batch_loss.append(loss_)
-                    loss = torch.mean(torch.stack(batch_loss))
+#                     batch_loss = []
+#                     for i in range(pred.size(0)):
+#                         loss_ = criterion(pred[i], gold[i])
+#                         batch_loss.append(loss_)
+#                     loss = torch.mean(torch.stack(batch_loss))
+                    loss = criterion(pred.flatten(end_dim=1), gold.view(-1))
                 test_losses_.append(loss.item())
 
             mean_test_loss = np.mean(test_losses_)
