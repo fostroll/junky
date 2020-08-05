@@ -33,11 +33,11 @@ Params:
 
 **shift**: how to place data of **array** to **ndarray** in case if the size
 of some subarray is less than corresponding dimension of **ndarray**. Allowed
-values:<br/>
-`'left'`: shift to start;<br/>
-`'right'`: shift to end;<br/>
+values:<br />
+`'left'`: shift to start;<br />
+`'right'`: shift to end;<br />
 `'center'`: place in center (or 1 position left from center if evennesses of
-subarray's size and ndarray dimension are not congruent);<br/>
+subarray's size and ndarray dimension are not congruent);<br />
 `'rcenter'`: the same as `'center'`, but if evennesses are not congruent, the
 shift will be 1 position right.
 

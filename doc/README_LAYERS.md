@@ -41,9 +41,9 @@ as `(batch, seq, feature)` (<==> `(N, *, H)`). Default: `False`.
 
 Shape:
 
-- Input:<br/>
+- Input:<br />
 **x**: :math:`(*, N, H)` where :math:`*` means any number of additional
-dimensions and :math:`H = \text{input_size}`.<br/>
+dimensions and :math:`H = \text{input_size}`.<br />
 **lens**: Array of lengths of **x** by the `seq` dimension. We mask data in
 all `seq` positions that greater than **lens**.
 
@@ -112,19 +112,19 @@ Args:
 **pad_idx**: Indices of padding element in character vocabulary.
 
 **out_type** - defines what to get as a result after the *BiLSTM*. Possible
-values:<br/>
+values:<br />
 `'final_concat'` - concatenate final hidden states of forward and backward
-*LSTM*;<br/>
+*LSTM*;<br />
 `'final_mean'` - take mean of final hidden states of forward and backward
-*LSTM*;<br/>
+*LSTM*;<br />
 `'all_mean'` - take mean of all timeframes.
 
-Shape:<br/>
+Shape:<br />
 
-- Input:<br/>
+- Input:<br />
 **x**: [batch[seq[word[ch_idx + pad] + word[pad]]]]; `torch.Tensor` of shape
 :math:`(N, S(padded), C(padded))`, where `N` is batch_size, `S` is seq_len and
-`C` is max char_len in a word in current batch.<br/>
+`C` is max char_len in a word in current batch.<br />
 **lens**: [seq[word_char_count]]; `torch.Tensor` of shape
 :math:`(N, S(padded), C(padded))`, word lengths for each sequence in batch.
 Used in masking & packing/unpacking sequences for *LSTM*.
@@ -163,10 +163,10 @@ kernel size. Default: 1.
     
 Shape:
 
-- Input:<br/>
+- Input:<br />
 **x**: [batch[seq[word[ch_idx + pad] + word[pad]]]]; `torch.Tensor` of shape
 :math:`(N, S(padded), C(padded))`, where `N` is batch_size, `S` is seq_len
-with padding and `C` is char_len with padding in current batch.<br/>
+with padding and `C` is char_len with padding in current batch.<br />
 **lens**: [seq[word_char_count]]; `torch.Tensor` of shape :math:`(N, S, C)`,
 word lengths for each sequence in batch. Used for eliminating padding in *CNN*
 layers.
@@ -190,16 +190,16 @@ layer(x, x_hw, *U_args, **U_kwargs)
 [Srivastava et al.](https://arxiv.org/abs/1507.06228) and it's formalation is:
 **H(x)\*T(x) + x\*(1 - T(x))**, where:
 
-**H(x)** - affine trainsformation followed by a non-linear activation;<br/>
+**H(x)** - affine trainsformation followed by a non-linear activation;<br />
 **T(x)** - transform gate: affine transformation followed by a sigmoid
-activation;<br/>
+activation;<br />
 **\*** - element-wise multiplication.
 
 There are some variations of it, so we implement more universal architectute:
 **U(x)\*H(x)\*T(x) + x\*C(x)**, where:
 
 **U(x)** - user defined layer that we make *Highway* around; By default,
-**U(x) = I** (identity matrix);<br/>
+**U(x) = I** (identity matrix);<br />
 **C(x)** - carry gate: generally, affine transformation followed by a sigmoid
 activation. By default, **C(x) = 1 - T(x)**.
 
@@ -230,11 +230,11 @@ activation function is used. Default is ``F.relu``.
 **H_dropout**: if non-zero, introduces a Dropout layer on the outputs of H(x)
 on each layer, with dropout probability equal to **H_dropout**. Default: 0.
 
-**gate_type**: a type of the transform and carry gates:<br/>
-`'generic'` (default): **C(x) = 1 - T(x)**;<br/>
-`'independent'`: use both independent **C(x)** and **T(x)**;<br/>
-`'T_only'`: don't use carry gate: **C(x) = I**;<br/>
-`'C_only'`: don't use carry gate: **T(x) = I**;<br/>
+**gate_type**: a type of the transform and carry gates:<br />
+`'generic'` (default): **C(x) = 1 - T(x)**;<br />
+`'independent'`: use both independent **C(x)** and **T(x)**;<br />
+`'T_only'`: don't use carry gate: **C(x) = I**;<br />
+`'C_only'`: don't use carry gate: **T(x) = I**;<br />
 `'none'`: **C(x) = T(x) = I**.
 
 **global_highway_input**: if `True`, we treat the input of all the network as
