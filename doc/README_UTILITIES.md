@@ -152,3 +152,54 @@ Method is called inside **func**; **func_locals** is an output of the
 `locals()` call inside **func**.
 
 If **keep_self** is `True`, don't remove `self` variable from `args`.
+
+```python
+word2index, vectors = filter_embeddings(pretrained_embs, corpus,
+						min_abs_freq=1, save_name=None,
+						include_emb_info=False, pad_token=None,
+						unk_token=None, extra_tokens=None)
+```
+Filters pretrained word embeddings' vocabulary, leaving only tokens that are
+present in the specified `corpus` which are more frequent than minimum
+absolute frequency `min_abs_freq`. This method allows to significantly reduce
+memory usage and speed up word embedding process. The drawbacks include lower
+performance on unseen data.
+
+Args:
+
+**vectors**: file with pretrained word vectors in text format (not binary),
+where the first line is `<vocab_size> <embedding_dimensionality>`.
+
+**corpus**: a list of lists or tuples with already tokenized sentences.
+Filtered result will not contain any tokens outside of this corpus.
+
+**min_abs_freq** (`int`): minimum absolute frequency; only tokens the
+frequency of which is equal or greater than this specified value will be
+included in the filtered word embeddings. Default `min_abs_freq=1`, meaning
+all words from the corpus that have corresponding word vectors in
+`pretrained_embs` are preserved. 
+
+**save_name**(`str`): if specified, filtered word embeddings are saved in a
+file with the specified name.
+
+**include_emb_info**(`bool`): whether to include `<vocab_size> <emb_dim>` as
+the first line to the filtered embeddings file. Default is `False`, embedding
+info line is skipped. Relevant only if `save_name` is not None.
+
+For the arguments below note, that typically pretrained embeddings already
+include PAD or UNK tokens. But these argumets are helpful if you need to
+specify your custom pad/unk/extra tokens or make sure they are at the top of
+the vocab (thus, pad_token will have index=0 for convenience).
+
+**pad_token** (`str`): custom padding token, which is initialized with zeros
+and included at the top of the vocabulary. 
+
+**unk_token** (`str`): custom token for unknown words, which is initialized
+with small random numbers and included at the top of the vocabulary.
+
+**extra_tokens** (`list`): list of any extra custom tokens. For now, they are
+initialized with small random numbers and included at the top of the 
+vocabulary. Typically, used for special tokens, e.g. start/end tokens etc.
+
+If `save_name` is specified, saves the filtered vocabulary. Otherwise, returns
+word2index OrderedDict and a numpy array of corresponding word vectors.
