@@ -154,10 +154,10 @@ Method is called inside **func**; **func_locals** is an output of the
 If **keep_self** is `True`, don't remove `self` variable from `args`.
 
 ```python
-word2index, vectors = filter_embeddings(pretrained_embs, corpus,
-						min_abs_freq=1, save_name=None,
-						include_emb_info=False, pad_token=None,
-						unk_token=None, extra_tokens=None)
+word2index, vectors = filter_embeddings(
+    pretrained_embs, corpus, min_abs_freq=1, save_name=None,
+    include_emb_info=False, pad_token=None, unk_token=None, extra_tokens=None
+)
 ```
 Filters pretrained word embeddings' vocabulary, leaving only tokens that are
 present in the specified `corpus` which are more frequent than minimum
@@ -177,7 +177,7 @@ Filtered result will not contain any tokens outside of this corpus.
 frequency of which is equal or greater than this specified value will be
 included in the filtered word embeddings. Default `min_abs_freq=1`, meaning
 all words from the corpus that have corresponding word vectors in
-`pretrained_embs` are preserved. 
+`pretrained_embs` are preserved.
 
 **save_name**(`str`): if specified, filtered word embeddings are saved in a
 file with the specified name.
@@ -192,13 +192,13 @@ specify your custom pad/unk/extra tokens or make sure they are at the top of
 the vocab (thus, pad_token will have index=0 for convenience).
 
 **pad_token** (`str`): custom padding token, which is initialized with zeros
-and included at the top of the vocabulary. 
+and included at the top of the vocabulary.
 
 **unk_token** (`str`): custom token for unknown words, which is initialized
 with small random numbers and included at the top of the vocabulary.
 
 **extra_tokens** (`list`): list of any extra custom tokens. For now, they are
-initialized with small random numbers and included at the top of the 
+initialized with small random numbers and included at the top of the
 vocabulary. Typically, used for special tokens, e.g. start/end tokens etc.
 
 If `save_name` is specified, saves the filtered vocabulary. Otherwise, returns
