@@ -15,6 +15,7 @@ import numpy as np
 from sklearn.metrics import accuracy_score, f1_score, precision_score, \
                             recall_score
 import sys
+import time
 import torch
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
@@ -32,6 +33,26 @@ def clear_stderr():
                   'in future releases. Use clear_tqdm() instead.',
                   DeprecationWarning)
     clear_tqdm()
+
+
+def seconds_to_time(sec, with_week=True, round_sec=True):
+    s0 = int(round(sec)) if round_sec else sec
+    m0, s1 = divmod(int(s0), 60)
+    h0, m1 = divmod(m0, 60)
+    d0, h1 = divmod(h0, 24)
+    w, d1 = divmod(d0, 7) if with_week else (0, d0)
+    return (w, d1, h1, m1, s1), \
+           (w, d0, h0, m0, s0), \
+           (sec / 604800, sec / 86400, sec / 3600, sec / 60, sec)
+
+def seconds_to_strtime(sec, with_week=True, round_sec=True):
+    w, d, h, m, s = seconds_to_time(sec, with_week=with_week,
+                                    round_sec=round_sec)[0]
+    return '{}{}{}{}{}s'.format('{}w '.format(w) if w else '',
+                                '{}d '.format(d) if w + d else '',
+                                '{}h '.format(h) if w + d + h else '',
+                                '{}m '.format(m) if w + d + h + m else '',
+                                s)
 
 def make_word_embeddings(vocab, vectors=None,
                          pad_token=None, extra_tokens=None,
@@ -439,6 +460,7 @@ def train(loaders, model, criterion, optimizer, scheduler,
     f1s = []
     bad_epochs_ = 0
     score = None
+    start_time = time.time()
 
     if with_progress:
         clear_tqdm()
@@ -595,6 +617,9 @@ def train(loaders, model, criterion, optimizer, scheduler,
 
     if log_file:
         print(print_str, file=log_file)
+        print('Elapsed time: {}'
+                  .format(seconds_to_strtime(time.time - start_time)),
+              file=log_file)
         log_file.flush()
 
     return {'train_losses': train_losses,
