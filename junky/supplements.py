@@ -618,7 +618,7 @@ def train(loaders, model, criterion, optimizer, scheduler,
     if log_file:
         print(print_str, file=log_file)
         print('Elapsed time: {}'
-                  .format(seconds_to_strtime(time.time - start_time)),
+                  .format(seconds_to_strtime(time.time() - start_time)),
               file=log_file)
         log_file.flush()
 
