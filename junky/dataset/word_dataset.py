@@ -88,24 +88,37 @@ class WordDataset(BaseDataset):
     def _push_xtrn(self, xtrn):
         self.emb_model = xtrn
 
-    def word_to_vec(self, word, skip_unk=True):
+    def word_to_vec(self, word, check_lower=True, skip_unk=True):
         """Convert a token to its vector. If the token is not present in the
-        model, return vector of unk token or None if it's not defined."""
+        model, return vector of unk token or ``None`` if it's not defined.
+
+        If *check_lower* is ``True`` (default), try to find vector of
+        `word.lower()` if vector of *word* is absent.
+
+        If *skip_unk* is ``True``, unknown words will be skipped."""
         return self.extra_model[word] if word in self.extra_model else \
                self.emb_model[word] if word in self.emb_model else \
+               self.emb_model[word.lower()] \
+                   if check_lower and word.lower() in self.emb_model else \
                self.unk if not skip_unk and self.unk is not None else \
                None
 
-    def transform_words(self, words, skip_unk=False):
+    def transform_words(self, words, check_lower=True, skip_unk=False):
         """Convert a word or a list of words to the corresponding
-        vector|list of vectors. If skip_unk is ``True``, unknown words will be
-        skipped."""
-        return self.word_to_vec(words, skip_unk=skip_unk) \
-                   if isinstance(words, str) else \
-               [self.word_to_vec(w, skip_unk=skip_unk) for w in words]
+        vector|list of vectors.
 
-    def transform(self, sentences, skip_unk=False, keep_empty=False,
-                  save=True, append=False):
+        If *check_lower* is ``True`` (default), try to find vector of
+        `word.lower()` if vector of *word* is absent.
+
+        If *skip_unk* is ``True``, unknown words will be skipped."""
+        return self.word_to_vec(words, check_lower=check_lower,
+                                skip_unk=skip_unk) \
+                   if isinstance(words, str) else \
+               [self.word_to_vec(w, check_lower=check_lower,
+                                 skip_unk=skip_unk) for w in words]
+
+    def transform(self, sentences, check_lower=True, skip_unk=False,
+                  keep_empty=False, save=True, append=False):
         """Convert *sentences* of words to the sequences of the corresponding
         vectors and adjust their format for Dataset. If *skip_unk* is
         ``True``, unknown words will be skipped. If *keep_empty* is ``False``,
@@ -121,7 +134,8 @@ class WordDataset(BaseDataset):
         data = [tensor([
             v for v in s if keep_empty or v is not None
         ], dtype=self.float_tensor_dtype) for s in [
-            self.transform_words(s, skip_unk=skip_unk)
+            self.transform_words(s, check_lower=check_lower,
+                                 skip_unk=skip_unk)
                 for s in sentences
         ] if keep_empty or s]
         if save:

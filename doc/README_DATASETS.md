@@ -518,29 +518,45 @@ Generally, you don't need to change any attribute directly.
 #### Methods
 
 ```python
-vec = ds.word_to_vec(token, skip_unk=False)
+vec = ds.word_to_vec(word, check_lower=True, skip_unk=False)
 ```
-Converts a **token** to its **vector**. If the **token** is not present in the
-model, returns a vector of **&lt;UNK&gt;** token or `None` if it's not defined.
+Converts a **word** to its **vector**. If the **word** is not present in the
+model, returns a vector of **&lt;UNK&gt;** word or `None` if it's not
+defined.
+
+If **check_lower** is `True` (default), try to find vector of `word.lower()`
+if vector of **word* is absent.
+
+If **skip_unk** is `True`, unknown words will be skipped.
 
 **NB:** If you created the `Dataset` with **&lt;UNK&gt;**, this token is
 present in the model. So, if exactly that token will be met, its vector
 will be returned by the method even with `skip_unk=True` param.
 
 ```python
-vecs = ds.transform_words(words, skip_unk=False)
+vecs = ds.transform_words(words, check_lower=True, skip_unk=False)
 ```
 Converts a word or a `list` of words to the corresponding vector|`list` of
-vectors. If **skip_unk** is `True`, unknown words will be skipped.
+vectors.
+
+If **check_lower** is `True` (default), try to find vector of `word.lower()`
+if vector of **word** is absent.
+
+If **skip_unk** is `True`, unknown words will be skipped.
 
 ```python
-ds.transform(sentences, skip_unk=False, keep_empty=False, save=True,
-             append=False)
+ds.transform(sentences, check_lower=True, skip_unk=False, keep_empty=False,
+             save=True, append=False)
 ```
 Converts tokenized **sentences** to the sequences of the corresponding vectors
-and adjusts their format for `torch.utils.data.Dataset`. If **skip_unk** is
-`True`, unknown tokens will be skipped. If **keep_empty** is `False`
-(default), we'll remove sentences that have no data after converting.
+and adjusts their format for `torch.utils.data.Dataset`.
+
+If **check_lower** is `True` (default), try to find vector of `word.lower()`
+if vector of **word** is absent.
+
+If **skip_unk** is `True`, unknown tokens will be skipped. If **keep_empty**
+is `False` (default), we'll remove sentences that have no data after
+converting.
 
 If **save** is `True` (default), we'll keep the converted **sentences** as the
 `Dataset` source.
