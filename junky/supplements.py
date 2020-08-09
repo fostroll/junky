@@ -505,6 +505,8 @@ def train(loaders, model, criterion, optimizer, scheduler,
                     n_update = 0
 
         if with_progress:
+            if n_update:
+                progress_bar.update(n_update)
             progress_bar.close()
 
         mean_train_loss = np.mean(train_losses_)
