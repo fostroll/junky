@@ -101,10 +101,12 @@ class WordDataset(BaseDataset):
 
         If *skip_unk* is ``True``, unknown words will be skipped."""
         return self.extra_model[word] if word in self.extra_model else \
-               self.emb_model[word.lower() if force_lower else word] \
-                   if word in self.emb_model else \
                self.emb_model[word.lower()] \
-                   if check_lower and word.lower() in self.emb_model else \
+                   if force_lower and word.lower() in self.emb_model else \
+               self.emb_model[word] if word in self.emb_model else \
+               self.emb_model[word.lower()] \
+                   if not force_lower \
+                  and check_lower and word.lower() in self.emb_model else \
                self.unk if not skip_unk and self.unk is not None else \
                None
 
