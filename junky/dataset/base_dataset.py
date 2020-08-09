@@ -139,7 +139,7 @@ class BaseDataset(Dataset):
         _src = sentences
         if loglevel >= 1:
             print('Processing corpus')
-            _src = tqdm(_src, file=sys.stdout)
+            _src = tqdm(iterable=_src, mininterval=2, file=sys.stdout)
         for sentence in _src:
             batch.append(sentence)
             if len(batch) == batch_size:

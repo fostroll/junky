@@ -409,7 +409,8 @@ def filter_embeddings(pretrained_embs, corpus, min_abs_freq=1, save_name=None,
                 np.random.rand(1, embedding_dim) / math.sqrt(embedding_dim))
             word2index[x_t] = len(word2index)
 
-    progress_bar = tqdm(desc='Filtering vectors', total=n_words)
+    progress_bar = tqdm(desc='Filtering vectors',
+                        total=n_words, mininterval=2)
 
     while True:
         line = word2vec_file.readline().strip()

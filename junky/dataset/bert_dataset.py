@@ -197,7 +197,7 @@ class BertDataset(BaseDataset):
         _src = sentences
         if loglevel >= 2:
             print('Tokenizing')
-            _src = tqdm(_src, file=sys.stdout)
+            _src = tqdm(iterable=_src, mininterval=2, file=sys.stdout)
         time0 = time()
         # tokenize each token separately by the BERT tokenizer
         tokenized_sentences = [[self.tokenizer.tokenize(x) or ['[UNK]']
@@ -318,7 +318,7 @@ class BertDataset(BaseDataset):
         _src = range(0, num_sents, batch_size)
         if loglevel:
             print('Vectorizing')
-            _src = tqdm(_src, file=sys.stdout)
+            _src = tqdm(iterable=_src, mininterval=2, file=sys.stdout)
 
         for batch_i in _src:
             batch_max_len = min(
@@ -410,7 +410,7 @@ class BertDataset(BaseDataset):
         _src = num_subtokens
         if loglevel:
             print('Reordering')
-            _src = tqdm(_src, file=sys.stdout)
+            _src = tqdm(iterable=_src, mininterval=2, file=sys.stdout)
         for i, token_lens in enumerate(_src):
             token_lens = num_subtokens[i]
             start = 0
