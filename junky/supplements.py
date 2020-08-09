@@ -477,7 +477,7 @@ def train(loaders, model, criterion, optimizer, scheduler,
                        None
 
         model.train()
-        start_time = time.time()
+        start_time, n_update = time.time(), 0
         for batch in train_loader:
             batch = to_device(batch, device)
             optimizer.zero_grad()
@@ -495,12 +495,14 @@ def train(loaders, model, criterion, optimizer, scheduler,
 
             if with_progress:
                 t = time.time()
+                n_update += len(batch[0])
                 if t - start_time >= 2:
                     start_time = t
                     progress_bar.set_postfix(
                         train_loss=np.mean(train_losses_[-500:])
                     )
-                    progress_bar.update(len(batch[0]))
+                    progress_bar.update(n_update)
+                    n_update = 0
 
         if with_progress:
             progress_bar.close()
