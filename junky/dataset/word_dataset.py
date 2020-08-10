@@ -33,7 +33,8 @@ class WordDataset(BaseDataset):
         int_tensor_dtype: dtype for int tensors: torch.dtype.
         sentences: sequences of words: list([list([str])]). If not ``None``,
             they will be transformed and saved.
-        skip_unk, keep_empty: params for the `.transform()` method.
+        check_lower, skip_unk, keep_empty: params for the `.transform()`
+        method.
     """
     #@property
     #def vec_size(self):
@@ -47,7 +48,8 @@ class WordDataset(BaseDataset):
                  pad_token=None, pad_vec_norm=0.,
                  extra_tokens=None, extra_vec_norm=1.,
                  float_tensor_dtype=float32, int_tensor_dtype=int64,
-                 sentences=None, skip_unk=False, keep_empty=False):
+                 sentences=None, check_lower=True, skip_unk=False,
+                 keep_empty=False):
         super().__init__()
         self.emb_model = emb_model
         self.vec_size = vec_size
@@ -77,8 +79,9 @@ class WordDataset(BaseDataset):
             self.pad = None
             self.pad_tensor = None
         if sentences:
-            self.transform(sentences, skip_unk=skip_unk,
-                           keep_empty=keep_empty, save=True)
+            self.transform(sentences, check_lower=check_lower,
+                           skip_unk=skip_unk, keep_empty=keep_empty,
+                           save=True)
 
     def _pull_xtrn(self):
         xtrn = self.emb_model

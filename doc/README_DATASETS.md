@@ -491,7 +491,8 @@ tensors. Don't change it.
 **sentences** (`list([list([str])])`): already tokenized sentences of words.
 If not `None`, they will be transformed and saved.
 
-**skip_unk**, **keep_empty**: params for the `.transform()` method.
+**check_lower**, **skip_unk**, **keep_empty**: params for the `.transform()`
+method.
 
 #### Attributes
 
