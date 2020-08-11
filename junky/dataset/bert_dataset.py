@@ -62,6 +62,11 @@ class BertDataset(BaseDataset):
 
     def __init__(self, model, tokenizer, int_tensor_dtype=torch.int64,
                  sentences=None, **kwargs):
+        assert self.model.config.output_hidden_states, \
+               'ERROR: BERT model was created with ' \
+               '`output_hidden_states=False` option. To use it in ' \
+               'BertDataset, the model must be created with ' \
+               '`output_hidden_states=True`'
         super().__init__()
         self.model = model
         self.tokenizer = tokenizer
