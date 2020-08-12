@@ -317,6 +317,7 @@ def extract_conllu_fields(corpus, fields=None, word2idx=None, unk_token=None,
     for i, sent in enumerate(corpus):
         if isinstance(sent, tuple):
             sent = sent[0]
+        isempty = True
         for j, field in enumerate(zip(*[
             (x['FORM'] if not word2idx or x['FORM'] in word2idx else
              unk_token,
@@ -330,12 +331,11 @@ def extract_conllu_fields(corpus, fields=None, word2idx=None, unk_token=None,
                                   and (not word2idx or x['FORM'] in word2idx
                                                     or unk_token)
         ])):
-            if field or with_empty:
-                sents[j].append(field)
-            else:
-                if return_nones:
-                    empties.append(i)
-                break
+            sents[j].append(field)
+            isempty = False
+        else:
+            if isempty and return_nones:
+                empties.append(i)
 
         if return_nones:
             for j, x in enumerate(sent):
