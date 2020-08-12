@@ -630,9 +630,7 @@ def train(loaders, model, criterion, optimizer, scheduler,
               file=log_file)
         log_file.flush()
 
-    return {'train_losses': train_losses,
-            'test_losses': test_losses,
-            'best_epoch': best_epoch,
+    return {'best_epoch': best_epoch,
             'best_score': best_score,
             'best_test_golds': best_test_golds,
             'best_test_preds': best_test_preds,
