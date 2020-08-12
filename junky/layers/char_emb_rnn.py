@@ -67,7 +67,8 @@ class CharEmbeddingRNN(nn.Module):
         self._rnn_l = nn.LSTM(input_size=self._emb_l.embedding_dim,
                               hidden_size=self._emb_l.embedding_dim // (
                                   2 if out_type in ['final_concat',
-                                                    'all_mean'] else
+                                                    'all_mean',
+                                                    'all_max'] else
                                   1 if out_type in ['final_mean'] else
                                   0 # error
                               ),
@@ -135,9 +136,9 @@ class CharEmbeddingRNN(nn.Module):
         ### чем реальная размерность, которую мы хотим получить на входе
         ### в результате.
         if self.out_type == 'all_mean':
-            ## если результат - среднее значение hidden state на всех
+            ## если результат - среднее значение выходов LSTM на всех
             ## таймфреймах:
-            # 1. распаковываем hidden state. 
+            # 1. распаковываем outputs:
             x_m, _ = pad_packed_sequence(x_m, batch_first=True)
             # 2. теперь x_m имеет ту же форму, что и перед запаковыванием.
             # помещаем его в то же место x, откуда забрали (используем
@@ -167,6 +168,17 @@ class CharEmbeddingRNN(nn.Module):
             # слова (получим форму [N, S, E]). т.е., теперь у нас в x
             # будут эмбеддинги слов
             x = x.view(*x_shape, -1).sum(-2)
+
+        elif self.out_type == 'all_max':
+            ## если результат - максимальное значение выходов LSTM на всех
+            ## таймфреймах:
+            # 1. распаковываем outputs:
+            x_m, _ = pad_packed_sequence(x_m, batch_first=True)
+            # 2. теперь x_m имеет ту же форму, что и перед запаковыванием.
+            # помещаем его в то же место x, откуда забрали (используем
+            # ту же маску)
+            x[mask] = x_m
+            x = torch.max(x, dim=1)[0]
 
         elif self.out_type in ['final_concat', 'final_mean']:
             ## если результат - конкатенация либо средние значения последних
