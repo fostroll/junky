@@ -94,14 +94,16 @@ class BertDataset(BaseDataset):
             else:
                 hiddens = [hidden_states[x] for x in layer_ids]
 
-            if aggregate_op == 'cat':
+            if aggregate_op == 'absmax':
+                hiddens = absmax_torch(hiddens, dim=0)
+            elif aggregate_op == 'cat':
                 hiddens = torch.cat(hiddens, dim=-1)
             elif aggregate_op == 'first':
                 hiddens = hiddens[0]
             elif aggregate_op == 'last':
                 hiddens = hiddens[-1]
             elif aggregate_op == 'max':
-                hiddens = absmax_torch(hiddens, dim=0)
+                hiddens = torch.max(hiddens, dim=0)[0]
             elif aggregate_op == 'mean':
                 hiddens = torch.mean(hiddens if isinstance(hiddens, Tensor) else
                                      torch.stack(hiddens, dim=0),
@@ -113,7 +115,7 @@ class BertDataset(BaseDataset):
             else:
                 RuntimeError(
                   'ERROR: unknown aggregate_op '
-                  "(choose one of ['cat', 'max', 'mean', 'sum'])"
+                  "(choose one of ['absmax', 'cat', 'max', 'mean', 'sum'])"
                 )
         return hiddens
 
@@ -138,15 +140,14 @@ class BertDataset(BaseDataset):
             int or tuple of ints. If ``None``, we'll aggregate all the layers.
 
         *aggregate_hidden_op*: how to aggregate hidden scores. The ops
-            allowed: 'cat', 'max', 'mean', 'sum'. For 'max' method we take
-            into account the absolute values of the compared items (absmax
-            method).
+            allowed: 'absmax', 'cat', 'max', 'mean', 'sum'. For 'absmax'
+            method we take into account the absolute values of the compared
+            items.
 
         *aggregate_subtokens_op*: how to aggregate subtokens vectors to form
             only one vector for each input token. The ops allowed: ``None``,
-            'first', 'last', 'max', 'mean', 'sum'. For 'max' method we take
-            into account the absolute values of the compared items (absmax
-            method).
+            'absmax', 'first', 'last', 'max', 'mean', 'sum'. For 'absmax'
+            method we take into account absolute values of the compared items.
 
         If you want to get the result placed on some exact device, specify the
         device with *to* param. If *to* is ``None`` (defautl), data will be
@@ -172,11 +173,11 @@ class BertDataset(BaseDataset):
         assert max_len >= 16, 'ERROR: max len must be >= 16'
         assert max_len <= self.tokenizer.max_len, \
                'ERROR: max len must be <= {}'.format(self.tokenizer.max_len)
-        valid_ops = ['cat', 'max', 'mean', 'sum']
+        valid_ops = ['absmax', 'cat', 'max', 'mean', 'sum']
         assert aggregate_hiddens_op in valid_ops, \
                'ERROR: unknown aggregate_hidden_op (choose one of {})' \
                    .format(valid_ops)
-        valid_ops = [None, 'first', 'last', 'max', 'mean', 'sum']
+        valid_ops = [None, 'absmax', 'first', 'last', 'max', 'mean', 'sum']
         assert aggregate_subtokens_op in valid_ops, \
                'ERROR: unknown aggregate_subtokens_op (choose one of {})' \
                    .format(valid_ops)
