@@ -178,7 +178,7 @@ class CharEmbeddingRNN(nn.Module):
             # помещаем его в то же место x, откуда забрали (используем
             # ту же маску)
             x[mask] = x_m
-            x = torch.max(x, dim=-2)[0]
+            x = torch.max(x.view(*x_shape, -1), dim=-2)[0]
 
         elif self.out_type in ['final_concat', 'final_mean']:
             ## если результат - конкатенация либо средние значения последних
