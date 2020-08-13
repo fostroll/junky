@@ -22,13 +22,14 @@ class CharEmbeddingRNN(nn.Module):
             initialized as torch.nn.Embedding.from_pretrained() or elsewise.
         emb_dim: character embedding dimensionality.
         pad_idx: indices of padding element in character vocabulary.
-        out_type: 'final_concat'|'final_mean'|'all_mean'.
+        out_type: 'final_concat'|'final_mean'|'all_mean'|'all_max'.
             `out_type` defines what to get as a result from the LSTM.
             'final_concat' concatenate final hidden states of forward and
                            backward lstm;
             'final_mean' take mean of final hidden states of forward and
                          backward lstm;
-            'all_mean' take mean of all timeframes.
+            'all_mean' take mean of all timeframes
+            'all_max' take maximum of all timeframes.
 
     Shape:
         - Input:
@@ -178,6 +179,10 @@ class CharEmbeddingRNN(nn.Module):
             # помещаем его в то же место x, откуда забрали (используем
             # ту же маску)
             x[mask] = x_m
+            # 3. теперь возвращаем обратно уровень предложений (в
+            # результате будет форма [N, S, C, E]) и берём максимум по
+            # размерности длин слов (C). Т.о., теперь у нас в x
+            # будут эмбеддинги слов
             x = torch.max(x.view(*x_shape, -1), dim=-2)[0]
 
         elif self.out_type in ['final_concat', 'final_mean']:

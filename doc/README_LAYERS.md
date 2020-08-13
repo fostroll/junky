@@ -117,7 +117,8 @@ values:<br />
 *LSTM*;<br />
 `'final_mean'` - take mean of final hidden states of forward and backward
 *LSTM*;<br />
-`'all_mean'` - take mean of all timeframes.
+`'all_mean'` - take mean of all timeframes;<br />
+`'all_mean'` - take maximum of all timeframes.
 
 Shape:<br />
 
