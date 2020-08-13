@@ -782,13 +782,13 @@ to convert all **sentences** in one batch.
 or `tuple(int)`. If `None`, we'll aggregate all the layers.
 
 **aggregate_hidden_op**: how to aggregate hidden scores. The ops allowed:
-`'cat'`, `'max'`, `'mean'`, `'sum'`. For `'max'` method we take into account
-the absolute values of the compared items (*absmax* method).
+`'absmax'`, `'cat'`, `'max'`, `'mean'`, `'sum'`. For the `'absmax'` method we
+take into account absolute values of the compared items.
 
 **aggregate_subtokens_op**: how to aggregate subtokens vectors to form only
-one vector for each input word. The ops allowed: `None`, `'first'`, `'last'`,
-`'max'`, `'mean'`, `'sum'`. For `'max'` method we take into account the
-absolute values of the compared items (`absmax` method).
+one vector for each input word. The ops allowed: `None`, `'absmax'`,
+`'first'`, `'last'`, `'max'`, `'mean'`, `'sum'`. For the `'absmax'` method we
+take into account absolute values of the compared items.
 
 If you want to get the result placed on some exact device, specify the device
 with **to** param. If **to** is `None`, the data will be placed to the very
