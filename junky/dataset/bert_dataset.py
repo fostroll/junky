@@ -121,7 +121,7 @@ class BertDataset(BaseDataset):
 
     def transform(self, sentences, max_len=None, batch_size=64,
                   hidden_ids=0, aggregate_hiddens_op='mean',
-                  aggregate_subtokens_op='max', to=None,
+                  aggregate_subtokens_op='absmax', to=None,
                   save=True, append=False, loglevel=1):
         """Convert *sentences* of words to the sequences of the corresponding
         contextual vectors and adjust their format for Dataset.
