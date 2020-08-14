@@ -15,20 +15,9 @@ import torch
 from torch import Tensor, tensor
 from tqdm import tqdm
 
+#import logging
+#logging.basicConfig(level=logging.ERROR)  # to suppress transformers' warnings
 
-# from collections import Iterable
-#
-# def print_struct(o, shift=0):
-#     if isinstance(o, torch.Tensor):
-#         print('{}tensor({}, dtype={})'
-#                   .format(' ' * shift, o.shape, o.dtype))
-#     elif isinstance(o, Iterable):
-#         print(' ' * (shift - 1), type(o), 'len =', len(o))
-#         for o_ in o:
-#             print_struct(o_, shift=shift + 4)
-#
-# def print_list(lst):
-#     [print('   ', x) for x in lst]
 
 class BertDataset(BaseDataset):
     """
@@ -336,6 +325,7 @@ class BertDataset(BaseDataset):
                                            add_special_tokens=True,
                                            max_length=batch_max_len,
                                            pad_to_max_length=True,
+                                           truncation=True,
                                            return_tensors='pt',
                                            return_attention_mask=True,
                                            return_overflowing_tokens=False)
