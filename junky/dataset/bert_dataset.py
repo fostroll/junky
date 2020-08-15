@@ -15,8 +15,8 @@ import torch
 from torch import Tensor, tensor
 from tqdm import tqdm
 
-#import logging
-#logging.basicConfig(level=logging.ERROR)  # to suppress transformers' warnings
+import logging
+logging.basicConfig(level=logging.ERROR)  # to suppress transformers' warnings
 
 
 class BertDataset(BaseDataset):
@@ -325,7 +325,7 @@ class BertDataset(BaseDataset):
                                            add_special_tokens=True,
                                            max_length=batch_max_len,
                                            pad_to_max_length=True,
-                                           truncation=True,
+                                           #truncation=True,
                                            return_tensors='pt',
                                            return_attention_mask=True,
                                            return_overflowing_tokens=False)
