@@ -48,7 +48,7 @@ setup(
 
     packages=find_packages(exclude=['doc', 'examples', 'scripts', 'tests']),
     install_requires=['matplotlib', 'numpy', 'pandas', 'seaborn', 'sklearn',
-                      'torch>=1.2.0', 'transformers>=3.0.0'],
+                      'torch>=1.2.0', 'transformers>=2.5.1'],
     include_package_data=True,
     python_requires='>=3.5',
 )
