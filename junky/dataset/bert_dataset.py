@@ -6,24 +6,25 @@
 """
 Provides implementation of torch.utils.data.Dataset for word-level input.
 """
+import logging
+import sys
+#logging.basicConfig(level=logging.ERROR)
+#if not sys.warnoptions:
+#    import warnings
+#    warnings.simplefilter('ignore')
+#    os.environ['PYTHONWARNINGS'] = 'ignore'
 from junky import CPU, absmax_torch, pad_array_torch, \
                   pad_sequences_with_tensor
 from junky.dataset.base_dataset import BaseDataset
-import sys
 from time import time
 import torch
 from torch import Tensor, tensor
 from tqdm import tqdm
 
-import logging
-#logging.basicConfig(level=logging.ERROR)
 # to suppress transformers' warnings
-logging.getLogger("transformers.tokenization_utils_base").setLevel(logging.ERROR)
-#logging.getLogger("pytorch_pretrained_bert.tokenization").setLevel(logging.ERROR)
-#if not sys.warnoptions:
-#    import warnings
-#    warnings.simplefilter('ignore')
-#    os.environ['PYTHONWARNINGS'] = 'ignore'
+#logging.getLogger('transformers.tokenization_utils_base').setLevel(logging.ERROR)
+#logging.getLogger('pytorch_pretrained_bert.tokenization').setLevel(logging.ERROR)
+logging.getLogger('transformers').setLevel(logging.ERROR)
 
 
 class BertDataset(BaseDataset):
