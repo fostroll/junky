@@ -21,7 +21,9 @@ def plot_losses(train_losses=None, test_losses=None, accuracies=None,
                 legend_labels=['train', 'dev', '1 - acc'], save_name=None):
     """Plots train and dev losses obtained during training.
     The plot image is saved to disk.
-    args:
+    
+    Args:
+    
       train_losses:   list of floats, train losses throughout epochs.
                       If `None`, not plotted.
       test_losses:    list of floats, test losses throughout epochs.
@@ -67,7 +69,9 @@ def plot_confusion_matrix(y_true, y_pred,
     """
     Generate matrix plot of confusion matrix with pretty annotations.
     The plot image is saved to disk.
-    args:
+    
+    Args:
+    
       y_true:           true labels of the data, with shape (nsamples,)
 
       y_pred:           label predictions, with shape (nsamples,)
@@ -176,7 +180,9 @@ def plot_metrics(metrics=[], legend_loc='best',
     """Plots metrics obtained during training.
     Default: ['accuracy', 'precision', 'recalls', 'f1_score'].
     The plot image is saved to disk.
-    args:
+    
+    Args:
+    
       metrics:        tuple or list of metrics, where each metric is
                       a list of floats, len(metric)==num_epochs.
       legend_loc:     location of the legend according to matplotlib.
@@ -201,3 +207,20 @@ def plot_metrics(metrics=[], legend_loc='best',
     if save_name is not None:
         plt.savefig(save_name, bbox_inches='tight')
     plt.show()
+
+def plot_seqlens(corpus, bins=100, **plot_kwargs):
+    """Plots histogram of sentence lengths from the corpus.
+    
+    Args:
+    
+    **corpus** (`list([list([str])])`): pretokenized corpus.
+    
+    **figsize** (`tuple(x, y)`): figure size
+    
+    **\*\*plot_kwargs**: any other `pandas.DataFrame.hist` 
+    keyword arguments.
+    """
+    lens = [len(x) for x in corpus]
+    _ = pd.Series(lens).hist(bins=bins, **plot_kwargs)
+    print('Minimum sequence length:', min(lens))
+    print('Maximum sequence length:', max(lens))
