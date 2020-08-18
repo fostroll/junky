@@ -605,10 +605,10 @@ def train(loaders, model, criterion, optimizer, scheduler,
             best_model_backup_method(model, score)
 
         if scheduler:
-            if score is None:
-                try:
-                    scheduler.step()
-                except TypeError:
+            try:
+                scheduler.step()
+            except TypeError:
+                if score is None:
                     scheduler.step(mean_train_loss)
                     warnings.warn(
                         ('The test score is None' if test_loader else
@@ -617,11 +617,8 @@ def train(loaders, model, criterion, optimizer, scheduler,
                       + '. The mean train loss have been used instead',
                         RuntimeWarning
                     )
-            else:
-                try:
+                else:
                     scheduler.step(score)
-                except TypeError:
-                    scheduler.step()
 
     if log_file:
         print(print_str, file=log_file)
