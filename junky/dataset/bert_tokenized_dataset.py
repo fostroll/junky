@@ -10,6 +10,7 @@ sentences for `transformers.BertModel` input.
 from junky.dataset.base_dataset import BaseDataset
 import logging
 from torch import int64, tensor
+from tqdm import tqdm
 
 logging.getLogger('transformers').setLevel(logging.ERROR)
 
