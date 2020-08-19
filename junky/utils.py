@@ -301,11 +301,11 @@ def absmax_torch(tensors, dim=None):
 
     return res
 
-def kwargs (**kwargs):
+def kwargs(**kwargs):
     """Return any keyword arguments as a dict."""
     return kwargs
 
-def kwargs_nonempty (**kwargs):
+def kwargs_nonempty(**kwargs):
     """Return any keyword arguments with non-empty values as a dict."""
     return {x: y for x, y in kwargs.items() if y}
 
