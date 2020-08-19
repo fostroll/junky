@@ -9,6 +9,7 @@ sentences for `transformers.BertModel` input.
 """
 from junky.dataset.base_dataset import BaseDataset
 import logging
+import sys
 from torch import int64, tensor
 from tqdm import tqdm
 
@@ -80,9 +81,10 @@ class BertTokenizedDataset(BaseDataset):
                 return_attention_mask=True,
                 return_overflowing_tokens=False
             ) for sent in tqdm(
-                sentences
+                iterable=sentences
                     if sentences and isinstance(sentences[0], str) else
-                [' '.join(x for x in x) for x in sentences]
+                [' '.join(x for x in x) for x in sentences],
+                mininterval=2, file=sys.stdout
             )
         ]
         if save:
