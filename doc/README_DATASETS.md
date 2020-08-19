@@ -11,6 +11,7 @@ used together with *PyTorch* models.
 2. [CharDataset](#char)
 3. [WordDataset](#word)
 4. [BertDataset](#bert)
+4. [BertTokenizedDataset](#bertok)
 5. [FrameDataset](#frame)
 6. [DummyDataset](#dummy)
 7. [LenDataset](#len)
@@ -446,7 +447,7 @@ methods. Actually, you shouldn't use it because it's not thread-safe.
 To read batches sequentially use:
 ```python
 loader = ds.transform_collate(sentences, batch_size=32, transform_kwargs=None,
-                           collate_kwargs=None, loglevel=0)
+                              collate_kwargs=None, loglevel=0)
 ```
 
 ### WordDataset <a name="word"></a>
@@ -637,7 +638,7 @@ methods. Actually, you shouldn't use it because it's not thread-safe.
 To read batches sequentially use:
 ```python
 loader = ds.transform_collate(sentences, batch_size=32, transform_kwargs=None,
-                           collate_kwargs=None, loglevel=0)
+                              collate_kwargs=None, loglevel=0)
 ```
 
 ### BertDataset <a name="bert"></a>
@@ -835,7 +836,7 @@ and **tokenizer** that you used during object creation (or received from the
 `.save()` method).
 
 **NB:** Really, without `ds.model` and `ds.tokenizer`, `BertDataset` is almost
-empty. It's easier to create the object from scratch, instead of bother with
+empty. It's easier to create the object from scratch instead of bother with
 all those `save` / `load` / `clone` actions.
 
 ```python
@@ -847,7 +848,7 @@ be transferred as is.
 
 ```python
 loader = ds.create_loader(batch_size=32, shuffle=False, num_workers=0,
-         **kwargs)
+                          **kwargs)
 ```
 Creates `torch.utils.data.DataLoader` for this object. All params are the
 params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
@@ -877,7 +878,153 @@ methods. Actually, you shouldn't use it because it's not thread-safe.
 To read batches sequentially use:
 ```python
 loader = ds.transform_collate(sentences, batch_size=32, transform_kwargs=None,
-                           collate_kwargs=None, loglevel=0)
+                              collate_kwargs=None, loglevel=0)
+```
+
+### BertTokenizedDataset <a name="bertok"></a>
+
+Maps text sentences to sequences prepared for input of
+`transformers.BertModel`.
+
+```python
+from junky.dataset import BertTokenizedDataset
+ds = BertTokenizedDataset(tokenizer, int_tensor_dtype=torch.int64,
+                          sentences=None, **kwargs)
+```
+`Dataset` processes text sentences or already tokenized sentences.
+
+Params:
+
+**tokenizer**: a tokenizer from the *transformers* package.
+
+**int_tensor_dtype** (`torch.dtype`, default `torch.int64`): type for int
+tensors. Don't change it.
+
+**sentences** (`list([str])|list([list([str])])`): If not `None`, they will be
+transformed and saved. NB: All the sentences must not be empty.
+
+All other args are params for the `.transpose()` method. They are used only if
+**sentences** is not `None`. You can use any args but `save` that is set to
+`True`.
+
+Example:
+```python
+from corpuscula.corpus_utils import syntagrus
+import junky
+from junky.dataset import BertTokenizedDataset
+from transformers import AutoTokenizer
+
+bert_model_name = 'bert-base-multilingual-cased'
+
+bert_tokenizer = AutoTokenizer.from_pretrained(
+    bert_model_name, do_lower_case=False
+)
+
+train = junky.get_conllu_fields(syntagrus.train, fields=[])
+
+ds = BertTokenizedDataset(bert_tokenizer, sentences=train)
+
+loader = ds.create_loader(shuffle=True)
+x, lens = next(iter(loader))
+print(x.shape)
+print(lens[0])
+```
+
+#### Attributes
+
+`ds.tokenizer`: a tokenizer from the *transformers* package.
+
+`ds.int_tensor_dtype` (`torch.dtype`): type for int tensors.
+
+Generally, you don't need to change those attributes directly.
+
+#### Methods
+
+```python
+def transform(sentences, add_special_tokens=True, max_len=None, save=True,
+              append=False):
+```
+Convert text **sentences** to the `transformers.BertModel` input. Already
+tokenized sentences are also allowed but fill be joined before tokenizing with
+space character.
+
+**max_len** and **add_special_tokens** are params for tokenizer. **max_len**
+`None` (default) or `0` means the highest number of subtokens for the model
+(usually, `512`).
+
+If **save** is `True`, we'll keep the converted sentences as the `Dataset`
+source.
+
+If **append** is `True`, we'll append the converted sentences to the existing
+`Dataset` source. Elsewise (default), the existing `Dataset` source will be
+replaced. The param is used only if **save** is `True`.
+
+```python
+o = ds.clone(with_data=True)
+```
+Makes a deep copy of the `BertTokenizedDataset` object. If **with_data** is
+`False`, the `Dataset` source in the new object will be empty. All attributes
+will be copied but `ds.model` and `ds.tokenizer` that are copied by link.
+
+```python
+tokenizer, = ds.save(file_path, with_data=True)
+```
+Saves the `BertTokenizedDataset` object to **file_path**. If **with_data** is
+`False`, the `Dataset` source of the saved object will be empty. All
+attributes will be saved but `ds.tokenizer` that is returned by the method for
+you saved them if need by their own methods.
+
+```python
+ds = BertTokenizedDataset.load(file_path, (tokenizer, )):
+```
+Load the `BertTokenizedDataset` object from **file_path**. You should specify
+**tokenizer** that you used during object creation (or received from the
+`.save()` method).
+
+**NB:** Really, without `ds.tokenizer`, `BertTokenizedDataset` is almost
+empty. It's easier to create the object from scratch instead of bother with
+all those `save` / `load` / `clone` actions.
+
+```python
+ds.to(*args, **kwargs):
+```
+Invokes `.to(*args, **kwargs)` methods for all the elements of the `Dataset`
+source that have `torch.Tensor` or `torch.nn.Model` type. All the params will
+be transferred as is.
+
+```python
+loader = ds.create_loader(batch_size=32, shuffle=False, num_workers=0,
+                          **kwargs)
+```
+Creates `torch.utils.data.DataLoader` for this object. All params are the
+params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
+
+**NB:** If you set **num_workers** != `0`, don't move the **ds** source to
+*CUDA*. The `torch` multiprocessing implementation can't handle it. Better,
+create several instances of `DataLoader` for **ds** (each with `workers=0`)
+and use them in parallel.
+
+The created `DataLoader` will return batches of the format (*<`list` of words'
+vectors>*, *\<length of the sentence>*\[, *\<`list` of numbers subtokens in
+corresponding words>*]). If you use `BertDataset` as part of `FrameDataset`,
+you can set the param **with_lens** to `False` to omit sequence lengths from the
+batches:
+```python
+# fds - object of junky.dataset.FrameDataset
+fds.add('x', ds, with_lens=False)
+```
+
+If you don't need the lengths of tokens, you can set the param
+**with_token_lens**  to `False`. Note, that you have it only if you invoked
+`.transform(save=True)` with `aggregate_subtokens_op=None` option.
+
+On the inference stage you don't have to use the combination of
+`.transform(sentences, save=True)` and `.create_loader(shuffle=False)`
+methods. Actually, you shouldn't use it because it's not thread-safe. 
+To read batches sequentially use:
+```python
+loader = ds.transform_collate(sentences, batch_size=32, transform_kwargs=None,
+                              collate_kwargs=None, loglevel=0)
 ```
 
 ### FrameDataset <a name="frame"></a>
@@ -997,7 +1144,7 @@ On the inference stage you don't have to use the combination of
 methods. Actually, you shouldn't use it because it's not thread-safe. To read batches sequentially use:
 ```python
 loader = ds.transform_collate(sentences, batch_size=32, transform_kwargs=None,
-                           collate_kwargs=None, loglevel=0)
+                              collate_kwargs=None, loglevel=0)
 ```
 
 ### DummyDataset <a name="dummy"></a>
@@ -1078,7 +1225,7 @@ methods. Actually, you shouldn't use it because it's not thread-safe.
 To read batches sequentially use:
 ```python
 loader = ds.transform_collate(sentences, batch_size=32, transform_kwargs=None,
-                           collate_kwargs=None, loglevel=0)
+                              collate_kwargs=None, loglevel=0)
 ```
 
 ### LenDataset <a name="len"></a>
@@ -1151,7 +1298,7 @@ methods. Actually, you shouldn't use it because it's not thread-safe.
 To read batches sequentially use:
 ```python
 loader = ds.transform_collate(sentences, batch_size=32, transform_kwargs=None,
-                           collate_kwargs=None, loglevel=0)
+                              collate_kwargs=None, loglevel=0)
 ```
 
 ### WordCatDataset <a name="wordcat"></a>
@@ -1272,7 +1419,7 @@ methods. Actually, you shouldn't use it because it's not thread-safe.
 To read batches sequentially use:
 ```python
 loader = ds.transform_collate(sentences, batch_size=32, transform_kwargs=None,
-                           collate_kwargs=None, loglevel=0)
+                              collate_kwargs=None, loglevel=0)
 ```
 
 ### Examples <a name="examples"></a>

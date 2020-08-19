@@ -23,8 +23,9 @@ class BertTokenizedDataset(BaseDataset):
         tokenizer: the tokenizer from `transformers` package corresponding to
             `model` chosen.
         int_tensor_dtype: dtype for int tensors: torch.dtype.
-        sentences (`list([str])`): If not ``None``, they will be transformed
-            and saved. NB: All the sentences must not be empty.
+        sentences (`list([str])|list([list([str])])`): If not ``None``, they
+            will be transformed and saved. NB: All the sentences must not be
+            empty.
         All other args are params for the `.transpose()` method. They are used
             only if *sentences* is not ``None``. You can use any args but
             `save` that is set to `True`.
@@ -45,16 +46,18 @@ class BertTokenizedDataset(BaseDataset):
     def _push_xtrn(self, xtrn):
         self.tokenizer = xtrn
 
-    def transform(self, sentences, max_len=None, save=True, append=False):
+    def transform(self, sentences, add_special_tokens=True, max_len=None,
+                  save=True, append=False):
         """Convert text *sentences* to the `transformers.BertModel` input.
+        Already tokenized sentences are also allowed but fill be joined before
+        tokenizing with space character.
 
-        *max_len* is a param for tokenizer. We'll transform lines of any
-            length, but the quality is higher if *max_len* is greater.
-            ``None`` (default) or `0` means the maximum for the model
-            (usually, 512).
+        *max_len* and *add_special_tokens* are params for tokenizer. *max_len*
+            ``None`` (default) or `0` means the highest number of subtokens
+            for the model (usually, `512`).
 
         If *save* is ``True``, we'll keep the converted sentences as the
-        `Dataset` source.
+        Dataset source.
 
         If *append* is ``True``, we'll append the converted sentences to the
         existing Dataset source. Elsewise (default), the existing Dataset
@@ -71,7 +74,7 @@ class BertTokenizedDataset(BaseDataset):
             self.tokenizer.encode_plus(
                 text=sent,
                 add_special_tokens=True,
-                max_length=min(max_len, len(sent) + 2),
+                max_length=max_len,
                 pad_to_max_length=False,
                 return_tensors=None,
                 return_attention_mask=True,

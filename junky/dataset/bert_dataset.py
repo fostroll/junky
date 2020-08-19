@@ -126,11 +126,11 @@ class BertDataset(BaseDataset):
         *max_len* is a param for tokenizer. We'll transform lines of any
             length, but the quality is higher if *max_len* is greater.
             ``None`` (default) or `0` means the maximum for the model
-            (usually, 512).
+            (usually, `512`).
 
         *batch_size* affects only on the execution time. Greater is faster,
             but big *batch_size* may be cause of CUDA Memory Error. If
-            ``None`` or 0, we'll try to convert all *sentences* with one
+            ``None`` or `0`, we'll try to convert all *sentences* with one
             batch.
 
         *hidden_ids*: hidden score layers that we need to aggregate. Allowed
