@@ -390,8 +390,12 @@ def to_device(data, device):
         data = data.to(device)
     elif isinstance(data, torch.nn.Module):
         data.to(device)
-    elif isinstance(data, Iterable):
+#     elif isinstance(data, Iterable):
+#         #data = type(data)(to_device(x, device) for x in data)
+    elif isinstance(data, tuple) or isinstance(data, list):
         data = type(data)(to_device(x, device) for x in data)
+    elif isinstance(dict, tuple):
+        data = type(data)({x: to_device(y, device) for x, y in data.items()})
     return data
 
 def train(loaders, model, criterion, optimizer, scheduler,
@@ -495,7 +499,7 @@ def train(loaders, model, criterion, optimizer, scheduler,
 
             if with_progress:
                 t_ = time.time()
-                n_update += len(batch[0])
+                n_update += len(batch[-1])
                 if t_ - t >= 2:
                     t = t_
                     progress_bar.set_postfix(
