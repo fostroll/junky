@@ -682,7 +682,7 @@ tensors. Don't change it.
 If not `None`, they will be transformed and saved. NB: All the sentences must
 not be empty.
 
-All other args are params for the `.transpose()` method. They are used only if
+All other args are params for the `.transform()` method. They are used only if
 **sentences** is not `None`. You can use any args but `save` that is set to
 `True`.
 
@@ -903,7 +903,7 @@ tensors. Don't change it.
 **sentences** (`list([str])|list([list([str])])`): If not `None`, they will be
 transformed and saved. NB: All the sentences must not be empty.
 
-All other args are params for the `.transpose()` method. They are used only if
+All other args are params for the `.transform()` method. They are used only if
 **sentences** is not `None`. You can use any args but `save` that is set to
 `True`.
 
