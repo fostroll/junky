@@ -84,7 +84,7 @@ class BertTokenizedDataset(BaseDataset):
             ) for sent in tqdm(
                 iterable=sentences
                     if sentences and (isinstance(sentences[0], str)
-                                   or is_pretokenized == False) else
+                                   or is_pretokenized == True) else
                 [' '.join(x for x in x) for x in sentences],
                 mininterval=2, file=sys.stdout
             )
