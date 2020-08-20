@@ -208,7 +208,7 @@ def plot_metrics(metrics=[], legend_loc='best',
         plt.savefig(save_name, bbox_inches='tight')
     plt.show()
 
-def plot_seqlens(corpus, bins=20, figsize=(5, 2), **plot_kwargs):
+def plot_seqlens(corpus, bins=20, figsize=(7, 2), **plot_kwargs):
     """Plots histogram of sentence lengths from the corpus.
 
     Args:
@@ -220,6 +220,7 @@ def plot_seqlens(corpus, bins=20, figsize=(5, 2), **plot_kwargs):
     **\*\*plot_kwargs**: any other `pandas.DataFrame.hist` 
     keyword arguments.
     """
+    mpl.style.use('default')
     lens = [len(x) for x in corpus]
     _ = pd.Series(lens).hist(bins=bins, figsize=figsize, **plot_kwargs)
     print('Minimum sequence length:', min(lens))
