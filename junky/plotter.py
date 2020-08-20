@@ -208,7 +208,7 @@ def plot_metrics(metrics=[], legend_loc='best',
         plt.savefig(save_name, bbox_inches='tight')
     plt.show()
 
-def plot_seqlens(corpus, bins=100, figsize=(5, 2), **plot_kwargs):
+def plot_seqlens(corpus, bins=20, figsize=(5, 2), **plot_kwargs):
     """Plots histogram of sentence lengths from the corpus.
 
     Args:
