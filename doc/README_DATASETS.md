@@ -948,9 +948,9 @@ Convert text **sentences** to the `transformers.BertModel` input. Already
 tokenized sentences are also allowed but fill be joined before tokenizing with
 space character.
 
-**max_len** and **add_special_tokens** are params for tokenizer. **max_len**
-`None` (default) or `0` means the highest number of subtokens for the model
-(usually, `512`).
+**max_len**, **add_special_tokens** and **is_pretokenized** are params for the
+tokenizer. **max_len** `None` (default) or `0` means the highest number of
+subtokens for the model (usually, `512`).
 
 If **save** is `True`, we'll keep the converted sentences as the `Dataset`
 source.
