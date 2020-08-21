@@ -444,6 +444,7 @@ def train(loaders, model, criterion, optimizer, scheduler,
 
     is_bce = bool(isinstance(criterion, nn.BCEWithLogitsLoss) \
                   or isinstance(criterion, nn.BCELoss))
+    flatten_idx = -1 if is_bce else -2
 
     if not callable(best_model_backup_method):
         f = best_model_backup_method
@@ -493,8 +494,6 @@ def train(loaders, model, criterion, optimizer, scheduler,
 
             if is_bce:
                 gold = gold.float()
-            flatten_idx = -1 if len(pred.shape) == 2 \
-                            and pred.shape[1] == 1 else -2
             loss = criterion(pred.flatten(end_dim=flatten_idx),
                              gold.flatten(end_dim=-1))
 
@@ -554,8 +553,6 @@ def train(loaders, model, criterion, optimizer, scheduler,
 
                 if is_bce:
                     gold = gold.float()
-                flatten_idx = -1 if len(pred.shape) == 2 \
-                                and pred.shape[1] == 1 else -2
                 loss = criterion(pred.flatten(end_dim=flatten_idx),
                                  gold.flatten(end_dim=-1))
                 test_losses_.append(loss.item())
