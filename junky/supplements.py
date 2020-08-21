@@ -555,11 +555,11 @@ def train(loaders, model, criterion, optimizer, scheduler,
 
             accuracy = accuracy_score(test_golds, test_preds)
             precision = precision_score(test_golds, test_preds,
-                                        average='macro')
+                                        average='macro', zero_division=0)
             recall = recall_score(test_golds, test_preds,
-                                  average='macro')
+                                  average='macro', zero_division=0)
             f1 = f1_score(test_golds, test_preds,
-                          average='macro')
+                          average='macro', zero_division=0)
 
             accuracies.append(accuracy)
             precisions.append(precision)
