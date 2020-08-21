@@ -17,6 +17,7 @@ from sklearn.metrics import accuracy_score, f1_score, precision_score, \
 import sys
 import time
 import torch
+import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 import warnings
@@ -487,8 +488,11 @@ def train(loaders, model, criterion, optimizer, scheduler,
             optimizer.zero_grad()
             pred, gold = model(*batch[:-1]), batch[-1]
 
-            loss = criterion(pred.flatten(end_dim=-2), gold.flatten(end_dim=-1))
-            loss.backward()
+            if isinstance(criterion, nn.BCEWithLogitsLoss) \
+            or isinstance(criterion, nn.BCELoss):
+                gold = gold.float()
+            flatten_idx = -1 if len(pred.shape) == 2 and pred.shape[1] == 1 else -2
+            loss = criterion(pred.flatten(end_dim=flatten_idx), gold.flatten(end_dim=-1))
 
             if max_grad_norm:
                 torch.nn.utils.clip_grad_norm_(parameters=model.parameters(),
