@@ -442,6 +442,9 @@ def train(loaders, model, criterion, optimizer, scheduler,
            'ERROR: At least one of the params `loaders[1]`, `dataset[1]` ' \
            'or `epochs` must be not None'
 
+    is_bce = bool(isinstance(criterion, nn.BCEWithLogitsLoss) \
+                  or isinstance(criterion, nn.BCELoss))
+
     if not callable(best_model_backup_method):
         f = best_model_backup_method
         def best_model_backup_method(model, model_score):
@@ -488,8 +491,7 @@ def train(loaders, model, criterion, optimizer, scheduler,
             optimizer.zero_grad()
             pred, gold = model(*batch[:-1]), batch[-1]
 
-            if isinstance(criterion, nn.BCEWithLogitsLoss) \
-            or isinstance(criterion, nn.BCELoss):
+            if is_bce:
                 gold = gold.float()
             flatten_idx = -1 if len(pred.shape) == 2 \
                             and pred.shape[1] == 1 else -2
@@ -536,7 +538,8 @@ def train(loaders, model, criterion, optimizer, scheduler,
                 with torch.no_grad():
                     pred = model(*batch[:-1])
 
-                pred_indices = pred.argmax(-1)
+                pred_indices = pred.round().int() if is_bce else \
+                               pred.argmax(-1)
 
                 if len(pred.shape) == 2:
                     test_golds.extend(gold.cpu().numpy())
@@ -549,8 +552,7 @@ def train(loaders, model, criterion, optimizer, scheduler,
                          for y_, len_ in zip(pred_indices.cpu().numpy(),
                                              gold_lens)]
 
-                if isinstance(criterion, nn.BCEWithLogitsLoss) \
-                or isinstance(criterion, nn.BCELoss):
+                if is_bce:
                     gold = gold.float()
                 flatten_idx = -1 if len(pred.shape) == 2 \
                                 and pred.shape[1] == 1 else -2
