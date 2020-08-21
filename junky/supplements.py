@@ -491,8 +491,10 @@ def train(loaders, model, criterion, optimizer, scheduler,
             if isinstance(criterion, nn.BCEWithLogitsLoss) \
             or isinstance(criterion, nn.BCELoss):
                 gold = gold.float()
-            flatten_idx = -1 if len(pred.shape) == 2 and pred.shape[1] == 1 else -2
-            loss = criterion(pred.flatten(end_dim=flatten_idx), gold.flatten(end_dim=-1))
+            flatten_idx = -1 if len(pred.shape) == 2 \
+                            and pred.shape[1] == 1 else -2
+            loss = criterion(pred.flatten(end_dim=flatten_idx),
+                             gold.flatten(end_dim=-1))
 
             if max_grad_norm:
                 torch.nn.utils.clip_grad_norm_(parameters=model.parameters(),
@@ -547,7 +549,13 @@ def train(loaders, model, criterion, optimizer, scheduler,
                          for y_, len_ in zip(pred_indices.cpu().numpy(),
                                              gold_lens)]
 
-                loss = criterion(pred.flatten(end_dim=-2), gold.flatten(end_dim=-1))
+                if isinstance(criterion, nn.BCEWithLogitsLoss) \
+                or isinstance(criterion, nn.BCELoss):
+                    gold = gold.float()
+                flatten_idx = -1 if len(pred.shape) == 2 \
+                                and pred.shape[1] == 1 else -2
+                loss = criterion(pred.flatten(end_dim=flatten_idx),
+                                 gold.flatten(end_dim=-1))
                 test_losses_.append(loss.item())
 
             mean_test_loss = np.mean(test_losses_)
