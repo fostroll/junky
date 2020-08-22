@@ -57,6 +57,11 @@ class BertTokenizedDataset(BaseDataset):
             the tokenizer. *max_len* ``None`` (default) or `0` means the
             highest number of subtokens for the model (usually, `512`).
 
+        Important! `is_pretokenized=True` means, that each sentence is
+        splitten on tokens ("pre-tokenized"), not tokenized with some
+        transformers' tokenizer. If sentences are fully tokenized on
+        *sub*tokens, use `is_pretokenized=False`.
+
         If *save* is ``True``, we'll keep the converted sentences as the
         Dataset source.
 

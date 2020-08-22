@@ -941,8 +941,8 @@ Generally, you don't need to change those attributes directly.
 #### Methods
 
 ```python
-def transform(sentences, add_special_tokens=True, max_len=None, save=True,
-              append=False):
+def transform(sentences, add_special_tokens=True, is_pretokenized=False,
+              max_len=None, save=True, append=False):
 ```
 Convert text **sentences** to the `transformers.BertModel` input. Already
 tokenized sentences are also allowed but fill be joined before tokenizing with
@@ -951,6 +951,10 @@ space character.
 **max_len**, **add_special_tokens** and **is_pretokenized** are params for the
 tokenizer. **max_len** `None` (default) or `0` means the highest number of
 subtokens for the model (usually, `512`).
+
+**Important!** `is_pretokenized=True` means, that each sentence is splitten on
+tokens ("pre-tokenized"), not tokenized with some transformers' tokenizer. If
+sentences are fully tokenized on **sub**tokens, use `is_pretokenized=False`.
 
 If **save** is `True`, we'll keep the converted sentences as the `Dataset`
 source.
