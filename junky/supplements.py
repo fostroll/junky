@@ -492,7 +492,10 @@ def train(loaders, model, criterion, optimizer, scheduler,
             optimizer.zero_grad()
             pred, gold = model(*batch[:-1]), batch[-1]
 
-            loss = criterion(pred.flatten(end_dim=-2), gold.flatten(end_dim=-1))
+            if is_bce:
+                gold = gold.float()
+            loss = criterion(pred.flatten(end_dim=flatten_idx),
+                             gold.flatten(end_dim=-1))
             loss.backward()
 
             if max_grad_norm:
@@ -535,7 +538,8 @@ def train(loaders, model, criterion, optimizer, scheduler,
                 with torch.no_grad():
                     pred = model(*batch[:-1])
 
-                pred_indices = pred.argmax(-1)
+                pred_indices = pred.round().int() if is_bce else \
+                               pred.argmax(-1)
 
                 if len(pred.shape) == 2:
                     test_golds.extend(gold.cpu().numpy())
@@ -548,7 +552,10 @@ def train(loaders, model, criterion, optimizer, scheduler,
                          for y_, len_ in zip(pred_indices.cpu().numpy(),
                                              gold_lens)]
 
-                loss = criterion(pred.flatten(end_dim=-2), gold.flatten(end_dim=-1))
+                if is_bce:
+                    gold = gold.float()
+                loss = criterion(pred.flatten(end_dim=flatten_idx),
+                                 gold.flatten(end_dim=-1))
                 test_losses_.append(loss.item())
 
             mean_test_loss = np.mean(test_losses_)
