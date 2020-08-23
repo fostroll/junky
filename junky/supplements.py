@@ -393,9 +393,9 @@ def to_device(data, device):
         data.to(device)
 #     elif isinstance(data, Iterable):
 #         #data = type(data)(to_device(x, device) for x in data)
-    elif isinstance(data, tuple) or isinstance(data, list):
+    elif isinstance(data, (tuple, list)):
         data = type(data)(to_device(x, device) for x in data)
-    elif isinstance(dict, tuple):
+    elif isinstance(data, tuple):
         data = type(data)({x: to_device(y, device) for x, y in data.items()})
     return data
 
@@ -442,8 +442,7 @@ def train(loaders, model, criterion, optimizer, scheduler,
            'ERROR: At least one of the params `loaders[1]`, `dataset[1]` ' \
            'or `epochs` must be not None'
 
-    is_bce = bool(isinstance(criterion, nn.BCEWithLogitsLoss) \
-                  or isinstance(criterion, nn.BCELoss))
+    is_bce = isinstance(criterion, (nn.BCEWithLogitsLoss, nn.BCELoss))
     flatten_idx = -1 if is_bce else -2
 
     if not callable(best_model_backup_method):
