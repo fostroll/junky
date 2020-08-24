@@ -611,6 +611,7 @@ def train(loaders, model, criterion, optimizer, scheduler,
             if log_file:
                 print(print_str, file=log_file)
                 log_file.flush()
+                print_str = ''
 
             prev_score = score
 
@@ -634,7 +635,8 @@ def train(loaders, model, criterion, optimizer, scheduler,
                     scheduler.step(score)
 
     if log_file:
-        print(print_str, file=log_file)
+        if print_str:
+            print(print_str, file=log_file)
         print('Elapsed time: {}'
                   .format(seconds_to_strtime(time.time() - start_time)),
               file=log_file)
