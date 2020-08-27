@@ -660,9 +660,11 @@ contains a number of subtokens that is greater than *effective max_len*
 
 In general mode, `BertDataset` replaces **max_len** with the length of the
 longest sentence in batch (if that length is less than **max_len**). Also, we
-sort all the **sentences** by size before passing them to the **model**. By doing so,
-we speed up the processing drasticaly without quality loss, but that
-behavior can be changed (see *Attributes* section).
+sort all the sequences of subtokens by size before splitting them to batches
+and feeding to the **model**. By doing so, we speed up the processing
+drasticaly without quality loss, but that behavior can be changed (see
+*Attributes* section). **NB:** We don't sort sequences of subtokens if their
+number is not greater than `4 * batch_size`.
 
 Params:
 
