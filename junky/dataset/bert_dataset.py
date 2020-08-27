@@ -234,9 +234,11 @@ class BertDataset(BaseDataset):
         # lengths of flattened tokenized_sentences
         sent_lens = [len(x) for x in tokenized_sentences]
 
+        need_sort_dataset = self.sort_dataset \
+                        and len(tokenized_sentences) > 4 * batch_size
         ## sort tokenized sentences by lenght
         ######
-        if self.sort_dataset:
+        if need_sort_dataset:
             sent_lens, sorted_sent_ids = zip(*sorted(
                 [(x, i) for i, x in enumerate(sent_lens)],
                 reverse=True
@@ -405,7 +407,7 @@ class BertDataset(BaseDataset):
 
         ## sort data in original order
         ######
-        if self.sort_dataset:
+        if need_sort_dataset:
             _, data = zip(*sorted(
                 [(i, x) for i, x in enumerate(data)],
                 key=lambda x: sorted_sent_ids[x[0]]
