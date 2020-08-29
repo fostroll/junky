@@ -664,7 +664,7 @@ sort all the sequences of subtokens by size before splitting them to batches
 and feeding to the **model**. By doing so, we speed up the processing
 drasticaly without quality loss, but that behavior can be changed (see
 *Attributes* section). **NB:** We don't sort sequences of subtokens if their
-number is not greater than `4 * batch_size`.
+number is not greater than **batch_size**.
 
 Params:
 

@@ -235,7 +235,8 @@ class BertDataset(BaseDataset):
         sent_lens = [len(x) for x in tokenized_sentences]
 
         need_sort_dataset = self.sort_dataset \
-                        and len(tokenized_sentences) > 4 * batch_size
+                        and self.use_batch_max_len \
+                        and len(tokenized_sentences) > batch_size
         ## sort tokenized sentences by lenght
         ######
         if need_sort_dataset:
