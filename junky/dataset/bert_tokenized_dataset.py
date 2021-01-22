@@ -70,11 +70,17 @@ class BertTokenizedDataset(BaseDataset):
         source will be replaced. The param is used only if *save* is
         ``True``."""
 
+        tokenizer_max_len = self.tokenizer.max_len \
+                                if hasattr(self.tokenizer, 'max_len') else \
+                            self.tokenizer.model_max_len \
+                                if hasattr(self.tokenizer,
+                                           'model_max_len') else \
+                            512
         if not max_len:
-            max_len = self.tokenizer.max_len
+            max_len = tokenizer_max_len
         assert max_len >= 16, 'ERROR: max len must be >= 16'
-        assert max_len <= self.tokenizer.max_len, \
-               'ERROR: max len must be <= {}'.format(self.tokenizer.max_len)
+        assert max_len <= tokenizer_max_len, \
+               'ERROR: max_len must be <= {}'.format(tokenizer_max_len)
 
         data = [
             self.tokenizer.encode_plus(
