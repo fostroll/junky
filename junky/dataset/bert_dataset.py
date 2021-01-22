@@ -164,7 +164,7 @@ class BertDataset(BaseDataset):
         *aggregate_subtokens_op* is used, each sentence will be converted to
         exactly one tensor of shape [<sentence length>, <vector size>]."""
 
-        tokenizer_max_len = self.tokenizer.max_len \
+        tokenizer_max_len = self.tokenizer.max_len  \
                                 if hasattr(self.tokenizer, 'max_len') else \
                             self.tokenizer.model_max_len \
                                 if hasattr(self.tokenizer,
