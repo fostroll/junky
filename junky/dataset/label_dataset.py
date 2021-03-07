@@ -16,7 +16,7 @@ class LabelDataset(BaseDataset):
     torch.utils.data.Dataset for token-level input.
 
     Args:
-        sentences: sequences of tokens: list([list([str])]).
+        labels: list([str])|list[list([str])]).
         unk_token: add a token for tokens that are not present in the
             internal dict: str.
         extra_tokens: add tokens for any other purposes: list([str]).
