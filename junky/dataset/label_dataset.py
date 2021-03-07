@@ -17,44 +17,44 @@ class LabelDataset(BaseDataset):
 
     Args:
         labels: list([str])|list[list([str])]).
-        unk_token: add a token for tokens that are not present in the
+        unk_label: add a token for tokens that are not present in the
             internal dict: str.
-        extra_tokens: add tokens for any other purposes: list([str]).
+        extra_labels: add tokens for any other purposes: list([str]).
         int_tensor_dtype: dtype for int tensors: torch.dtype.
         transform: if ``True``, transform and save `sentences`.
         skip_unk, keep_empty: params for the `.transform()` method.
     """
-    def __init__(self, labels, unk_token=None, extra_tokens=None, 
+    def __init__(self, labels, unk_label=None, extra_labels=None, 
                  int_tensor_dtype=int64, transform=False, skip_unk=False,
                  keep_empty=False):
         super().__init__()
         self.int_tensor_dtype = int_tensor_dtype
-        self.fit(labels, unk_token=unk_token, extra_tokens=extra_tokens)
+        self.fit(labels, unk_label=unk_label, extra_labels=extra_labels)
         if transform:
             self.transform(labels, skip_unk=skip_unk, keep_empty=keep_empty,
                            save=True)
 
-    def fit(self, labels, unk_token=None, extra_tokens=None):
+    def fit(self, labels, unk_label=None, extra_labels=None):
         """Recreate the internal dict.
 
-        :param sentences: sequences of tokens.
-        :type sentences: list([list([str])])
-        :param unk_token: add a token for tokens that are not present in the
+        :param labels: sequences of tokens.
+        :type labels: list([str])|list[list([str])]).
+        :param unk_label: add a token for tokens that are not present in the
             dict.
-        :type unk_token: str
-        :param extra_tokens: add tokens for any other purposes.
-        :type extra_tokens: list([str])
+        :type unk_label: str
+        :param extra_labels: add tokens for any other purposes.
+        :type extra_labels: list([str])
         """
-        if unk_token:
-            extra_tokens = (extra_tokens if extra_tokens else []) \
-                         + [unk_token]
+        if unk_label:
+            extra_labels = (extra_labels if extra_labels else []) \
+                         + [unk_label]
         self.transform_dict, _, extra = make_token_dict(
              labels if labels and (isinstance(labels[0], dict)
                                 or isinstance(labels[0], tuple)) else
              [labels],
-             extra_tokens=extra_tokens
+             extra_labels=extra_labels
         )
-        self.unk = extra[-1] if unk_token else None
+        self.unk = extra[-1] if unk_label else None
         self.reconstruct_dict = {y: x for x, y in self.transform_dict.items()}
 
     def label_to_idx(self, label, skip_unk=False):
@@ -92,10 +92,22 @@ class LabelDataset(BaseDataset):
         existing Dataset source. Elsewise (default), the existing Dataset
         source will be replaced. The param is used only if *save* is
         ``True``."""
-        data = tensor([i for i in (self.label_to_idx(l, skip_unk=skip_unk)
-                                       for l in labels)
-                           if keep_empty or i is not None],
-                      dtype=self.int_tensor_dtype)
+        
+        if labels and (isinstance(labels[0], dict)
+                    or isinstance(labels[0], tuple)):
+            data = []
+            for labs in labels:
+                d = torch.zeros((len(transform_dict),),
+                                dtype=self.int_tensor_dtype)
+                for i in (self.label_to_idx(l, skip_unk=skip_unk)
+                              for l in labs):
+                    data[i] = 1
+                data.append(d)
+        else:
+            data = tensor([i for i in (self.label_to_idx(l, skip_unk=skip_unk)
+                                           for l in labels)
+                               if keep_empty or i is not None],
+                          dtype=self.int_tensor_dtype)
         if save:
             if append:
                 self.data += data
@@ -114,10 +126,10 @@ class LabelDataset(BaseDataset):
                                 for i in ids)
                     if keep_empty or l]
 
-    def fit_transform(self, labels, unk_token=None, extra_tokens=None,
+    def fit_transform(self, labels, unk_label=None, extra_labels=None,
                       skip_unk=False, keep_empty=False, save=True):
         """Just a serial execution `.fit()` and `.transform()` methods."""
-        self.fit(labels, unk_token=unk_token, extra_tokens=extra_tokens)
+        self.fit(labels, unk_label=unk_label, extra_labels=extra_labels)
         return self.transform(labels, skip_unk=skip_unk,
                               keep_empty=keep_empty, save=save)
 
