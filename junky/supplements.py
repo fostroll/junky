@@ -411,7 +411,7 @@ def train(loaders, model, criterion, optimizer, scheduler,
            "ERROR: unknown control_metric '{}' ".format(control_metric) \
          + "(only 'accuracy', 'f1' and 'loss' are available)"
     assert loaders or datasets, \
-           'ERROR: You must pass a tuple of Dataloader or Dataset ' \
+           'ERROR: You must pass a list of Dataloader or Dataset ' \
            'instances for train and test goals'
 
     train_loader = loaders[0] if loaders and loaders[0] else \
@@ -422,7 +422,7 @@ def train(loaders, model, criterion, optimizer, scheduler,
                    DataLoader(datasets[0], batch_size=batch_size,
                               shuffle=True, num_workers=0,
                               collate_fn=pad_collate if pad_collate else
-                              datasets[0].pad_collate)
+                                         datasets[0].pad_collate)
     test_loader = loaders[1] \
                       if loaders and len(loaders) > 1 and loaders[1] else \
                   datasets[1].create_loader(batch_size=batch_size,
@@ -435,7 +435,7 @@ def train(loaders, model, criterion, optimizer, scheduler,
                   DataLoader(datasets[1], batch_size=batch_size,
                              shuffle=False, num_workers=0,
                              collate_fn=pad_collate if pad_collate else
-                             datasets[1].pad_collate) \
+                                        datasets[1].pad_collate) \
                       if datasets and len(datasets) > 1 and datasets[1] else \
                   None
     assert test_loader or epochs, \

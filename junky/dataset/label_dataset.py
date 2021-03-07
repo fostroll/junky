@@ -48,8 +48,12 @@ class LabelDataset(BaseDataset):
         if unk_token:
             extra_tokens = (extra_tokens if extra_tokens else []) \
                          + [unk_token]
-        self.transform_dict, _, extra = \
-            make_token_dict([labels], extra_tokens=extra_tokens)
+        self.transform_dict, _, extra = make_token_dict(
+             labels if labels and (isinstance(labels[0], dict)
+                                or isinstance(labels[0], tuple)) else
+             [labels],
+             extra_tokens=extra_tokens
+        )
         self.unk = extra[-1] if unk_token else None
         self.reconstruct_dict = {y: x for x, y in self.transform_dict.items()}
 
