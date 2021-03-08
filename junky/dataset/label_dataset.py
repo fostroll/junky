@@ -52,7 +52,7 @@ class LabelDataset(BaseDataset):
              labels if labels and (isinstance(labels[0], dict)
                                 or isinstance(labels[0], tuple)) else
              [labels],
-             extra_labels=extra_labels
+             extra_tokens=extra_labels
         )
         self.unk = extra[-1] if unk_label else None
         self.reconstruct_dict = {y: x for x, y in self.transform_dict.items()}
