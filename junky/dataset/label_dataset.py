@@ -49,7 +49,7 @@ class LabelDataset(BaseDataset):
             extra_labels = (extra_labels if extra_labels else []) \
                          + [unk_label]
         self.transform_dict, _, extra = make_token_dict(
-             labels if labels and (isinstance(labels[0], dict)
+             labels if labels and (isinstance(labels[0], list)
                                 or isinstance(labels[0], tuple)) else
              [labels],
              extra_tokens=extra_labels
@@ -93,7 +93,7 @@ class LabelDataset(BaseDataset):
         source will be replaced. The param is used only if *save* is
         ``True``."""
         
-        if labels and (isinstance(labels[0], dict)
+        if labels and (isinstance(labels[0], list)
                     or isinstance(labels[0], tuple)):
             data = []
             for labs in labels:

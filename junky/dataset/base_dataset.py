@@ -18,6 +18,9 @@ from tqdm import tqdm
 class BaseDataset(Dataset):
     """
     Base class for junky.dataset.*Dataset classes.
+
+    Args:
+        data: any list of data.
     """
     def __init__(self, data=None):
         super().__init__()
