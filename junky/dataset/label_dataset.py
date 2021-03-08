@@ -97,7 +97,8 @@ class LabelDataset(BaseDataset):
                     or isinstance(labels[0], tuple)):
             data = []
             for labs in labels:
-                d = zeros((len(transform_dict),), dtype=self.int_tensor_dtype)
+                d = zeros((len(self.transform_dict),),
+                          dtype=self.int_tensor_dtype)
                 for i in (self.label_to_idx(l, skip_unk=skip_unk)
                               for l in labs):
                     data[i] = 1
