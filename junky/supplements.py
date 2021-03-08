@@ -506,7 +506,7 @@ def train(loaders, model, criterion, optimizer, scheduler,
 
             if with_progress:
                 t_ = time.time()
-                n_update += len(batch[-1])
+                n_update += len(gold)
                 if t_ - t >= 2:
                     t = t_
                     progress_bar.set_postfix(
