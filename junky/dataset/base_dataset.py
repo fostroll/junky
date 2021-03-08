@@ -19,9 +19,9 @@ class BaseDataset(Dataset):
     """
     Base class for junky.dataset.*Dataset classes.
     """
-    def __init__(self):
+    def __init__(self, data=None):
         super().__init__()
-        self.data = []
+        self.data = data if data else []
 
     def __len__(self):
         return len(self.data)
