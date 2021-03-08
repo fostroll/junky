@@ -24,7 +24,10 @@ class BaseDataset(Dataset):
     """
     def __init__(self, data=None):
         super().__init__()
-        self.transform(data if data else [], append=False)
+        if data:
+            self.transform(data if data else [], append=False)
+        else:
+            self.data = []
 
     def __len__(self):
         return len(self.data)
