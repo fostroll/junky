@@ -92,7 +92,7 @@ class LabelDataset(BaseDataset):
         existing Dataset source. Elsewise (default), the existing Dataset
         source will be replaced. The param is used only if *save* is
         ``True``."""
-        
+
         if labels and (isinstance(labels[0], list)
                     or isinstance(labels[0], tuple)):
             data = []

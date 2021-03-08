@@ -20,11 +20,11 @@ class BaseDataset(Dataset):
     Base class for junky.dataset.*Dataset classes.
 
     Args:
-        data: any list of data.
+        data: any list of data to save as Dataset source.
     """
     def __init__(self, data=None):
         super().__init__()
-        self.data = data if data else []
+        self.transform(data if data else [], append=False)
 
     def __len__(self):
         return len(self.data)
@@ -103,6 +103,17 @@ class BaseDataset(Dataset):
         """Invoke the `.to()` method for all object of `torch.Tensor` or
         `torch.nn.Module` type."""
         self.data = self._to(self.data, *args, **kwargs)
+
+    def transform(self, data, append=False):
+        """Just save any list of *data* as Dataset source.
+
+        If *append* is ``True``, we'll append the converted sentences to the
+        existing Dataset source. Elsewise (default), the existing Dataset
+        source will be replaced."""
+        if append:
+            self.data += data
+        else:
+            self.data = data
 
     def _frame_collate(self, batch, pos, **kwargs):
         """The method to use with `junky.dataset.FrameDataset`.
