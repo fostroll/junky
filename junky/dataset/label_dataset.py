@@ -8,7 +8,7 @@ Provides implementation of torch.utils.data.Dataset for token-level input.
 """
 from junky import CPU, make_token_dict
 from junky.dataset.base_dataset import BaseDataset
-from torch import Tensor, int64, tensor, zeros
+from torch import Tensor, int64, stack, tensor, zeros
 
 
 class LabelDataset(BaseDataset):
@@ -104,10 +104,10 @@ class LabelDataset(BaseDataset):
                     d[i] = 1
                 data.append(d)
         else:
-            data = tensor([i for i in (self.label_to_idx(l, skip_unk=skip_unk)
-                                           for l in labels)
-                               if keep_empty or i is not None],
-                          dtype=self.int_tensor_dtype)
+            data = [tensor(i, dtype=self.int_tensor_dtype)
+                        for i in (self.label_to_idx(l, skip_unk=skip_unk)
+                                      for l in labels)
+                        if keep_empty or i is not None]
         if save:
             if append:
                 self.data += data
@@ -134,4 +134,5 @@ class LabelDataset(BaseDataset):
                               keep_empty=keep_empty, save=save)
 
     def _collate(self, batch):
-        return tensor(batch, dtype=self.int_tensor_dtype)
+        #return tensor(batch, dtype=self.int_tensor_dtype)
+        return stack(batch, dim=0)
