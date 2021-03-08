@@ -101,7 +101,7 @@ class LabelDataset(BaseDataset):
                           dtype=self.int_tensor_dtype)
                 for i in (self.label_to_idx(l, skip_unk=skip_unk)
                               for l in labs):
-                    data[i] = 1
+                    d[i] = 1
                 data.append(d)
         else:
             data = tensor([i for i in (self.label_to_idx(l, skip_unk=skip_unk)
