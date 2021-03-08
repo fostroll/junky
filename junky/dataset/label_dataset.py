@@ -8,7 +8,7 @@ Provides implementation of torch.utils.data.Dataset for token-level input.
 """
 from junky import CPU, make_token_dict
 from junky.dataset.base_dataset import BaseDataset
-from torch import Tensor, int64, tensor
+from torch import Tensor, int64, tensor, zeros
 
 
 class LabelDataset(BaseDataset):
@@ -97,8 +97,7 @@ class LabelDataset(BaseDataset):
                     or isinstance(labels[0], tuple)):
             data = []
             for labs in labels:
-                d = torch.zeros((len(transform_dict),),
-                                dtype=self.int_tensor_dtype)
+                d = zeros((len(transform_dict),), dtype=self.int_tensor_dtype)
                 for i in (self.label_to_idx(l, skip_unk=skip_unk)
                               for l in labs):
                     data[i] = 1
