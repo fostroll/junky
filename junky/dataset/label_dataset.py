@@ -8,7 +8,7 @@ Provides implementation of torch.utils.data.Dataset for label-level input.
 """
 from junky import CPU, make_token_dict
 from junky.dataset.base_dataset import BaseDataset
-from torch import Tensor, float32, int64, stack, tensor, zeros
+from torch import Tensor, int64, stack, tensor, zeros
 
 
 class LabelDataset(BaseDataset):
@@ -20,14 +20,12 @@ class LabelDataset(BaseDataset):
         unk_label: add a value for labels that are not present in the internal
             dict: str.
         extra_labels: add label values for any other purposes: list([str]).
-        tensor_dtype: dtype for tensors' data: torch.dtype. Default depends on
-            labels: for just list it is torch.int64 wereas for list of lists
-            it is torch.float32.
+        tensor_dtype: dtype for tensors' data: torch.dtype. Default is torch.int64
         transform: if ``True``, transform and save `labels`.
         skip_unk, keep_empty: params for the `.transform()` method.
     """
     def __init__(self, labels, unk_label=None, extra_labels=None, 
-                 tensor_dtype=None, transform=False, skip_unk=False,
+                 tensor_dtype=int64, transform=False, skip_unk=False,
                  keep_empty=False):
         super().__init__()
         self.tensor_dtype = tensor_dtype
@@ -93,9 +91,7 @@ class LabelDataset(BaseDataset):
         indices are represented as multi-hot vectors.
 
         The type of indices representation is exactly the tensor_dtype
-        specified in constructor. If ``None`` specified (default), torch.int64
-        is used for singleton-type labels and torch.float32 in the multi-hot
-        case.
+        specified in constructor.
 
         If *save* is ``True``, we'll keep the converted labels as the
         Dataset source.
@@ -107,8 +103,6 @@ class LabelDataset(BaseDataset):
 
         if labels and (isinstance(labels[0], list)
                     or isinstance(labels[0], tuple)):
-            if not self.tensor_dtype:
-                self.tensor_dtype = int64#float32
             data = []
             for labs in labels:
                 d = zeros((len(self.transform_dict),),
@@ -118,8 +112,6 @@ class LabelDataset(BaseDataset):
                     d[i] = 1
                 data.append(d)
         else:
-            if not self.tensor_dtype:
-                self.tensor_dtype = int64
             data = [tensor(i, dtype=self.tensor_dtype)
                         for i in (self.label_to_idx(l, skip_unk=skip_unk)
                                       for l in labels)
