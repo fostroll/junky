@@ -8,7 +8,7 @@ Provides implementation of torch.utils.data.Dataset for token-level input.
 """
 from junky import CPU, make_token_dict
 from junky.dataset.base_dataset import BaseDataset
-from torch import Tensor, int64, stack, tensor, zeros
+from torch import Tensor, float32, int64, stack, tensor, zeros
 
 
 class LabelDataset(BaseDataset):
@@ -20,15 +20,17 @@ class LabelDataset(BaseDataset):
         unk_label: add a token for tokens that are not present in the
             internal dict: str.
         extra_labels: add tokens for any other purposes: list([str]).
-        int_tensor_dtype: dtype for int tensors: torch.dtype.
-        transform: if ``True``, transform and save `sentences`.
+        tensor_dtype: dtype for tensors' data: torch.dtype. Default depends on
+            labels: for just list it is torch.int64 wereas for list of lists
+            it is torch.float32.
+        transform: if ``True``, transform and save `labels`.
         skip_unk, keep_empty: params for the `.transform()` method.
     """
     def __init__(self, labels, unk_label=None, extra_labels=None, 
-                 int_tensor_dtype=int64, transform=False, skip_unk=False,
+                 tensor_dtype=None, transform=False, skip_unk=False,
                  keep_empty=False):
         super().__init__()
-        self.int_tensor_dtype = int_tensor_dtype
+        self.tensor_dtype = tensor_dtype
         self.fit(labels, unk_label=unk_label, extra_labels=extra_labels)
         if transform:
             self.transform(labels, skip_unk=skip_unk, keep_empty=keep_empty,
@@ -95,16 +97,20 @@ class LabelDataset(BaseDataset):
 
         if labels and (isinstance(labels[0], list)
                     or isinstance(labels[0], tuple)):
+            if not self.tensor_dtype:
+                self.tensor_dtype = float32
             data = []
             for labs in labels:
                 d = zeros((len(self.transform_dict),),
-                          dtype=self.int_tensor_dtype)
+                          dtype=self.tensor_dtype)
                 for i in (self.label_to_idx(l, skip_unk=skip_unk)
                               for l in labs):
                     d[i] = 1
                 data.append(d)
         else:
-            data = [tensor(i, dtype=self.int_tensor_dtype)
+            if not self.tensor_dtype:
+                self.tensor_dtype = int64
+            data = [tensor(i, dtype=self.tensor_dtype)
                         for i in (self.label_to_idx(l, skip_unk=skip_unk)
                                       for l in labels)
                         if keep_empty or i is not None]
@@ -134,5 +140,5 @@ class LabelDataset(BaseDataset):
                               keep_empty=keep_empty, save=save)
 
     def _collate(self, batch):
-        #return tensor(batch, dtype=self.int_tensor_dtype)
+        #return tensor(batch, dtype=self.tensor_dtype)
         return stack(batch, dim=0)
