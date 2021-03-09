@@ -108,7 +108,7 @@ class LabelDataset(BaseDataset):
         if labels and (isinstance(labels[0], list)
                     or isinstance(labels[0], tuple)):
             if not self.tensor_dtype:
-                self.tensor_dtype = float32
+                self.tensor_dtype = int64#float32
             data = []
             for labs in labels:
                 d = zeros((len(self.transform_dict),),
