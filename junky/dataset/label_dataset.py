@@ -21,7 +21,7 @@ class LabelDataset(BaseDataset):
             dict: str.
         extra_labels: add label values for any other purposes: list([str]).
         tensor_dtype: dtype for tensors' data: torch.dtype. Default is torch.int64
-        transform: if ``True``, transform and save `labels`.
+        transform: if `True`, transform and save `labels`.
         skip_unk, keep_empty: params for the `.transform()` method.
     """
     def __init__(self, labels, unk_label=None, extra_labels=None, 
@@ -69,8 +69,7 @@ class LabelDataset(BaseDataset):
     def idx_to_label(self, idx, skip_unk=False):
         """Convert an index to the corresponding label value. If the index is
         not present in the internal dict, return unk label or empty string if
-        it's not defined or *skip_unk* is ``True``. If *skip_pad* is ``True``,
-        padding index will be replaced to empty string, too."""
+        it's not defined or *skip_unk* is `True`."""
         if isinstance(idx, Tensor):
             idx = idx.tolist()
         return self.reconstruct_dict[idx] \
@@ -82,8 +81,8 @@ class LabelDataset(BaseDataset):
                   save=True, append=False):
         """Convert *labels* of str type to the sequences of the corresponding
         indices and adjust their format for Dataset. If *skip_unk* is
-        ``True``, unknown labels will be skipped. If *keep_empty* is
-        ``False``, we'll remove rows that have no data after converting.
+        `True`, unknown labels will be skipped. If *keep_empty* is `False`,
+        we'll remove rows that have no data after converting.
 
         Corresponding indices are represented as is (int numbers) if *labels*
         are of list([str]) type. Elsewise, if *labels* are of list of
@@ -93,13 +92,13 @@ class LabelDataset(BaseDataset):
         The type of indices representation is exactly the tensor_dtype
         specified in constructor.
 
-        If *save* is ``True``, we'll keep the converted labels as the
+        If *save* is `True`, we'll keep the converted labels as the
         Dataset source.
 
-        If *append* is ``True``, we'll append the converted labels to the
+        If *append* is `True`, we'll append the converted labels to the
         existing Dataset source. Elsewise (default), the existing Dataset
         source will be replaced. The param is used only if *save* is
-        ``True``."""
+        `True`."""
 
         if labels and (isinstance(labels[0], list)
                     or isinstance(labels[0], tuple)):
@@ -126,9 +125,9 @@ class LabelDataset(BaseDataset):
 
     def reconstruct(self, ids, skip_unk=False, keep_empty=False):
         """Convert *sequences* of indices in Dataset format to the rows of the
-        corresponding label values. If *skip_unk* is ``True``, unknown indices
-        will be skipped. If *skip_pad* is ``True``, padding will be removed.
-        If *keep_empty* is ``False``, we'll remove labels that are empty after
+        corresponding label values.
+        If *skip_unk* is `True`, unknown indices will be skipped.
+        If *keep_empty* is `False`, we'll remove labels that are empty after
         converting."""
         return [l for l in (self.idx_to_label(i, skip_unk=skip_unk)
                                 for i in ids)

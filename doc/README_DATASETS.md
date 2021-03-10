@@ -11,12 +11,13 @@ used together with *PyTorch* models.
 2. [CharDataset](#char)
 3. [WordDataset](#word)
 4. [BertDataset](#bert)
-4. [BertTokenizedDataset](#bertok)
-5. [FrameDataset](#frame)
-6. [DummyDataset](#dummy)
-7. [LenDataset](#len)
-8. [WordCatDataset](#wordcat)
-9. [Examples](#examples)
+5. [BertTokenizedDataset](#bertok)
+6. [FrameDataset](#frame)
+7. [DummyDataset](#dummy)
+8. [LenDataset](#len)
+9. [WordCatDataset](#wordcat)
+10. [LabelDataset](#label)
+11. [Examples](#examples)
 
 ### TokenDataset  <a name="token"></a>
 
@@ -204,13 +205,8 @@ fds.add('y', ds, with_lens=False)
 On the inference stage you don't have to use the combination of
 `.transform(sentences, save=True)` and `.create_loader(shuffle=False)`
 methods. Actually, you shouldn't use it because it's not thread-safe. 
+
 To read batches sequentially use:
-    def transform_collate(self, sentences, batch_size=32,
-                          transform_kwargs=None, collate_kwargs=None,
-                          loglevel=0):
-        """Sequentially makes batches from **sentences** and call
-        `.transform(batch, save=False, **transform_kwargs)` and
-        `._collate(batch, **collate_kwargs)` methods for them."""
 ```python
 loader = ds.transform_collate(sentences, batch_size=32, transform_kwargs=None,
                            collate_kwargs=None, loglevel=0)
@@ -943,7 +939,7 @@ Generally, you don't need to change those attributes directly.
 #### Methods
 
 ```python
-def transform(sentences, add_special_tokens=True, is_pretokenized=False,
+ds.transform(sentences, add_special_tokens=True, is_pretokenized=False,
               max_len=None, save=True, append=False):
 ```
 Convert text **sentences** to the `transformers.BertModel` input. Already
@@ -1427,6 +1423,177 @@ To read batches sequentially use:
 loader = ds.transform_collate(sentences, batch_size=32, transform_kwargs=None,
                               collate_kwargs=None, loglevel=0)
 ```
+
+### LabelDataset <a name="label"></a>
+
+Dataset for label-level input.
+
+```python
+from junky.dataset import LabelDataset
+ds = LabelDataset(labels, unk_label=None, extra_labels=None, 
+                 tensor_dtype=int64, transform=False, skip_unk=False,
+                 keep_empty=False)
+```
+Params:
+
+**labels** (`list([str])|list[list([str])])`): list of available labels. Each
+row may contain several label values.
+
+**unk_label** (`str`): value for unknown labels that are not present in the
+internal dict. `None` by default.
+
+**extra_labels** (`list([str])`): list of any additional labels.
+
+**tensor_dtype** (`torch.dtype`): dtype of tensors, `int64` by default.
+
+**transform** (`bool`): if `True`, transform and save `labels`.
+
+**skip_unk** (`bool`): param for `.transform()` method. If `True`, unknown
+labels are skipped. `False` by default.
+
+**keep_empty** (`bool`): param for `.transform()` method. If `True`, empty
+rows are removed. `False` by default.
+
+#### Attributes
+
+`ds.tensor_dtype` (`torch.dtype`): tensor type.
+
+`ds.transform_dict` (`dict({str: int})`): tokens to indices mapping.
+
+`ds.reconstruct_dict` (`dict({int: str})`): indices to tokens mapping.
+
+`ds.unk` (`numpy.ndarray([float])`): `unk_label` index.
+
+`ds.data` (`list([torch.Tensor([numpy.ndarray([float])])])`): the source of
+`Dataset`.
+
+Generally, you don't need to change any attribute directly.
+
+#### Methods
+
+To re-initialize the Dataset, call
+```python
+ds.fit(labels, unk_label=None, extra_labels=None)
+```
+The method fits the `Dataset` model to **labels**. All params here have the
+same meaning as in the constructor, and this method is invoked from the
+constructor. You need it only to reuse already existing `Dataset` object for
+a new task with a different set of tokens. In fact, it's recommended to rather
+create a new object for that.
+
+```python
+idx = ds.label_to_idx(label, skip_unk=False)
+```
+
+Converts a **label** value to its index. If the value is not present in the
+internal dict, return index of the `unk_label` or `None` if it's not defined
+**skip_unk** is `True`.
+
+**NB:** If `unk_label` was initially in the internal dictionary, its index
+will be returned by the method even if `skip_unk=True`.
+
+```python
+token = ds.idx_to_label(idx, skip_unk=False)
+```
+Returns an index of the corresponding label value. If the index is not present
+in the internal dict, return `unk_label` or an empty string if it's not
+defined or **skip_unk** is `True`. 
+
+**NB:** If `unk_label` was initially in the internal dictionary, it will be
+returned by the method even if `skip_unk=True`.
+
+```python
+ids = ds.transform(labels, skip_unk=False, keep_empty=False, 
+                  save=True, append=False)
+```
+Convert **labels** of `str` type to the sequences of corresponding indices
+and adjust their format for `Dataset`. If **skip_unk** is `True`, unknown
+labels will be skipped. If **keep_empty** is `False`, empty rows with no data
+after converting will be removed.
+
+Corresponding indices are represented as is (`int` numbers) if **labels** are
+of `list([str])` type. Elsewise, if **labels** are of `list` of `list([str])`
+type (each row may contain several label values), the indices are represented
+as multi-hot vectors. The type of indices' representation is `tensor_dtype`
+specified in constructor.
+
+If **save** is `True`, converted labels are kept as Dataset source.
+
+If **append** is `True`, converted labels are appended to the existing Dataset
+source. Elsewise (default), the existing Dataset source will be replaced. The
+param is used only if **save** is `True`.
+
+
+```python
+tokens = ds.reconstruct(ids, skip_unk=False, keep_empty=False)
+```
+Convert *sequences* of indices in `Dataset` format to the rows of the
+corresponding label values.
+
+If **skip_unk** is `True`, unknown indices
+will be skipped.
+
+If **keep_empty** is `False`, the labels that are empty after converting are
+removed.
+
+```python
+ds.fit_transform(labels, unk_label=None, extra_labels=None,
+                skip_unk=False, keep_empty=False, save=True)
+```
+Fits the `Dataset` model to **labels** and then transforms them. This method
+combines `.fit()` and `.transform()` methods. All the attributes are the same
+as in these methods. Returns the return of the `ds.transform()`.
+
+```python
+o = ds.clone(with_data=True)
+```
+Makes a deep copy of the `LabelDataset` object. If **with_data** is `False`,
+the `Dataset` source in the new object will be empty. The model and all other
+attributes will be copied.
+
+```python
+ds.save(file_path, with_data=True)
+```
+Saves the `LabelDataset` object to **file_path**. If **with_data** is `False`,
+the `Dataset` source of the saved object will be empty. The model and all
+other attributes will be saved.
+
+```python
+ds = LabelDataset.load(file_path):
+```
+Load the `LabelDataset` object from **file_path**.
+
+```python
+ds.to(*args, **kwargs):
+```
+Invokes `.to(*args, **kwargs)` methods for all the elements of the `Dataset`
+source that have `torch.Tensor` or `torch.nn.Model` type. All the params will
+be transferred as is.
+
+```python
+loader = ds.create_loader(batch_size=32, shuffle=False, num_workers=0,
+                          **kwargs)
+```
+Creates `torch.utils.data.DataLoader` for this object. All params are the
+params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
+
+**NB:** If you set **num_workers** != `0`, don't move the **ds** source to
+*CUDA*. The `torch` multiprocessing implementation can't handle it. Better,
+create several instances of `DataLoader` for **ds** (each with `workers=0`)
+and use them in parallel.
+
+During the inference stage you don't have to use the combination of
+`.transform(sentences, save=True)` and `.create_loader(shuffle=False)`
+methods. Actually, you even shouldn't use it because it's not thread-safe. 
+To read batches sequentially use:
+
+```python
+loader = ds.transform_collate(sentences, batch_size=32, transform_kwargs=None,
+                           collate_kwargs=None, loglevel=0)
+```
+
+
+###########
 
 ### Examples <a name="examples"></a>
 
