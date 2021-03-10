@@ -1504,7 +1504,7 @@ returned by the method even if `skip_unk=True`.
 
 ```python
 ids = ds.transform(labels, skip_unk=False, keep_empty=False, 
-                  save=True, append=False)
+                   save=True, append=False)
 ```
 Convert **labels** of `str` type to the sequences of corresponding indices
 and adjust their format for `Dataset`. If **skip_unk** is `True`, unknown
@@ -1538,7 +1538,7 @@ removed.
 
 ```python
 ds.fit_transform(labels, unk_label=None, extra_labels=None,
-                skip_unk=False, keep_empty=False, save=True)
+                 skip_unk=False, keep_empty=False, save=True)
 ```
 Fits the `Dataset` model to **labels** and then transforms them. This method
 combines `.fit()` and `.transform()` methods. All the attributes are the same
@@ -1589,7 +1589,7 @@ To read batches sequentially use:
 
 ```python
 loader = ds.transform_collate(sentences, batch_size=32, transform_kwargs=None,
-                           collate_kwargs=None, loglevel=0)
+                              collate_kwargs=None, loglevel=0)
 ```
 
 ### Examples <a name="examples"></a>
