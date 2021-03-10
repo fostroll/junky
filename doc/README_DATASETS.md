@@ -1592,9 +1592,6 @@ loader = ds.transform_collate(sentences, batch_size=32, transform_kwargs=None,
                            collate_kwargs=None, loglevel=0)
 ```
 
-
-###########
-
 ### Examples <a name="examples"></a>
 
 Let us suppose that we have sets of data for training (**train** and
