@@ -82,6 +82,7 @@ class BertTokenizedDataset(BaseDataset):
         assert max_len <= tokenizer_max_len, \
                'ERROR: max_len must be <= {}'.format(tokenizer_max_len)
 
+        # TODO: not to cut output to 512 if max_len is None
         data = [
             self.tokenizer.encode_plus(
                 text=sent,

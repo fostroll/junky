@@ -341,6 +341,7 @@ class BertDataset(BaseDataset):
                 max_len
             ) if self.use_batch_max_len else max_len
 
+            # TODO: not to cut output to 512 if max_len is None
             encoded_sentences = [
                 self.tokenizer.encode_plus(text=sent,
                                            add_special_tokens=True,
