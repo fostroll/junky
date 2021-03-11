@@ -54,8 +54,8 @@ class BertTokenizedDataset(BaseDataset):
         tokenizing with space character.
 
         *max_len*, *add_special_tokens* and *is_pretokenized* are params for
-            the tokenizer. *max_len* ``None`` (default) or `0` means the
-            highest number of subtokens for the model (usually, `512`).
+            the tokenizer. *max_len* `0` means the highest number of subtokens
+            for the model (usually, `512`). ``None`` (default) means no limit.
 
         Important! `is_pretokenized=True` means, that each sentence is
         splitten on tokens ("pre-tokenized"), not tokenized with some
@@ -76,11 +76,11 @@ class BertTokenizedDataset(BaseDataset):
                                 if hasattr(self.tokenizer,
                                            'model_max_len') else \
                             512
-        if not max_len:
+        if max_len == 0:
             max_len = tokenizer_max_len
-        assert max_len >= 16, 'ERROR: max len must be >= 16'
-        assert max_len <= tokenizer_max_len, \
-               'ERROR: max_len must be <= {}'.format(tokenizer_max_len)
+        assert max_len and max_len >= 16, 'ERROR: max len must be >= 16'
+        #assert max_len <= tokenizer_max_len, \
+        #       'ERROR: max_len must be <= {}'.format(tokenizer_max_len)
 
         # TODO: not to cut output to 512 if max_len is None
         data = [

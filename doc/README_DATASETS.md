@@ -1027,8 +1027,8 @@ tokenized sentences are also allowed but fill be joined before tokenizing with
 space character.
 
 **max_len**, **add_special_tokens** and **is_pretokenized** are params for the
-tokenizer. **max_len** `None` (default) or `0` means the highest number of
-subtokens for the model (usually, `512`).
+tokenizer. **max_len** `0` means the highest number of subtokens for the model
+(usually, `512`). `None` (default) means no limit.
 
 **Important!** `is_pretokenized=True` means, that each sentence is splitten on
 tokens ("pre-tokenized"), not tokenized with some transformers' tokenizer. If
