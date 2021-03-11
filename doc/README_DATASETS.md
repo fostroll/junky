@@ -7,6 +7,7 @@ used together with *PyTorch* models.
 
 ### Table of Contents
 
+0. [BaseDataset](#base)
 1. [TokenDataset](#token)
 2. [CharDataset](#char)
 3. [WordDataset](#word)
@@ -18,6 +19,85 @@ used together with *PyTorch* models.
 9. [WordCatDataset](#wordcat)
 10. [LabelDataset](#label)
 11. [Examples](#examples)
+
+### BaseDataset <a name="base"></a>
+
+Base class for `junky.dataset.*Dataset` classes described below.
+
+```python
+ds = BaseDataset(data=None)
+```
+
+Params:
+
+**data** (`list`): any list of data to save as Dataset source. `None` by
+default.
+
+#### Attributes
+
+`self.data` (`list`): Dataset source
+
+#### Methods
+
+```python
+o = ds.clone(with_data=True)
+```
+Makes a deep copy of the `BaseDataset` object. If **with_data** is `False`,
+the `Dataset` source in the new object will be empty. The model and all other
+attributes will be copied.
+
+```python
+ds.save(file_path, with_data=True)
+```
+Saves the `BaseDataset` object to **file_path**. If **with_data** is `False`,
+the `Dataset` source of the saved object will be empty. The model and all
+other attributes will be saved.
+
+```python
+ds = TokenDataset.load(file_path):
+```
+Load previously saved `BaseDataset` object from **file_path**.
+
+```python
+ds.to(*args, **kwargs):
+```
+Invokes `.to(*args, **kwargs)` methods for all the elements of the `Dataset`
+source that have `torch.Tensor` or `torch.nn.Model` type. All the params will
+be transferred as is.
+
+```python
+ds.transform(data, append=False)
+```
+
+Saves any list of **data** as the Dataset source. If **append** is `True`, the
+converted sentences will be appended to the existing Dataset source. Elsewise
+(default), the existing Dataset source will be replaced.
+
+```python
+loader = ds.create_loader(batch_size=32, shuffle=False, num_workers=0,
+                          **kwargs)
+```
+Creates `torch.utils.data.DataLoader` for this object. All params are the
+params of `DataLoader`. Only **dataset** and **collate_fn** can't be changed.
+
+**NB:** If you set **num_workers** != `0`, don't move the **ds** source to
+*CUDA*. The `torch` multiprocessing implementation can't handle it. Better,
+create several instances of `DataLoader` for **ds** (each with `workers=0`)
+and use them in parallel.
+
+On the inference stage you don't have to use the combination of
+`.transform(sentences, save=True)` and `.create_loader(shuffle=False)`
+methods. Actually, you shouldn't use it because it's not thread-safe. 
+
+To read batches sequentially use:
+```python
+loader = ds.transform_collate(sentences, batch_size=32, transform_kwargs=None,
+                           collate_kwargs=None, loglevel=0)
+```
+
+Sequentially makes batches from **sentences** and calls
+`.transform(batch, save=False, **transform_kwargs)` and
+`._collate(batch, **collate_kwargs)` methods.
 
 ### TokenDataset  <a name="token"></a>
 
