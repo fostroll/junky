@@ -88,7 +88,7 @@ class BertTokenizedDataset(BaseDataset):
                 text=sent,
                 add_special_tokens=True,
                 max_length=max_len,
-                is_pretokenized=is_pretokenized,
+                #is_pretokenized=is_pretokenized,
                 pad_to_max_length=False,
                 return_tensors=None,
                 return_attention_mask=True,
