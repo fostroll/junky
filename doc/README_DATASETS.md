@@ -1243,8 +1243,8 @@ Params:
 `None`.
 
 **data**: an array-like object that support the `len(data)` method or just
-`int` value that is treated as the length of that object. If not `None`, it
-will be transformed and saved.
+`int` value that is treated as the length of that object. **NB:** In the
+first case we use only size of it.
 
 #### Attributes
 

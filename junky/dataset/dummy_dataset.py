@@ -17,7 +17,8 @@ class DummyDataset(BaseDataset):
         output_obj: the object that will be returned with every invoke.
             Default is `None`.
         data: an array-like object that support the `len(data)` method or just
-            int value that is treated as the length of that object.
+            int value that is treated as the length of that object. NB: In the
+            first case we use only size of it.
     """
     def __init__(self, output_obj=None, data=None):
         super().__init__()
@@ -50,7 +51,7 @@ class DummyDataset(BaseDataset):
 
         If *append* is ``True``, we'll increase the size of the Dataset source
         by the size of *data*."""
-        size = len(data)
+        size = data if isinstance(data, int) else len(data)
         if save:
             if append:
                 self.size += size
