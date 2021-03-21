@@ -488,10 +488,11 @@ def train(loaders, model, criterion, optimizer, scheduler,
         model.train()
         t, n_update = time.time(), 0
         for batch in train_loader:
+            batch, gold = batch[:-1], to_device(batch[-1])
             if batch_to_device:
                 batch = to_device(batch, device)
             optimizer.zero_grad()
-            pred, gold = model(*batch[:-1]), batch[-1]
+            pred = model(*batch)
 
             if is_bce:
                 gold = gold.float()
@@ -533,8 +534,9 @@ def train(loaders, model, criterion, optimizer, scheduler,
         if test_loader:
             model.eval()
             for batch in test_loader:
-                batch = to_device(batch, device)
-                gold, gold_lens = batch[-1], batch[1]
+                batch, gold, gold_lens = batch[:-1], batch[-1], batch[1]
+                if batch_to_device:
+                    batch = to_device(batch, device)
 
                 with torch.no_grad():
                     pred = model(*batch[:-1])
@@ -543,11 +545,11 @@ def train(loaders, model, criterion, optimizer, scheduler,
                                pred.argmax(-1)
 
                 if len(pred.shape) == 2:
-                    test_golds.extend(gold.cpu().numpy())
+                    test_golds.extend(gold.numpy())
                     test_preds.extend(pred_indices.cpu().numpy())
                 else:
                     [test_golds.extend(y_[:len_])
-                         for y_, len_ in zip(gold.cpu().numpy(),
+                         for y_, len_ in zip(gold.numpy(),
                                              gold_lens)]
                     [test_preds.extend(y_[:len_])
                          for y_, len_ in zip(pred_indices.cpu().numpy(),
