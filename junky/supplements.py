@@ -488,7 +488,7 @@ def train(loaders, model, criterion, optimizer, scheduler,
         model.train()
         t, n_update = time.time(), 0
         for batch in train_loader:
-            batch, gold = batch[:-1], to_device(batch[-1])
+            batch, gold = batch[:-1], to_device(batch[-1], device)
             if batch_to_device:
                 batch = to_device(batch, device)
             optimizer.zero_grad()
