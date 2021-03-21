@@ -494,7 +494,7 @@ def train(loaders, model, criterion, optimizer, scheduler,
             optimizer.zero_grad()
             pred = model(*batch)
 
-            if is_bce:
+           if is_bce:
                 gold = gold.float()
             loss = criterion(pred.flatten(end_dim=flatten_idx),
                              gold.flatten(end_dim=-1))
@@ -558,7 +558,7 @@ def train(loaders, model, criterion, optimizer, scheduler,
                 if is_bce:
                     gold = gold.float()
                 loss = criterion(pred.flatten(end_dim=flatten_idx),
-                                 gold.flatten(end_dim=-1))
+                                 to_device(gold, device).flatten(end_dim=-1))
                 test_losses_.append(loss.item())
 
             mean_test_loss = np.mean(test_losses_)
