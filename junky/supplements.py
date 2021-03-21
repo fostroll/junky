@@ -403,7 +403,8 @@ def train(loaders, model, criterion, optimizer, scheduler,
           best_model_backup_method, log_prefix='', datasets=None,
           pad_collate=None, epochs=None, min_epochs=0, bad_epochs=5,
           batch_size=32, control_metric='accuracy', max_grad_norm=None,
-          best_score=None, with_progress=True, log_file=LOG_FILE):
+          cpu_batch_ixs=None, best_score=None, with_progress=True,
+          log_file=LOG_FILE):
 
     assert epochs or bad_epochs, \
            'ERROR: Whether epochs or bad_epochs must be specified'
@@ -454,6 +455,8 @@ def train(loaders, model, criterion, optimizer, scheduler,
             torch.save(model, f, pickle_protocol=2)
 
     device = next(model.parameters()).device or junky.CPU
+    if not cpu_batch_ixs:
+        cpu_batch_ixs = []
 
     best_epoch = None
     if best_score is None:
@@ -487,7 +490,9 @@ def train(loaders, model, criterion, optimizer, scheduler,
         model.train()
         t, n_update = time.time(), 0
         for batch in train_loader:
-            batch = to_device(batch, device)
+            batch = [(to_device(x, device) if i not in cpu_batch_ixs else x) \
+                         for i, x in enumerate(batch)]
+            #batch = to_device(batch, device)
             optimizer.zero_grad()
             pred, gold = model(*batch[:-1]), batch[-1]
 
