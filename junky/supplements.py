@@ -494,7 +494,7 @@ def train(loaders, model, criterion, optimizer, scheduler,
             optimizer.zero_grad()
             pred = model(*batch)
 
-           if is_bce:
+            if is_bce:
                 gold = gold.float()
             loss = criterion(pred.flatten(end_dim=flatten_idx),
                              gold.flatten(end_dim=-1))
