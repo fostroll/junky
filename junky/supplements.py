@@ -539,7 +539,7 @@ def train(loaders, model, criterion, optimizer, scheduler,
                     batch = to_device(batch, device)
 
                 with torch.no_grad():
-                    pred = model(*batch[:-1])
+                    pred = model(*batch)
 
                 pred_indices = pred.round().int() if is_bce else \
                                pred.argmax(-1)
