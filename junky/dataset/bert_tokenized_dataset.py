@@ -89,7 +89,8 @@ class BertTokenizedDataset(BaseDataset):
                 add_special_tokens=True,
                 max_length=max_len,
                 #is_pretokenized=is_pretokenized,
-                pad_to_max_length=False,
+                #pad_to_max_length=False,
+                padding=False,
                 return_tensors=None,
                 return_attention_mask=True,
                 return_overflowing_tokens=False

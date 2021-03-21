@@ -345,8 +345,9 @@ class BertDataset(BaseDataset):
                 self.tokenizer.encode_plus(text=sent,
                                            add_special_tokens=True,
                                            max_length=batch_max_len,
-                                           pad_to_max_length=True,
                                            #truncation=True,
+                                           #pad_to_max_length=True,
+                                           padding='max_length',
                                            return_tensors='pt',
                                            return_attention_mask=True,
                                            return_overflowing_tokens=False)
