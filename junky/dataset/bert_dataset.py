@@ -367,10 +367,11 @@ class BertDataset(BaseDataset):
                                                return_tensors='pt',
                                                return_attention_mask=True,
                                                return_overflowing_tokens=False)
-                except TypeError:
+                except TypeError as e:
                     print('batch_max_len =', batch_max_len)
                     print('type(sent) =', type(sent))
                     print('sent = [{}]'.format(sent))
+                    raise e
             #######
             input_ids, attention_masks = zip(*[
                 (x['input_ids'], x['attention_mask'])
