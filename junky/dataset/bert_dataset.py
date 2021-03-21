@@ -341,19 +341,37 @@ class BertDataset(BaseDataset):
                 max_len
             ) if self.use_batch_max_len else max_len
 
+            '''
             encoded_sentences = [
                 self.tokenizer.encode_plus(text=sent,
                                            add_special_tokens=True,
                                            max_length=batch_max_len,
                                            #truncation=True,
                                            #pad_to_max_length=True,
-                                           padding='max_length',
+                                           padding='longest',
                                            return_tensors='pt',
                                            return_attention_mask=True,
                                            return_overflowing_tokens=False)
                     for sent in tokenized_sentences[batch_i:batch_i
-                                                  + batch_size]
-            ]
+                                                          + batch_size]
+            ]'''
+            encoded_sentences = []
+            for sent in tokenized_sentences[batch_i:batch_i + batch_size]:
+                try:
+                    self.tokenizer.encode_plus(text=sent,
+                                               add_special_tokens=True,
+                                               max_length=batch_max_len,
+                                               #truncation=True,
+                                               #pad_to_max_length=True,
+                                               padding='longest',
+                                               return_tensors='pt',
+                                               return_attention_mask=True,
+                                               return_overflowing_tokens=False)
+                except TypeError:
+                    print('batch_max_len =', batch_max_len)
+                    print('type(sent) =', type(sent))
+                    print('sent = [{}]'.format(sent))
+            #######
             input_ids, attention_masks = zip(*[
                 (x['input_ids'], x['attention_mask'])
                     for x in encoded_sentences
