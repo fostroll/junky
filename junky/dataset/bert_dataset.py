@@ -335,13 +335,23 @@ class BertDataset(BaseDataset):
             print('Vectorizing')
             _src = tqdm(iterable=_src, mininterval=2, file=sys.stdout)
 
+        ####### workaround for transformers v.4
+        test_enc = bert_tokenizer.encode_plus(
+            text='', add_special_tokens=True, max_length=3, padding='max_length',
+            return_tensors=None, return_token_type_ids=False, return_attention_mask=True
+        )
+        cls_id, sep_id, pad_id = test_enc['input_ids']
+        att_mask1, _, att_mask0 = test_enc['attention_mask']
+        #######
+
         for batch_i in _src:
+            ####### workaround for transformers v.4
+            '''
             batch_max_len = min(
                 max(splitted_sent_lens[batch_i:batch_i + batch_size]) + 2,
                 max_len
             ) if self.use_batch_max_len else max_len
 
-            '''
             encoded_sentences = [
                 self.tokenizer.encode_plus(text=sent,
                                            add_special_tokens=True,
@@ -354,7 +364,7 @@ class BertDataset(BaseDataset):
                                            return_overflowing_tokens=False)
                     for sent in tokenized_sentences[batch_i:batch_i
                                                           + batch_size]
-            ]'''
+            ]
             encoded_sentences = []
             for sent in tokenized_sentences[batch_i:batch_i + batch_size]:
                 try:
@@ -371,12 +381,28 @@ class BertDataset(BaseDataset):
                     print('batch_max_len =', batch_max_len)
                     print('type(sent) =', type(sent))
                     print('sent = [{}]'.format(sent))
-                    raise e
-            #######
+                    raise e'''
+
+            batch_max_len = min(
+                max(splitted_sent_lens[batch_i:batch_i + batch_size]),
+                max_len - 2
+            ) if self.use_batch_max_len else max_len - 2
+
+            input_ids = tensor(
+                [([cls_id]
+                + self.tokenizer.convert_tokens_to_ids(sent)
+                + [sep_id] + [pad_id] * max_batch_len - len(sent))
+                     for sent in tokenized_sentences[batch_i:batch_i
+                                                           + batch_size]],
+                dtype=self.int_tensor_dtype
+            )
+            attention_mask = (input_ids != pad_id).type(self.int_tensor_dtype)
+            '''
             input_ids, attention_masks = zip(*[
                 (x['input_ids'], x['attention_mask'])
                     for x in encoded_sentences
-            ])
+            ])'''
+            #######
 
             with torch.no_grad():
                 hiddens = self.model(
