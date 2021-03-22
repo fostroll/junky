@@ -392,7 +392,7 @@ class BertDataset(BaseDataset):
             input_ids = tensor(
                 [([cls_id]
                 + self.tokenizer.convert_tokens_to_ids(sent)
-                + [sep_id] + [pad_id] * max_batch_len - len(sent))
+                + [sep_id] + [pad_id] * (batch_max_len - len(sent)))
                      for sent in tokenized_sentences[batch_i:batch_i
                                                            + batch_size]],
                 dtype=self.int_tensor_dtype
