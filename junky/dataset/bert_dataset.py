@@ -407,10 +407,12 @@ class BertDataset(BaseDataset):
 
             with torch.no_grad():
                 hiddens = self.model(
-                    torch.cat(input_ids, dim=0).to(device),
+                    #torch.cat(input_ids, dim=0).to(device),
+                    input_ids.to(device),
                     token_type_ids=None,
-                    attention_mask=torch.cat(attention_masks, dim=0)
-                                        .to(device)
+                    #attention_mask=torch.cat(attention_masks, dim=0)
+                    #                    .to(device)
+                    attention_mask=attention_masks.to(device)
                 )[-1]
 
                 hiddens = self._aggregate_hidden_states(
