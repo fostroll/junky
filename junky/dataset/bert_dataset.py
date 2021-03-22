@@ -336,9 +336,10 @@ class BertDataset(BaseDataset):
             _src = tqdm(iterable=_src, mininterval=2, file=sys.stdout)
 
         ####### workaround for transformers v.4
-        test_enc = bert_tokenizer.encode_plus(
-            text='', add_special_tokens=True, max_length=3, padding='max_length',
-            return_tensors=None, return_token_type_ids=False, return_attention_mask=True
+        test_enc = self.tokenizer.encode_plus(
+            text='', add_special_tokens=True, max_length=3,
+            padding='max_length', return_tensors=None,
+            return_token_type_ids=False, return_attention_mask=True
         )
         cls_id, sep_id, pad_id = test_enc['input_ids']
         att_mask1, _, att_mask0 = test_enc['attention_mask']
