@@ -407,9 +407,9 @@ def train(loaders, model, criterion, optimizer, scheduler,
           log_file=LOG_FILE):
 
     assert epochs or bad_epochs, \
-           'ERROR: Whether epochs or bad_epochs must be specified'
+           'ERROR: Either epochs or bad_epochs must be specified'
     assert control_metric in ['accuracy', 'f1', 'loss'], \
-           "ERROR: unknown control_metric '{}' ".format(control_metric) \
+           "ERROR: Unknown control_metric '{}' ".format(control_metric) \
          + "(only 'accuracy', 'f1' and 'loss' are available)"
     assert loaders or datasets, \
            'ERROR: You must pass a list of Dataloader or Dataset ' \
