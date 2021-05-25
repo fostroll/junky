@@ -342,8 +342,8 @@ def add_class_lock(cls, lock_name='lock', lock_object=None):
     If you need, you can use your own lock object. Use param *lock_object* for
     that.
     """
-    if not lock:
-        lock = Lock()
+    if not lock_object:
+        lock_object = Lock()
     '''
     _code = cls.__init__.__code__
     co_varnames, co_argcount = _code.co_varnames, _code.co_argcount
@@ -358,7 +358,8 @@ def add_class_lock(cls, lock_name='lock', lock_object=None):
     return Cls
     '''
     setattr(cls, lock_name,
-            property(lambda self: lock) if isinstance(cls, type) else lock)
+            property(lambda self: lock_object) if isinstance(cls, type) else
+                     lock_object)
     return cls
 
 def filter_embeddings(pretrained_embs, corpus, min_abs_freq=1, save_name=None,
