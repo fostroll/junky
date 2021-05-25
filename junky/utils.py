@@ -11,6 +11,7 @@ from collections import OrderedDict, Counter
 from itertools import chain
 from tqdm import tqdm
 import numpy as np
+from threading import Lock
 import torch
 import math
 
@@ -132,7 +133,7 @@ def pad_array_torch(array, padding_value=0, **kwargs):
                         **kwargs)
 
 def pad_sequences_with_tensor(sequences, padding_tensor=0.):
-    """Pad the `seq` dimension of *sequences* of shape
+    """Pads the `seq` dimension of *sequences* of shape
     `(batch, seq, features)` with *padding_tensor*.
 
     :param sequences: the list of sequences of shape `(seq, features)`.
@@ -160,7 +161,7 @@ def pad_sequences_with_tensor(sequences, padding_tensor=0.):
     return res
 
 def enforce_reproducibility(seed=None):
-    """Re-init random number generators.
+    """Re-inits random number generators.
     [We stole this method from Stanford C224U assignments]"""
     if seed:
         # Sets seed manually for both CPU and CUDA
@@ -176,7 +177,7 @@ def enforce_reproducibility(seed=None):
         np.random.seed(seed)
 
 def get_rand_vector(shape, norm, shift=0., dtype=np.float64):
-    """Create random vector with the norm given.
+    """Creates random vector with the norm given.
 
     :param shape: the shape of the new vector.
     :type shape: tuple|list
@@ -194,7 +195,7 @@ def get_rand_vector(shape, norm, shift=0., dtype=np.float64):
     return vector
 
 def add_mean_vector(vectors, axis=0, shift=0., scale=1.):
-    """Append *vectors* with a vector that has norm equals to the mean norm
+    """Appends *vectors* with a vector that has norm equals to the mean norm
     (possibly, scaled) of *vectors*.
 
     :param vectors: the array of floats.
@@ -264,7 +265,7 @@ def absmax_torch(tensors, dim=None):
     *dim*.
 
     :type tensors: torch.Tensor|list([torch.Tensor])
-    :type axis: int
+    :type dim: int
     :rtype: torch.Tensor
     """
     if not isinstance(tensors, torch.Tensor):
@@ -302,17 +303,17 @@ def absmax_torch(tensors, dim=None):
     return res
 
 def kwargs(**kwargs):
-    """Return any keyword arguments as a dict."""
+    """Returns any keyword arguments as a dict."""
     return kwargs
 
 def kwargs_nonempty(**kwargs):
-    """Return any keyword arguments with non-empty values as a dict."""
+    """Returns any keyword arguments with non-empty values as a dict."""
     return {x: y for x, y in kwargs.items() if y}
 
 def get_func_params(func, func_locals, keep_self=False):
-    """Return params of *func* as `args` and `kwargs` arrays. Method is called
-    inside *func*; *func_locals* is an output of the locals() call inside
-    *func*.
+    """Returns params of *func* as `args` and `kwargs` arrays. Method is
+    called inside *func*; *func_locals* is an output of the locals() call
+    inside *func*.
 
     If *keep_self* is ``True``, don't remove `self` variable from `args`."""
     all_args = func.__code__.co_varnames[:func.__code__.co_argcount]
@@ -321,6 +322,32 @@ def get_func_params(func, func_locals, keep_self=False):
                 if x != 'self' or keep_self]
     kwargs = {x: func_locals[x] for x in all_args[-n_kwargs:]}
     return args, kwargs
+
+def add_class_lock(cls, lock_name='lock'):
+    """Adds additional lock property *lock_name* to class *cls*. It can
+    be used as follows:
+
+    from junky add_class_lock
+    from pkg import Cls
+
+    Cls = addLock(Cls)
+    o = Cls()
+    with o.lock():
+        # some thread safe operations here
+        pass
+    """
+    _code = cls.__init__.__code__
+    co_varnames, co_argcount = _code.co_varnames, _code.co_argcount
+    #co_kwonlyargcount = _code.co_kwonlyargcount
+    _defaults = cls.__init__.__defaults__
+    #_kwdefaults = cls.__init__.__kwdefaults__
+    Cls = type('Cls', (cls,),
+               {x: _defaults[i] for i, x in \
+                    enumerate(co_varnames[co_argcount - len(_defaults) \
+                             :co_argcount])})
+    lock = Lock()
+    setattr(Cls, lock_name, property(lambda self: lock))
+    return Cls
 
 def filter_embeddings(pretrained_embs, corpus, min_abs_freq=1, save_name=None,
                    include_emb_info=False, pad_token=None, unk_token=None,

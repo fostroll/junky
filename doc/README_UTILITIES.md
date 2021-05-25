@@ -61,7 +61,7 @@ Just a wrapper for the `pad_array()` method that returns `torch.Tensor`.
 ```python
 padded_seq = junky.pad_sequences_with_tensor(sequences, padding_tensor=0.)
 ```
-Pad the `seq` dimension of **sequences** of shape `(batch, seq, features)`
+Pads the `seq` dimension of **sequences** of shape `(batch, seq, features)`
 with **padding_tensor**.
 
 Params:
@@ -77,7 +77,7 @@ Returns padded `list` converted to `torch.Tensor(batch, seq, features)`.
 ```python
 junky.enforce_reproducibility(seed=None)
 ```
-Re-init random number generators.
+Re-inits random number generators.
 
 ```python
 vec = junky.get_rand_vector(shape, norm, shift=0., dtype=float)
@@ -98,7 +98,7 @@ Params:
 ```python
 junky.add_mean_vector(vectors, axis=0, shift=0., scale=1.)
 ```
-Append **vectors** with a vector that has norm equals to the mean norm
+Appends **vectors** with a vector that has norm equals to the mean norm
 (possibly, scaled) of **vectors**.
 
 Params:
@@ -139,12 +139,12 @@ kwargs = junky.kwargs(**kwargs)
 Returns any keyword arguments as a `dict`.
 
 ```python
-def kwargs_nonempty (**kwargs):
+kwargs_nonempty (**kwargs):
 ```
 Returns any keyword arguments with non-empty values as a `dict`.
 
 ```python
-def get_func_params(func, func_locals):
+get_func_params(func, func_locals):
 ```
 Returns params of **func** as `args` and `kwargs` arrays.
 
@@ -152,6 +152,23 @@ Method is called inside **func**; **func_locals** is an output of the
 `locals()` call inside **func**.
 
 If **keep_self** is `True`, don't remove `self` variable from `args`.
+
+```python
+cls = add_class_lock(cls, lock_name='lock'):
+```
+Adds additional lock property **lock_name** to class **cls**. It can be used
+as follows:
+
+```python
+from junky add_class_lock
+from pkg import Cls
+
+Cls = addLock(Cls)
+o = Cls()
+with o.lock():
+    # some thread safe operations here
+    pass
+```
 
 ```python
 word2index, vectors = filter_embeddings(

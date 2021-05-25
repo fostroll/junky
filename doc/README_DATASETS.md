@@ -1138,6 +1138,9 @@ Param **collate_kwargs** is a keyword arguments for the **dataset**'s
 `._frame_collate()` method. Refer `help(dataset._frame_collate)` to learn
 what params the **dataset** has.
 
+**NB:** the **dataset** should not deliver data of the `tuple` type because if
+it does, all elements but first in each data row will be hidden.
+
 ```python
 ds.remove(name)
 ```
