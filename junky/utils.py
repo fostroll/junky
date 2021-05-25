@@ -329,12 +329,15 @@ def add_class_lock(cls, lock_name='lock'):
 
     from junky add_class_lock
     from pkg import Cls
+    add_class_lock(Cls)
 
-    Cls = addLock(Cls)
     o = Cls()
-    with o.lock():
+    with o.lock:
         # some thread safe operations here
         pass
+
+    Also, you can add lock to the particular object directly:
+    o = add_class_lock(Cls())
     """
     lock = Lock()
     '''
@@ -350,8 +353,9 @@ def add_class_lock(cls, lock_name='lock'):
     setattr(Cls, lock_name, property(lambda self: lock))
     return Cls
     '''
-    setattr(cls, lock_name, property(lambda self: lock))
-    
+    setattr(cls, lock_name,
+            property(lambda self: lock) if isinstance(cls, type) else lock)
+    return cls
 
 def filter_embeddings(pretrained_embs, corpus, min_abs_freq=1, save_name=None,
                    include_emb_info=False, pad_token=None, unk_token=None,

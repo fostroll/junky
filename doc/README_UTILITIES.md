@@ -163,12 +163,14 @@ as follows:
 from junky add_class_lock
 from pkg import Cls
 
-Cls = addLock(Cls)
+Cls = add_class_lock(Cls)
 o = Cls()
 with o.lock():
     # some thread safe operations here
     pass
 ```
+Also, one can add lock to the particular object directly:
+`o = add_class_lock(Cls())`
 
 ```python
 word2index, vectors = filter_embeddings(
