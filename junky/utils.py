@@ -336,6 +336,8 @@ def add_class_lock(cls, lock_name='lock'):
         # some thread safe operations here
         pass
     """
+    lock = Lock()
+    '''
     _code = cls.__init__.__code__
     co_varnames, co_argcount = _code.co_varnames, _code.co_argcount
     #co_kwonlyargcount = _code.co_kwonlyargcount
@@ -345,9 +347,11 @@ def add_class_lock(cls, lock_name='lock'):
                {x: _defaults[i] for i, x in \
                     enumerate(co_varnames[co_argcount - len(_defaults) \
                              :co_argcount])})
-    lock = Lock()
     setattr(Cls, lock_name, property(lambda self: lock))
     return Cls
+    '''
+    setattr(cls, lock_name, property(lambda self: lock))
+    
 
 def filter_embeddings(pretrained_embs, corpus, min_abs_freq=1, save_name=None,
                    include_emb_info=False, pad_token=None, unk_token=None,
