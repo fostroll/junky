@@ -323,7 +323,7 @@ def get_func_params(func, func_locals, keep_self=False):
     kwargs = {x: func_locals[x] for x in all_args[-n_kwargs:]}
     return args, kwargs
 
-def add_class_lock(cls, lock_name='lock'):
+def add_class_lock(cls, lock_name='lock', lock_object=None):
     """Adds additional lock property *lock_name* to class *cls*. It can
     be used as follows:
 
@@ -337,9 +337,13 @@ def add_class_lock(cls, lock_name='lock'):
         pass
 
     Also, you can add lock to the particular object directly:
-    o = add_class_lock(Cls())
+    o = add_class_lock(Cls()).
+
+    If you need, you can use your own lock object. Use param *lock_object* for
+    that.
     """
-    lock = Lock()
+    if not lock:
+        lock = Lock()
     '''
     _code = cls.__init__.__code__
     co_varnames, co_argcount = _code.co_varnames, _code.co_argcount

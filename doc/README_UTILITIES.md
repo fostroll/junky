@@ -170,7 +170,10 @@ with o.lock():
     pass
 ```
 Also, one can add lock to the particular object directly:
-`o = add_class_lock(Cls())`
+`o = add_class_lock(Cls())`.
+
+If you need, you can use your own lock object. Use param *lock_object* for
+that.
 
 ```python
 word2index, vectors = filter_embeddings(
