@@ -139,12 +139,12 @@ kwargs = junky.kwargs(**kwargs)
 Returns any keyword arguments as a `dict`.
 
 ```python
-kwargs_nonempty (**kwargs):
+kwargs_nonempty (**kwargs)
 ```
 Returns any keyword arguments with non-empty values as a `dict`.
 
 ```python
-get_func_params(func, func_locals):
+get_func_params(func, func_locals)
 ```
 Returns params of **func** as `args` and `kwargs` arrays.
 
@@ -154,10 +154,14 @@ Method is called inside **func**; **func_locals** is an output of the
 If **keep_self** is `True`, don't remove `self` variable from `args`.
 
 ```python
-cls = add_class_lock(cls, lock_name='lock'):
+cls = add_class_lock(cls, lock_name='lock', isasync=False, lock_object=None)
 ```
-Adds additional lock property **lock_name** to class **cls**. It can be used
-as follows:
+Adds additional lock property **lock_name** to class **cls**.
+
+if **isasync** is `True` the lock property is of `asyncio.Lock` type.
+Otherwise (default) it's of `threading.Lock` type.
+
+It can be used as follows:
 
 ```python
 from junky add_class_lock
@@ -165,15 +169,16 @@ from pkg import Cls
 
 Cls = add_class_lock(Cls)
 o = Cls()
-with o.lock():
+#async with o.lock:  # if isasync is True
+with o.lock:         # if isasync is False (default)
     # some thread safe operations here
     pass
 ```
 Also, one can add lock to the particular object directly:
 `o = add_class_lock(Cls())`.
 
-If you need, you can use your own lock object. Use param *lock_object* for
-that.
+If you need, you can use your own lock object. Use param **lock_object** for
+that. In that case, param **isasync** is ignored.
 
 ```python
 word2index, vectors = filter_embeddings(

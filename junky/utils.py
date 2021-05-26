@@ -6,12 +6,13 @@
 """
 Provides a bunch of utilities to use with PyTorch.
 """
+from asyncio import Lock as ALock
 from collections.abc import Iterable
 from collections import OrderedDict, Counter
 from itertools import chain
 from tqdm import tqdm
 import numpy as np
-from threading import Lock
+from threading import Lock as TLock
 import torch
 import math
 
@@ -323,27 +324,33 @@ def get_func_params(func, func_locals, keep_self=False):
     kwargs = {x: func_locals[x] for x in all_args[-n_kwargs:]}
     return args, kwargs
 
-def add_class_lock(cls, lock_name='lock', lock_object=None):
-    """Adds additional lock property *lock_name* to class *cls*. It can
-    be used as follows:
+def add_class_lock(cls, lock_name='lock', isasync=False, lock_object=None):
+    """Adds additional lock property *lock_name* to class *cls*.
+
+    if *isasync* is ``True`` the lock property is of `asyncio.Lock` type.
+    Otherwise (default) it's of `threading.Lock` type.
+
+    It can be used as follows:
 
     from junky add_class_lock
     from pkg import Cls
     add_class_lock(Cls)
 
     o = Cls()
-    with o.lock:
+    #async with o.lock:  # if isasync is True
+    with o.lock:         # if isasync is False (default)
         # some thread safe operations here
         pass
 
     Also, you can add lock to the particular object directly:
-    o = add_class_lock(Cls()).
+
+    o = add_class_lock(Cls())
 
     If you need, you can use your own lock object. Use param *lock_object* for
-    that.
+    that. In that case, param *isasync* is ignored.
     """
     if not lock_object:
-        lock_object = Lock()
+        lock_object = ALock() if isasync else TLock()
     '''
     _code = cls.__init__.__code__
     co_varnames, co_argcount = _code.co_varnames, _code.co_argcount
