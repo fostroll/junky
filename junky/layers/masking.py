@@ -21,7 +21,7 @@ class Masking(nn.Module):
         mask: Replace to what.
         indices_to_highlight: What positions in the `feature` dimension of the
             masked positions of the incoming data must not be replaced to the
-            `mask`.
+            `mask`. ``None`` means "replace all".
         highlighting_mask: Replace data in that positions to what. If
             ``None``, the data will keep as is.
         batch_first: If ``True``, then the input and output tensors are
