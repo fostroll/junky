@@ -844,7 +844,7 @@ about `1e-7`).
 ```python
 ds.transform(sentences, max_len=None, batch_size=None, hidden_ids=0,
              aggregate_hiddens_op='mean', aggregate_subtokens_op='max',
-             to=CPU, save=True, append=False, loglevel=1)
+             with_grad=False, to=CPU, save=True, append=False, loglevel=1)
 ```
 Converts tokenized **sentences** to the sequences of the corresponding
 contextual vectors and adjusts their format for `torch.utils.data.Dataset`.
@@ -875,6 +875,9 @@ device that `bs.model` is used.
 
 If **save** is `True` (default), we'll keep the converted **sentences** as the
 `Dataset` source.
+
+*with_grad*: calculate gradients during forward propagation through
+`ds.model`. Default is ``False``.
 
 If **append** is `True`, we'll append the converted sentences to the existing
 `Dataset` source. Elsewise (default), the existing `Dataset` source will be
@@ -1020,10 +1023,10 @@ Generally, you don't need to change those attributes directly.
 
 ```python
 ds.transform(sentences, add_special_tokens=True, is_pretokenized=False,
-              max_len=None, save=True, append=False):
+             max_len=None, save=True, append=False):
 ```
 Convert text **sentences** to the `transformers.BertModel` input. Already
-tokenized sentences are also allowed but fill be joined before tokenizing with
+tokenized sentences are also allowed but will be joined before tokenizing with
 space character.
 
 **max_len**, **add_special_tokens** and **is_pretokenized** are params for the

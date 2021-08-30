@@ -50,7 +50,7 @@ class BertTokenizedDataset(BaseDataset):
     def transform(self, sentences, add_special_tokens=True, is_pretokenized=False,
                   max_len=None, save=True, append=False):
         """Convert text *sentences* to the `transformers.BertModel` input.
-        Already tokenized sentences are also allowed but fill be joined before
+        Already tokenized sentences are also allowed but will be joined before
         tokenizing with space character.
 
         *max_len*, *add_special_tokens* and *is_pretokenized* are params for

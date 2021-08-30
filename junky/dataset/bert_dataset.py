@@ -119,7 +119,7 @@ class BertDataset(BaseDataset):
     def transform(self, sentences, max_len=None, batch_size=64,
                   hidden_ids=0, aggregate_hiddens_op='mean',
                   aggregate_subtokens_op='absmax', to=None,
-                  save=True, append=False, loglevel=1):
+                  with_grad=False, save=True, append=False, loglevel=1):
         """Convert *sentences* of words to the sequences of the corresponding
         contextual vectors and adjust their format for Dataset.
 
@@ -148,6 +148,9 @@ class BertDataset(BaseDataset):
         If you want to get the result placed on some exact device, specify the
         device with *to* param. If *to* is ``None`` (defautl), data will be
         placed to the very device that `bs.model` is used.
+
+        *with_grad*: calculate gradients during forward propagation through
+        self.model. Default is ``False``.
 
         If *save* is ``True``, we'll keep the converted sentences as the
         `Dataset` source.
@@ -405,7 +408,7 @@ class BertDataset(BaseDataset):
             ])'''
             #######
 
-            with torch.no_grad():
+            with torch.set_grad_enabled(with_grad):
                 hiddens = self.model(
                     #torch.cat(input_ids, dim=0).to(device),
                     input_ids.to(device),

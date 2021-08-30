@@ -31,7 +31,7 @@ Args:
 
 **indices_to_highlight**: What positions in the `feature` dimension of the
 masked positions of the incoming data must not be replaced to the `mask`.
-Default is `-1`.
+Default is `-1`. `None` means "replace all".
 
 **highlighting_mask**: Replace data in that positions to what. If `None`, the
 data will be left as is. Default is `1`
