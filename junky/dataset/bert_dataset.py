@@ -55,7 +55,7 @@ class BertDataset(BaseDataset):
     @property
     def vec_size(self):
         if self.data:
-            if isinstance(self.data[0], 'list'):
+            if isinstance(self.data[0], list):
                 res = self.data[0][0].shape[-1]
             else:
                 res = self.data[0].shape[-1]
