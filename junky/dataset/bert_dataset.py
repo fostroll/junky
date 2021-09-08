@@ -477,11 +477,11 @@ class BertDataset(BaseDataset):
             data = list(data)
         ######
 
-        _src = num_subtokens
-        if loglevel:
-            print('Reordering')
-            _src = tqdm(iterable=_src, mininterval=2, file=sys.stdout)
         if aggregate_subtokens_op != 'expand':
+            _src = num_subtokens
+            if loglevel:
+                print('Reordering')
+                _src = tqdm(iterable=_src, mininterval=2, file=sys.stdout)
             for i, token_lens in enumerate(_src):
                 #token_lens = num_subtokens[i]
                 start = 0
