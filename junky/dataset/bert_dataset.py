@@ -54,8 +54,14 @@ class BertDataset(BaseDataset):
 
     @property
     def vec_size(self):
-        return self.data[0].shape[-1] if self.data else \
-               self.model.config.hidden_size
+        if self.data:
+            if isinstance(self.data[0], 'list'):
+                res = self.data[0][0].shape[-1]
+            else:
+                res = self.data[0].shape[-1]
+        else:
+            res = self.model.config.hidden_size
+        return res
 
     def __init__(self, model, tokenizer, int_tensor_dtype=torch.int64,
                  sentences=None, **kwargs):
