@@ -550,8 +550,13 @@ class BertDataset(BaseDataset):
                         device = x[0].get_device()
                     tensor_dtype = x[0].dtype
                     break
-            lens = [tensor([len(x) for x in batch], device=device,
-                           dtype=self.int_tensor_dtype)] if with_lens else []
+            lens = [tensor([len(x for x in x for x in x) for x in batch],
+                           device=device, dtype=self.int_tensor_dtype)] \
+                       if with_lens and append_subtokens else \
+                   [tensor([len(x) for x in batch], device=device,
+                           dtype=self.int_tensor_dtype)] \
+                       if with_lens else \
+                   []
             if with_token_lens:
                 lens.append([tensor([len(x) for x in x], device=device,
                                     dtype=self.int_tensor_dtype)
