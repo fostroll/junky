@@ -142,8 +142,9 @@ class BertDataset(BaseDataset):
 
         *aggregate_subtokens_op*: how to aggregate subtokens vectors to form
             only one vector for each input token. The ops allowed: ``None``,
-            'absmax', 'first', 'last', 'max', 'mean', 'sum'. For the 'absmax'
-            method we take into account absolute values of the compared items.
+            'absmax', 'expand', 'first', 'last', 'max', 'mean', 'sum'. For the
+            'absmax' method we take into account absolute values of the
+            compared items.
 
         If you want to get the result placed on some exact device, specify the
         device with *to* param. If *to* is ``None`` (defautl), data will be
@@ -183,7 +184,8 @@ class BertDataset(BaseDataset):
         assert aggregate_hiddens_op in valid_ops, \
                'ERROR: unknown aggregate_hidden_op (choose one of {})' \
                    .format(valid_ops)
-        valid_ops = [None, 'absmax', 'first', 'last', 'max', 'mean', 'sum']
+        valid_ops = [None, 'absmax', 'expand', 'first', 'last', 'max', 'mean',
+                     'sum']
         assert aggregate_subtokens_op in valid_ops, \
                'ERROR: unknown aggregate_subtokens_op (choose one of {})' \
                    .format(valid_ops)
@@ -479,24 +481,25 @@ class BertDataset(BaseDataset):
         if loglevel:
             print('Reordering')
             _src = tqdm(iterable=_src, mininterval=2, file=sys.stdout)
-        for i, token_lens in enumerate(_src):
-            token_lens = num_subtokens[i]
-            start = 0
-            sent = data[i]
-            sent_ = []
-            for token_len in token_lens:
-                end = start + token_len
-                vecs = sent[start:end]
-                if aggregate_subtokens_op != None:
-                    vecs = self._aggregate_hidden_states(
-                        vecs, layer_ids=None,
-                        aggregate_op=aggregate_subtokens_op
-                    )
-                sent_.append(vecs)
-                start = end
+        if aggregate_subtokens_op != 'expand':
+            for i, token_lens in enumerate(_src):
+                #token_lens = num_subtokens[i]
+                start = 0
+                sent = data[i]
+                sent_ = []
+                for token_len in token_lens:
+                    end = start + token_len
+                    vecs = sent[start:end]
+                    if aggregate_subtokens_op != None:
+                        vecs = self._aggregate_hidden_states(
+                            vecs, layer_ids=None,
+                            aggregate_op=aggregate_subtokens_op
+                        )
+                    sent_.append(vecs)
+                    start = end
 
-            data[i] = sent_ if aggregate_subtokens_op == None else \
-                      torch.stack(sent_, dim=0)
+                data[i] = sent_ if aggregate_subtokens_op == None else \
+                          torch.stack(sent_, dim=0)
 
         if save:
             if append:
