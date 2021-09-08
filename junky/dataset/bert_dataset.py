@@ -552,8 +552,7 @@ class BertDataset(BaseDataset):
                                  for x in batch])
             if append_subtokens:
                 x = pad_sequences_with_tensor(
-                    [torch.vstack([x for x in x for x in x],
-                                  device=device, dtype=tensor_dtype) for x in batch],
+                    [torch.vstack([x for x in x for x in x]) for x in batch],
                     padding_tensor=pad
                 )
             else:
