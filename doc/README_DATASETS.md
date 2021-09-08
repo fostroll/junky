@@ -843,7 +843,7 @@ about `1e-7`).
 
 ```python
 ds.transform(sentences, max_len=None, batch_size=None, hidden_ids=0,
-             aggregate_hiddens_op='mean', aggregate_subtokens_op='max',
+             aggregate_hiddens_op='mean', aggregate_subtokens_op='absmax',
              with_grad=False, to=CPU, save=True, append=False, loglevel=1)
 ```
 Converts tokenized **sentences** to the sequences of the corresponding
@@ -952,6 +952,12 @@ fds.add('x', ds, with_lens=False)
 If you don't need the lengths of tokens, you can set the param
 **with_token_lens**  to `False`. Note, that you have it only if you invoked
 `.transform(save=True)` with `aggregate_subtokens_op=None` option.
+
+Also, you can specify here a param `append_subtokens=True`. It also allowed
+only if `.transform(save=True)` was called with `aggregate_subtokens_op=None`
+option, and in this case the loader will return vectors exactly as if you'd
+specify `aggregate_subtokens_op='expand'` in `.transform()`. But you can
+receive the lengths of tokens.
 
 On the inference stage you don't have to use the combination of
 `.transform(sentences, save=True)` and `.create_loader(shuffle=False)`

@@ -142,7 +142,7 @@ class BertDataset(BaseDataset):
 
         *aggregate_subtokens_op*: how to aggregate subtokens vectors to form
             only one vector for each input token. The ops allowed: ``None``,
-            'absmax', 'expand', 'first', 'last', 'max', 'mean', 'sum'. For the
+            'absmax', 'append', 'first', 'last', 'max', 'mean', 'sum'. For the
             'absmax' method we take into account absolute values of the
             compared items.
 
@@ -184,7 +184,7 @@ class BertDataset(BaseDataset):
         assert aggregate_hiddens_op in valid_ops, \
                'ERROR: unknown aggregate_hidden_op (choose one of {})' \
                    .format(valid_ops)
-        valid_ops = [None, 'absmax', 'expand', 'first', 'last', 'max', 'mean',
+        valid_ops = [None, 'absmax', 'append', 'first', 'last', 'max', 'mean',
                      'sum']
         assert aggregate_subtokens_op in valid_ops, \
                'ERROR: unknown aggregate_subtokens_op (choose one of {})' \
@@ -477,7 +477,7 @@ class BertDataset(BaseDataset):
             data = list(data)
         ######
 
-        if aggregate_subtokens_op != 'expand':
+        if aggregate_subtokens_op != 'append':
             _src = num_subtokens
             if loglevel:
                 print('Reordering')
@@ -509,12 +509,17 @@ class BertDataset(BaseDataset):
         else:
             return data
 
-    def _collate(self, batch, with_lens=True, with_token_lens=True):
+    def _collate(self, batch, with_lens=True, with_token_lens=True,
+                 append_subtokens=False):
         """The method to use with `torch.utils.data.DataLoader` and
         `.transform_collate()`.
 
         :with_lens: return lengths of data.
-        :with_token_lens: return lengths of tokens of the data.
+        :with_token_lens: return lengths of tokens of the data (only allowed
+            if `.transform()` was called with `aggregate_subtokens_op=None`).
+        :append_subtokens: line up tokens if `.transform()` was called with
+            `aggregate_subtokens_op=None`. The result will be exactly as if
+            `aggregate_subtokens_op='append'` but you can get token lens.
         :return: depends on keyword args.
         :rtype: if the `.transform()` method was called with
             *aggregate_subtokens_op*=None:
@@ -545,7 +550,12 @@ class BertDataset(BaseDataset):
                 lens.append([tensor([len(x) for x in x], device=device,
                                     dtype=self.int_tensor_dtype)
                                  for x in batch])
-            x = pad_array_torch(batch, padding_value=pad,
-                                device=device, dtype=tensor_dtype)
+            if append_tokens:
+                x = pad_sequences_with_tensor([[x for x in x for x in x]
+                                                   for x in batch],
+                                              padding_tensor=pad)
+            else:
+                x = pad_array_torch(batch, padding_value=pad,
+                                    device=device, dtype=tensor_dtype)
 
         return (x, *lens)
