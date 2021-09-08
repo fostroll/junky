@@ -550,7 +550,7 @@ class BertDataset(BaseDataset):
                 lens.append([tensor([len(x) for x in x], device=device,
                                     dtype=self.int_tensor_dtype)
                                  for x in batch])
-            if append_tokens:
+            if append_subtokens:
                 x = pad_sequences_with_tensor([[x for x in x for x in x]
                                                    for x in batch],
                                               padding_tensor=pad)
