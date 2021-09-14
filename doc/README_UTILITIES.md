@@ -230,3 +230,71 @@ vocabulary. Typically, used for special tokens, e.g. start/end tokens etc.
 
 If `save_name` is specified, saves the filtered vocabulary. Otherwise, returns
 word2index OrderedDict and a numpy array of corresponding word vectors.
+
+```python
+groups = balance_values(data, distinction_coef=1.5, attractor='middle')
+```
+Divides an array of positive values into groups, such as their sums of
+elements are close to each other.
+
+Args:
+
+**data**: an array of positive (greater than `0`) numbers.
+
+**distinction_coef**: the maximal coefficient of distinction between the
+maximum and minimum **data** values belonging to the same group.
+
+**attractor**: the value used to calculate the number of groups. Possible
+values are:<br />
+`'max'` - *\<maximum data value>*<br />
+`'lower'` - `'max'` / **distinction_coef**<br />
+`'min'` - the value from **data**` immediately preceding `'lower'`<br />
+`'upper'` - *`'min'` * **distinction_coef**<br />
+`'mean'` - the middle point between `'upper'` and `'lower'`<br />
+`'middle'` (default) - the middle point between `'max'` and `'min'`<br />
+In order to calculate the number of groups, the sum of all the values of
+**data** is divided to that value. Also, it is possibly just to specify a
+desired sum of the elements for each group as a value for **attractor**.
+The `'+'`/`'-'` sign before text **attractor** value increases/decreases the
+resulting number of groups by `1`.
+
+Returns a `list` of groups found. If a group contain just a single number, the
+corresponding element of the returning `list` is just that number. Otherwise
+(if group contain multiple numbers), the element is an array of numbers.
+
+```python
+classes_balanced, class_lens_balanced, y_data = \
+    balance_intents(y_data, distinction_coef=1.5, attractor='middle',
+                    tail_prefix='Tail', inplace=False)
+```
+Divides an array of labels into groups, such as counts of their elements are
+close to each other.
+
+Args:
+
+**y_data**: an array of labels.
+
+**distinction_coef** and **attractor**: see help for
+`balance_positive_values()` function.
+
+**tail_prefix**: new composite groups (ones that contain not identical
+elements of **y_data**) will get names of that value trailed with integer
+number.
+
+Returns 3 arrays:
+
+*classes balanced*: a `list` of new target categories. If a category contain
+just a single label from the original set, the corresponding element of the
+returning `list` is just that label. Otherwise (if a category contain multiple
+original labels), the element is a `tuple`, the 1st element of which is a name
+of that new category (prefixed with **tail_prefix**), and the 2nd one is the
+`list` of original labels that it contains.
+
+*class lengths balanced*: the counts of elements from **y_data** which labels
+are contained in the corresponding elements of *classes balances*. Here, for
+single categories, their lengths are just numbers, whereas for the composite
+categories their corresponding lengths are `list` of separate lengths for each
+included original label.
+
+*new y_data*: **y_data** with values replaced by names of new target
+categories.

@@ -9,6 +9,7 @@ Provides a bunch of utilities to use with PyTorch.
 from asyncio import Lock as ALock
 from collections.abc import Iterable
 from collections import OrderedDict, Counter
+from copy import deepcopy
 from itertools import chain
 from tqdm import tqdm
 import numpy as np
@@ -496,3 +497,163 @@ def filter_embeddings(pretrained_embs, corpus, min_abs_freq=1, save_name=None,
                       end=' \n', file=f)
     else:
         return word2index, vectors
+
+def balance_positive_values(data, distinction_coef=1.5, attractor='middle'):
+    """Divides an array of positive values into groups, such as sums of their
+    elements are close to each other.
+
+    Args:
+
+    **data**: an array of positive (greater than `0`) numbers.
+
+    **distinction_coef**: the maximal coefficient of distinction between the
+    maximum and minimum **data** values belonging to the same group.
+
+    **attractor**: the value used to calculate the number of groups. Possible
+    values are:<br />
+    `'max'` - *\<maximum data value>*<br />
+    `'lower'` - `'max'` / **distinction_coef**<br />
+    `'min'` - the value from **data**` immediately preceding `'lower'`<br />
+    `'upper'` - *`'min'` * **distinction_coef**<br />
+    `'mean'` - the middle point between `'upper'` and `'lower'`<br />
+    `'middle'` (default) - the middle point between `'max'` and `'min'`<br />
+    In order to calculate the number of groups, the sum of all the values of
+    **data** is divided to that value. Also, it is possibly just to specify a
+    desired sum of the elements for each group as a value for **attractor**.
+    The `'+'`/`'-'` sign before text **attractor** value increases/decreases the
+    resulting number of groups by `1`.
+
+    Returns a `list` of groups found. If a group contain just a single number,
+    the corresponding element of the returning `list` is just that number.
+    Otherwise (if group contain multiple numbers), the element is an array of
+    numbers.
+    """
+    vals = sorted(data, reverse=True)
+    num_folds_add = 0
+    if isinstance(attractor, str):
+        max_val = vals[0]
+        lower_bound = max_val / distinction_coef
+        min_ix = None
+        for ix, val in enumerate(vals):
+            if val < lower_bound:
+                min_ix, min_val = ix, vals[ix - 1]
+                break
+        if isinstance(attractor, str):
+            if attractor[-1] == '-':
+                num_folds_add = 1
+                attractor = attractor[:-1]
+            elif attractor[-1] == '+':
+                num_folds_add = -1
+                attractor = attractor[:-1]
+    else:
+        min_ix = -1
+    if min_ix and min_ix < len(vals) - 1:
+        if isinstance(attractor, str):
+            # vals, tail = [[x] for x in vals[:min_ix]], vals[min_ix:]
+            vals, tail = vals[:min_ix], vals[min_ix:]
+            upper_bound = min_val * distinction_coef
+        else:
+            vals, tail = [], vals
+        sum_tail = sum(tail)
+        num_folds = int(sum_tail // (
+            upper_bound if attractor == 'upper' else
+            lower_bound if attractor == 'lower' else
+            max_val if attractor == 'max' else
+            min_val if attractor == 'min' else
+            lower_bound + (upper_bound - lower_bound) / 2
+                if attractor == 'mean' else
+            min_val + (max_val - min_val) / 2
+                if attractor == 'middle' else
+            attractor
+        )) + num_folds_add or 1
+        fold_sums, tail = tail[:num_folds], tail[num_folds:]
+        folds = [[x] for x in fold_sums]
+        while tail:
+            for ix, val in zip(reversed(range(num_folds)), tail):
+                folds[ix].append(val)
+                fold_sums[ix] += val
+            tail = tail[num_folds:]
+            folds.sort(reverse=True)
+        vals += folds
+    # else:
+    #     vals = [[x] for x in vals[:min_ix]]
+    return vals
+
+def balance_intents(y_data, distinction_coef=1.5, attractor='middle',
+                    tail_prefix='Tail', inplace=False):
+    """Divides an array of labels into groups, such as counts of their
+    elements are close to each other.
+
+    Args:
+
+    **y_data**: an array of labels.
+
+    **distinction_coef** and **attractor**: see help for
+    `balance_positive_values()` function.
+
+    **tail_prefix**: new composite groups (ones that contain not identical
+    elements of **y_data**) will get names of that value trailed with integer
+    number.
+
+    Returns 3 arrays:
+
+    *classes balanced*: a `list` of new target categories. If a category
+    contain just a single label from the original set, the corresponding
+    element of the returning `list` is just that label. Otherwise (if a
+    category contain multiple original labels), the element is a `tuple`,
+    the 1st element of which is a name of that new category (prefixed with
+    **tail_prefix**), and the 2nd one is the `list` of original labels that
+    it contains.
+
+    *class lengths balanced*: the counts of elements from **y_data** which
+    labels are contained in the corresponding elements of *classes balances*.
+    Here, for single categories, their lengths are just numbers, whereas for
+    the composite categories their corresponding lengths are `list` of
+    separate lengths for each included original label.
+
+    *new y_data*: **y_data** with values replaced by names of new target
+    categories.
+    """
+    assert y_data, 'ERROR: y_data must be not empty.'
+    ismulti =  isinstance(y_data[0], Iterable)
+    y_data_ = [x for x in y_data for x in x] if ismulti else y_data
+    assert y_data_, 'ERROR: y_data must be not empty.'
+    classes = {}
+    for cls in y_data_:
+        classes[cls] = classes.get(cls, 0) + 1
+    classes, class_lens = zip(*classes.items())
+    classes, class_lens = list(classes), list(class_lens)
+    class_lens_balanced = balance_values(class_lens,
+                                         distinction_coef=distinction_coef,
+                                         attractor=attractor)
+    classes_balanced, classes_tail = [], {}
+    tail_ix = -1
+    for class_len in class_lens_balanced:
+        if len(class_len) > 1:
+            tail_ix += 1
+            class_name = tail_prefix + str(tail_ix)
+            class_tail = []
+            classes_balanced.append((class_name, class_tail))
+            for class_len in class_len:
+                ix = class_lens.index(class_len)
+                class_ = classes.pop(ix)
+                class_tail.append(class_)
+                class_lens.pop(ix)                
+                classes_tail[class_] = class_name
+        else:
+            ix = class_lens.index(class_len)
+            classes_balanced.append(classes.pop(ix))
+            class_lens.pop(ix)
+    if not inplace:
+        y_data = deepcopy(y_data)
+    for ix, class_ in enumerate(y_data):
+        if ismulti:
+            for ix, cls in enumerate(class_):
+                new_class = classes_tail.get(cls)
+                if new_class is not None:
+                    class_[ix] = new_class
+        else:
+            new_class = classes_tail.get(class_)
+            if new_class is not None:
+                y_data[ix] = new_class
+    return classes_balanced, class_lens_balanced, y_data
