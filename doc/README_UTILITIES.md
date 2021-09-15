@@ -298,3 +298,31 @@ included original label.
 
 *new y_data*: **y_data** with values replaced by names of new target
 categories.
+
+```python
+vecs = def rotate_vectors(vecs, cosine, d_cosine=0,
+                          norm_coef=1, d_norm_coef=0, dim=-1)
+```
+Rotates vectors of **vecs** in random directions to the angle defined with
+**cosine**.
+
+Args:
+
+**vecs**: either a `list`,  `numpy.ndarray` or `torch.Tensor` that we want
+to rotate. Any dimensionality is allowed.
+
+**cosine** (`float`): the cosine of the angle on which the **vec** should
+be rotated.
+
+**d_cosine** (`float`): if specified, the real **cosine** will be randomly
+selected from the range `[cosine, cosine + d_cosine)`.
+
+**norm_coef** (`float`): the L2 norm of the resulting vectors will be set
+as `L2_norm(vecs) * norm_coef`.
+
+**d_norm_coef** (`float`): if specified, the real **norm_coef** will be
+randomly selected from the range `[norm_coef, norm_coef + d_norm_coef)`.
+
+**dim** (`int`): the rotation will be made relative to that dimension.
+
+Returns rotated and resized copy of **vecs**.
