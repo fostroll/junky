@@ -657,3 +657,76 @@ def balance_intents(y_data, distinction_coef=1.5, attractor='middle',
             if new_class is not None:
                 y_data[ix] = new_class
     return classes_balanced, class_lens_balanced, y_data
+
+def rotate_vectors(vecs, cosine, d_cosine=0, norm_coef=1, d_norm_coef=0):
+    """Rotate vectors of **vecs** in random directions to the angle defined
+    with **cosine**.
+
+    Args:
+
+    **vec**: either a `list` or `numpy.ndarray` / `torch.Tensor` that we want
+    to rotate. Any dimensionality allowed (we will rotate the last dimension).
+
+    **cosine** (`float`): the cosine of the angle on which the **vec** should
+    be rotated.
+
+    **d_cosine** (`float`): if specified, the real **cosine** will be randomly
+    selected from the range `[cosine, cosine + d_cosine)`.
+
+    **norm_coef** (`float`): the L2 norm of the resulting vector will be set
+    as `L2_norm(vec) * norm_coef`.
+
+    **d_norm_coef** (`float`): if specified, the real **norm_coef** will be
+    randomly selected from the range `[norm_coef, norm_coef + d_norm_coef)`.
+
+    Returns rotated and renormalized copy of **vec**."""
+    convert_to = 'numpy' if isinstance(vecs, np.ndarray) else \
+                 'list' if isinstance(vecs, list) else \
+                 None
+    if convert_to:
+        vecs = torch.tensor(vecs)
+    elif not isinstance(vecs, torch.Tensor):
+        raise ValueError(
+            'ERROR: **vecs** must be of either `torch.Tensor`, '
+           f'`numpy.ndarray` or `list` type. Found `{type(vecs)}` type '
+            'instead.'
+        )
+
+    if d_cosine != 0:
+        cosine += d_cosine * torch.rand(*vecs.shape[:-1], device=vecs.device)
+    if d_norm_coef != 0:
+        norm_coef += d_norm_coef * torch.rand(*vecs.shape[:-1],
+                                              device=vecs.device)
+
+    f_norm = torch.norm
+    # L2 norms of input vecs
+    vecs_norm = f_norm(vecs, dim=-1)
+    # creating random vectors to define rotation planes for each vector of
+    # `vecs`
+    hypos = torch.rand(*vecs.shape)
+    # next, we're gonna construct a set of rectangular triangles for which
+    # `vecs` would be cathetuses, `hypos` after resize would be hypotenuses,
+    # and the set of another cathetuses we still need to find
+    cos = torch.nn.functional.cosine_similarity(vecs, hypos, dim=-1)
+        # cosines between vecs and hypos
+    hypos_norm = vecs_norm / cos  # lengths of hypos to be hypotenuses
+    hypos *= (hypos_norm / f_norm(hypos, dim=-1)).unsqueeze(dim=-1)
+        # now `hypos` are real hypotenuses
+    cats = hypos - vecs
+        # 2nd cathetuses
+    # the cossines of angles to rotate are given, so we can resize 2nd
+    # cathetuses which opposed to those angles. then, hypothenuses of such
+    # triangles will be onw-way with our target vectors
+    cats_norm = vecs_norm * np.sqrt(1 / (cosine * cosine) - 1)
+        # required lengths for the 2nd cathetuses
+    cats *= (cats_norm / f_norm(cats, dim=-1)).unsqueeze(dim=-1)
+        # cathetus are resized
+    res = vecs + cats
+        # hypothenuses
+    # resizing hypothenuses to target norm values, we'll obtain the target set
+    # of vectors
+    res *= (vecs_norm * norm_coef / f_norm(res, dim=-1)).unsqueeze(dim=-1)
+
+    return res.numpy() if convert_to == 'numpy' else \
+           res.tolist() if convert_to == 'list' else \
+           res
