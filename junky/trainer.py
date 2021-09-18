@@ -4,43 +4,112 @@ import sys
 
 class TrainerConfig():
     """
-    The configurator for the `Trainer` class
+    The configurator for the `Trainer` class.
 
     Args:
 
-    **save_dir**: the directory where to save the best model.
+    **save_dir** (`str`): the directory where to save the best model.
 
-    **\*\*kwargs**: any of the params defined below.
+    **batch_labels_idx** (`int`; default is -1): labels position in the batch
+    received from loader.
 
+    **batch_lens_idx** (`int`; default is `2`): lengthts of sentences in the
+    batch. Used only in the postprocessing, so it will be ignored if
+    postprocess doesn't apply (see the `Trainer` class description).
+
+    **model_args** (`list`; default is `None`): positional arguments of the
+    `model.forward()` method in the train mode. It must be indices of the
+    positions in the batch.
+
+    **model_kwargs** (`dict`; default is None): keyword arguments of the
+    `model.forward()` method in the train mode. It's the dict of kwarg names
+    and corresponding positions in the batch.
+
+    ***Example***: `model_args=[0, 1], model_kwargs={'labels': 2}` results in
+    invoking `model(batch[0], batch[1], labels=batch[2])`. Before this, all
+    the batch will be moved to the model's device.
+
+    ***NB:*** if both **model_args** and **model_kwargs** are `None`,
+    `model.forward(*batch)` is invoked.
+
+    **output_logits_idx** (default is `0`): if model.forward() returns a
+    `tuple`, it's the position of logits in that `tuple`.
+
+    **output_loss_idx** (default is `1`): if `model.forward()` calculates a
+    loss in the train mode by itself, it's the position of the loss in the
+    returning `tuple`.
+
+    **min_epochs** (default is `0`): the number of epochs we continue training
+    even if the number of bad epochs surpassed the **bad_epochs** param.
+
+    **max_epochs** (default is `None`): the total number of epochs can't be
+    greater than this value.
+
+    **bad_epochs** (default is `5`): we stop training if the control_metric
+    doesn't increase on the validation set for a period of this number of
+    epochs (really, the algorithm is slightly more complex but the meaning is
+    like that).
+
+    **adam_lr** (default is `.0001`), **adam_betas** (default is
+    `(0.9, 0.999)`), **adam_eps** (default is `1e-08`), **adam_weight_decay**
+    (default is `0`), **adam_amsgrad** (default is `False`): params for *Adam*
+    optimizer.
+
+    **adamw_lr** (default is `5e-5`), **adamw_betas** (default is
+    `(0.9, 0.999)`), **adamw_eps** (default is `1e-8`), **adamw_weight_decay**
+    (default is `0.01`), **adamw_amsgrad** (default is `False`) params for
+    *AdamW* optimizer.
+
+    **sgd_lr** (default is `.001`), **sgd_momentum** (default is `.9`),
+    **sgd_weight_decay** (default is `0`), **sgd_dampening** (default is `0`),
+    **sgd_nesterov** (default is `False`): params for *SGD* optimizer.
+
+    **grad_norm_clip** (default is `None`): if defined, we clip gradient norm
+    of the model's parameters to that value.
+
+    **criterion** (default is `None`): the function to calculate the loss. If
+    `None`, we suppose that the model in the train mode calculates the loss by
+    itself.
+
+    **optimizer** (default is `'SGD'`): the function to update the model's
+    parameters. Allowed values are: `'Adam'`, `'AdamW'`, `'SGD'` or instance
+    of the `torch.optim.Optimizer` class.
+
+    **scheduler** (default is `None`): the function to update the learning
+    rate. If defined, it's invoked just as `scheduler.step()`.
+
+    **postprocess_method** (default is `'strip_mask'`): the function to
+    postprocess both predicted and gold labels after model validation (e.g. to
+    remove labels of masked data). Allowed values are: `'strip_mask'`,
+    `'strip_mask_bert'` or the callable object implementin the syntax: `preds,
+    golds = postprocess_method(<predicted labels>, <gold labels>, batch)`.
+
+    **control_metric** (of `str` type; default is `'accuracy'`): the metric to
+    control the model performance in the validation time. The vaues allowed
+    are: `'loss'`, `'accuracy'`, `'precision'`, `'recall'`, `'f1'`.
+
+    **save_ckpt_method** (default is `None`): the function to save the best
+    model. Called every time as the model performance get better. Invoked as
+    `save_ckpt_method(model, save_dir)`. If `None`, the standard method of the
+    `Trainer` class is used.
+
+    **output_indent** (default is `4`: just for formatting the output.
+
+    **log_file** (default is `sys.stdout`): where to print training progress
+    messages.
     """
     parallel = False  # not implemented yet
 
-    batch_labels_idx = -1  # labels position in the batch received from loader
-    batch_lens_idx = 2     # lengthts of sentences in the batch. Used only in
-        # the postprocessing, so it will be ignored if postprocess doesn't
-        # apply (see the `Trainer` class description).
-    model_args = None      # positional arguments of model.forward() method.
-        # It must be indices of the batch positions
-    model_kwargs = {}      # keyword arguments of model.forward() method in
-        # the train mode. It's the dict of kwarg names and corresponding batch
-        # positions
-    # Example: model_args=[0, 1], model_kwargs={'labels': 2} results in
-    # invoking model(batch[0], batch[1], labels=batch[2]). Before this, all
-    # the batch will be moved to the model's device.
-    ############
-    output_logits_idx = 0  # if model.forward() returns a tuple, it's the
-        # position of logits in that tuple
-    output_loss_idx = 1    # if model.forward() calculates a loss in train
-        # mode by itself, it's the position of the loss in the returning tuple
+    batch_labels_idx = -1
+    batch_lens_idx = 2
+    model_args = None
+    model_kwargs = None
 
-    min_epochs = 0     # the number of epochs we continue training even if
-        # the number of bad epochs surpassed the bad_epochs param
-    max_epochs = None  # the total number of epochs can't be greater than this
-        # value
-    bad_epochs = 5     # we stop training if the control_metric doesn't
-        # increase on the validation set for a period of this number of epochs
-        # (really, the algorithm is slightly more complex but the meaning is
-        # it)
+    output_logits_idx = 0
+    output_loss_idx = 1
+    min_epochs = 0
+    max_epochs = None
+    bad_epochs = 5
 
     adam_lr, adam_betas, adam_eps, adam_weight_decay, adam_amsgrad = \
         .0001, (0.9, 0.999), 1e-08, 0, False
@@ -48,14 +117,17 @@ class TrainerConfig():
         .001, .9, 0, 0, False
     adamw_lr, adamw_betas, adamw_eps, adamw_weight_decay, adamw_amsgrad = \
         5e-5, (0.9, 0.999), 1e-8, 0.01, False
-    optimizer = 'SGD'  # allowed values are: 'Adam', 'AdamW', 'SGD'
 
     grad_norm_clip = None
-    control_metric = 'accuracy'  # the metric to control the model performance
-        # in the validation time. The vaues allowed are: 'loss', 'accuracy',
-        # 'precision', 'recall', 'f1'
+    criterion = None
+    optimizer = 'SGD'
+    scheduler = None
+    postprocess_method = 'strip_mask'
+    control_metric = 'accuracy'
+    save_ckpt_method = None
+
+    output_indent = 4
     log_file = sys.stdout
-    output_indent = 4  # just to formatting the output
 
     def __init__(self, save_dir, **kwargs):
         self.save_dir = save_dir
@@ -79,27 +151,6 @@ class Trainer():
     `torch.utils.data.DataLoader` classes delivered data for training and
     validation steps.
 
-    **criterion**: the function to calculate the loss. If omitted, we suppose
-    that the **model** in the train mode calculates the loss by itself.
-
-    **optimizer**: the function to update the **model**'s parameters.
-    Additionally, values of the `str` type are allowed as described in the
-    `TrainerConfig` class definition. If `None`, the value from **config** is
-    used.
-
-    **scheduler**: the function to update the learning rate. If defined, it's
-    invoked just as `scheduler.step()`.
-
-    **postprocess_method**: the function to postprocess both predicted and
-    gold labels after model validation (e.g. to remove labels of masked data).
-    Syntax: `preds, golds = postprocess_method(<predicted labels>,
-    <gold labels>, batch)`.
-
-    **save_ckpt_method**: the function to save the best **model**. Called
-    every time as the **model** performance get better. Invoked as
-    `save_ckpt_method(model, save_dir)` where the `save_dir` param must be
-    defined in the **config**.
-
     **force_cpu**: if `False` (default), the **model** and batches will be
     transfered to the `torch.cuda.current_device()`. So, don't forget to set
     default device with torch.cuda.set_device(\<device>) before create
@@ -107,8 +158,6 @@ class Trainer():
     **model** and batches are remained on the CPU during training.
     """
     def __init__(self, config, model, train_dataloader, test_dataloader=None,
-                 criterion=None, optimizer=None, scheduler=None,
-                 postprocess_method=None, save_ckpt_method=None,
                  force_cpu=False):
         self.config = TrainerConfig(**config) \
                           if isinstance(config, dict) else \
@@ -119,15 +168,6 @@ class Trainer():
         self.model = model
         self.train_dataloader = train_dataloader
         self.test_dataloader = test_dataloader
-        self.optimizer = optimizer or config.optimizer
-        self.scheduler = scheduler
-        self.save_ckpt_method = save_ckpt_method
-        self.postprocess_method = \
-            self.postprocess_strip_mask \
-                if postprocess_method == 'strip_mask' else \
-            self.postprocess_strip_mask_bert \
-                if postprocess_method == 'strip_mask_bert' else \
-            postprocess_method
 
         self.device = 'cpu'
         if torch.cuda.is_available() and not force_cpu:
@@ -151,14 +191,16 @@ class Trainer():
             os.makedirs(save_dir)
 
         print('Saving checkpoint to {}'.format(save_dir),
-              file=config.log_file)
+              file=self.log_file)
 
         if self.save_ckpt_method:
             self.save_ckpt_method(model, save_dir)
         else:
             with open(os.path.join(save_dir, 'config.json'), 'wt') as f:
-                print(json.dumps(model.config, sort_keys=True, indent=4), file=f)
-            torch.save(model.state_dict(), os.path.join(save_dir, 'state_dict.pt'),
+                print(json.dumps(model.config, sort_keys=True, indent=4),
+                      file=f)
+            torch.save(model.state_dict(), os.path.join(save_dir,
+                                                        'state_dict.pt'),
                        pickle_protocol=2)
 
         # Good practice: save your training arguments together
@@ -180,17 +222,23 @@ class Trainer():
     def train(self, best_score=None):
         config, model = self.config, self.model
         batch_labels_idx = config.batch_labels_idx
-        model_args, model_kwargs = config.model_args, config.model_kwargs
-        batch_payload_len = 0 if model_args is None else \
-                            (len(model_args) + len(model_kwargs))
+        model_args, model_kwargs = \
+            config.model_args or [], config.model_kwargs or {}
+        batch_payload_len = len(model_args) + len(model_kwargs)
         output_loss_idx, output_logits_idx = \
             config.output_loss_idx, config.output_logits_idx
-        log_file = config.log_file
 
-        optimizer = self.optimizer
+        grad_norm_clip = config.grad_norm_clip
+        criterion = config.criterion
+        optimizer = config.optimizer
+        scheduler = config.scheduler
+        postprocess_method = config.postprocess_method
+        control_metric = config.control_metric
+
         if isinstance(optimizer, str):
             # Take care of distributed/parallel training
-            raw_model = self.model.module if hasattr(self.model, 'module') else \
+            raw_model = self.model.module \
+                            if hasattr(self.model, 'module') else \
                         self.model
             optimizer = optimizer.lower()
             if optimizer == 'adam':
@@ -221,12 +269,20 @@ class Trainer():
                     amsgrad=config.adamw_amsgrad
                 )
             else:
-                raise ValueError('ERROR: unknown optimizer '
-                                f'{config.optimizer}')
+                raise ValueError(f'ERROR: unknown optimizer {optimizer}')
 
-        scheduler = self.scheduler
-        control_metric = config.control_metric
+        if isinstance(postprocess_method, str):
+            postprocess_method = postprocess_method.lower()
+            if postprocess_method == 'strip_mask':
+                postprocess_method = self.postprocess_strip_mask
+            elif postprocess_method == 'strip_mask_bert':
+                postprocess_method = self.postprocess_strip_mask_bert
+            else:
+                raise ValueError('ERROR: unknown postprocess method '
+                                f'{postprocess_method}')
+
         print_indent = ' ' * config.output_indent
+        log_file = config.log_file
 
         def run_epoch(split, epoch):
             assert split in ['train', 'test']
@@ -263,9 +319,9 @@ class Trainer():
                     # backprop
                     optimizer.zero_grad()
                     loss.backward()
-                    if config.grad_norm_clip:
+                    if grad_norm_clip:
                         torch.nn.utils.clip_grad_norm_(model.parameters(),
-                                                       config.grad_norm_clip)
+                                                       grad_norm_clip)
                     # update parameters
                     optimizer.step()
                     # update the learning rate
@@ -309,7 +365,6 @@ class Trainer():
 
         best_loss = prev_loss = float('inf')
         test_loss = None
-#         self.tokens = 0 # counter used for learning rate decay
         for epoch in range(1, config.max_epochs + 1) if config.epochs else \
                      itertools.count(start=1):
             print_str = 'Epoch {}: \n'.format(epoch)
@@ -353,14 +408,16 @@ class Trainer():
                 if score > best_score:
                     best_score = score
                     best_epoch = epoch
-                    best_test_golds, best_test_preds = test_golds[:], test_preds[:]
+                    best_test_golds, best_test_preds = \
+                        test_golds[:], test_preds[:]
                     bad_epochs_ = 0
                     print_str += '\nnew maximum score {:.8f}'.format(score)
                 else:
                     need_backup = False
                     if score <= prev_score:
                         bad_epochs_ += 1
-                    sgn = '{} {}'.format('==' if score == best_score else '<<',
+                    sgn = '{} {}'.format('==' if score == best_score else
+                                         '<<',
                                          '<' if score < prev_score else
                                          '=' if score == prev_score else
                                          '>')

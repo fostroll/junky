@@ -8,8 +8,6 @@ Provides a bunch of tools and utilities to use with PyTorch.
 
 ## Content
 
-[Autotrain](https://github.com/fostroll/junky/blob/master/doc/README_AUTOTRAIN.md)
-
 [Layers](https://github.com/fostroll/junky/blob/master/doc/README_LAYERS.md)
 
 [Datasets](https://github.com/fostroll/junky/blob/master/doc/README_DATASETS.md)
@@ -17,6 +15,10 @@ Provides a bunch of tools and utilities to use with PyTorch.
 [Utilities](https://github.com/fostroll/junky/blob/master/doc/README_UTILITIES.md)
 
 [Plotter](https://github.com/fostroll/junky/blob/master/doc/README_PLOTTER.md)
+
+[Trainer](https://github.com/fostroll/junky/blob/master/doc/README_TRAINER.md)
+
+[Autotrain](https://github.com/fostroll/junky/blob/master/doc/README_AUTOTRAIN.md)
 
 ## Installation
 
