@@ -2,7 +2,15 @@ import torch
 import sys
 
 
-class TrainerConfig():
+class BaseConfig:
+
+    def __init__(self, **kwargs):
+        for k, v in kwargs.items():
+            assert hasattr(self, k), f'ERROR: Unknown config attribute {k}'
+            setattr(self, k, v)
+
+
+class TrainerConfig(BaseConfig):
     """
     The configurator for the `Trainer` class.
 
@@ -130,10 +138,8 @@ class TrainerConfig():
     log_file = sys.stdout
 
     def __init__(self, save_dir, **kwargs):
+        super().__init(**kwargs)__
         self.save_dir = save_dir
-        for k, v in kwargs.items():
-            assert hasattr(self, k), f'ERROR: Unknown config attribute {k}'
-            setattr(self, k, v)
 
 
 class Trainer():
