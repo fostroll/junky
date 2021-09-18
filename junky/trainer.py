@@ -10,7 +10,7 @@ class TrainerConfig():
 
     **save_dir**: the directory where to save the best model.
 
-    **\*args**: any of the params defined below.
+    **\*\*kwargs**: any of the params defined below.
 
     """
     parallel = False  # not implemented yet
@@ -22,7 +22,7 @@ class TrainerConfig():
     model_args = None      # positional arguments of model.forward() method.
         # It must be indices of the batch positions
     model_kwargs = {}      # keyword arguments of model.forward() method in
-        # train mode. It's the dict of kwarg names and corresponding batch
+        # the train mode. It's the dict of kwarg names and corresponding batch
         # positions
     # Example: model_args=[0, 1], model_kwargs={'labels': 2} results in
     # invoking model(batch[0], batch[1], labels=batch[2]). Before this, all
@@ -70,7 +70,8 @@ class Trainer():
 
     Args:
 
-    **config**: an instance of the `TrainerConfig` class.
+    **config**: an instance of the `TrainerConfig` class or the dict that
+    contains initialization data for it.
 
     **model**: the model to train.
 
@@ -79,7 +80,7 @@ class Trainer():
     validation steps.
 
     **criterion**: the function to calculate the loss. If omitted, we suppose
-    that the `model` in train mode calculates the loss by itself.
+    that the **model** in the train mode calculates the loss by itself.
 
     **optimizer**: the function to update the **model**'s parameters.
     Additionally, values of the `str` type are allowed as described in the
@@ -88,6 +89,11 @@ class Trainer():
 
     **scheduler**: the function to update the learning rate. If defined, it's
     invoked just as `scheduler.step()`.
+
+    **postprocess_method**: the function to postprocess both predicted and
+    gold labels after model validation (e.g. to remove labels of masked data).
+    Syntax: `preds, golds = postprocess_method(<predicted labels>,
+    <gold labels>, batch)`.
 
     **save_ckpt_method**: the function to save the best **model**. Called
     every time as the **model** performance get better. Invoked as
@@ -104,7 +110,9 @@ class Trainer():
                  criterion=None, optimizer=None, scheduler=None,
                  postprocess_method=None, save_ckpt_method=None,
                  force_cpu=False):
-        self.config = config
+        self.config = TrainerConfig(**config) \
+                          if isinstance(config, dict) else \
+                      config
         assert test_dataloader or config.max_epochs, \
             'ERROR: Either `test_dataloaders` of `config.max_epochs` param' \
             'must be defined'
