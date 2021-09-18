@@ -138,7 +138,7 @@ class TrainerConfig(BaseConfig):
     log_file = sys.stdout
 
     def __init__(self, save_dir, **kwargs):
-        super().__init(**kwargs)__
+        super().__init__(**kwargs)
         self.save_dir = save_dir
 
 
