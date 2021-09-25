@@ -18,6 +18,9 @@ class TrainerConfig(BaseConfig):
 
     **save_dir** (`str`): the directory where to save the best model.
 
+    **save_prefix** (`str`; default is ''): the prefix for the model file
+    names.
+
     **batch_labels_idx** (`int`; default is -1): labels position in the batch
     received from loader.
 
