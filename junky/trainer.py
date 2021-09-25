@@ -37,7 +37,7 @@ class TrainerConfig(BaseConfig):
     invoking `model(batch[0], batch[1], labels=batch[2])`. Before this, all
     the batch will be moved to the model's device.
 
-    ***NB:*** if both **model_args** and **model_kwargs** are `None`,
+    ***NB:*** If both **model_args** and **model_kwargs** are `None`,
     `model.forward(*batch)` is invoked.
 
     **output_logits_idx** (default is `0`): if model.forward() returns a
@@ -106,6 +106,8 @@ class TrainerConfig(BaseConfig):
     **log_file** (default is `sys.stdout`): where to print training progress
     messages.
     """
+    save_dir = None
+
     parallel = False  # not implemented yet
 
     batch_labels_idx = -1
