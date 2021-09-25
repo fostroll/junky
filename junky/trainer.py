@@ -107,6 +107,7 @@ class TrainerConfig(BaseConfig):
     messages.
     """
     save_dir = None
+    save_prefix = ''
 
     parallel = False  # not implemented yet
 
@@ -188,7 +189,7 @@ class Trainer():
 
     def save_ckpt(self):
         config = self.config
-        save_dir = config.save_dir
+        save_dir, save_prefix = config.save_dir, config.save_prefix
 
         # Take care of distributed/parallel training
         model = self.model.module if hasattr(self.model, 'module') else \
@@ -202,13 +203,14 @@ class Trainer():
               file=self.log_file)
 
         if self.save_ckpt_method:
-            self.save_ckpt_method(model, save_dir)
+            self.save_ckpt_method(model, save_dir, save_prefix)
         else:
-            with open(os.path.join(save_dir, 'config.json'), 'wt') as f:
+            with open(os.path.join(save_dir, save_prefix + 'config.json'),
+                      'wt') as f:
                 print(json.dumps(model.config, sort_keys=True, indent=4),
                       file=f)
-            torch.save(model.state_dict(), os.path.join(save_dir,
-                                                        'state_dict.pt'),
+            torch.save(model.state_dict(),
+                       os.path.join(save_dir, save_prefix + 'state_dict.pt'),
                        pickle_protocol=2)
 
         # Good practice: save your training arguments together
