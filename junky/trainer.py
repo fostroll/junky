@@ -380,7 +380,8 @@ class Trainer():
 
         best_loss = prev_loss = float('inf')
         test_loss = None
-        for epoch in range(1, config.max_epochs + 1) if config.epochs else \
+        for epoch in range(1, config.max_epochs + 1) \
+                         if config.max_epochs else \
                      itertools.count(start=1):
             print_str = 'Epoch {}: \n'.format(epoch)
             need_backup = True
