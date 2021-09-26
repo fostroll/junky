@@ -206,7 +206,8 @@ class Trainer():
               file=self.log_file)
 
         if self.save_ckpt_method:
-            self.save_ckpt_method(model, save_dir, save_prefix)
+            kwargs = {'save_prefix': save_prefix} if save_prefix else {}
+            self.save_ckpt_method(model, save_dir, **kwargs)
         else:
             with open(os.path.join(save_dir, save_prefix + 'config.json'),
                       'wt') as f:
