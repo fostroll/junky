@@ -353,9 +353,9 @@ class Trainer():
                 else:
                     preds_ = logits.detach().max(dim=-1)[1]
                     golds_ = batch[batch_labels_idx]
-                    if self.postprocess_method:
+                    if postprocess_method:
                         preds_, golds_ = \
-                            self.postprocess_method(preds_, golds_, batch)
+                            postprocess_method(preds_, golds_, batch)
                     preds.extend(preds_)
                     golds.extend(golds_)
 
