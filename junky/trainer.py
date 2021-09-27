@@ -1,4 +1,5 @@
 import numpy as np
+import os
 from sklearn.metrics import accuracy_score, confusion_matrix, \
                             f1_score, precision_score, recall_score
 import time
@@ -203,17 +204,17 @@ class Trainer():
         model = self.model.module if hasattr(self.model, 'module') else \
                 self.model
 
-        # Create output directory if needed
-        if not os.path.exists(save_dir):
-            os.makedirs(save_dir)
-
         print('Saving checkpoint to {}'.format(save_dir),
               file=self.log_file)
 
-        if self.save_ckpt_method:
+        if config.save_ckpt_method:
             kwargs = {'save_prefix': save_prefix} if save_prefix else {}
-            self.save_ckpt_method(model, save_dir, **kwargs)
+            config.save_ckpt_method(model, save_dir, **kwargs)
         else:
+            # Create output directory if needed
+            if not os.path.exists(save_dir):
+                os.makedirs(save_dir)
+
             with open(os.path.join(save_dir, save_prefix + 'config.json'),
                       'wt') as f:
                 print(json.dumps(model.config, sort_keys=True, indent=4),
