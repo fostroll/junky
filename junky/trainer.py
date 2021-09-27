@@ -205,7 +205,7 @@ class Trainer():
                 self.model
 
         print('Saving checkpoint to {}'.format(save_dir),
-              file=self.log_file)
+              file=config.log_file)
 
         if config.save_ckpt_method:
             kwargs = {'save_prefix': save_prefix} if save_prefix else {}
