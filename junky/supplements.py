@@ -560,11 +560,14 @@ def train(loaders, model, criterion, optimizer, scheduler,
                          for y_, len_ in zip(pred_indices.cpu().numpy(),
                                              gold_lens)]
 
-                if is_bce:
-                    gold = gold.float()
-                loss = criterion(pred.flatten(end_dim=flatten_idx),
-                                 to_device(gold, device).flatten(end_dim=-1))
-                test_losses_.append(loss.item())
+                if criterion:
+                    if is_bce:
+                        gold = gold.float()
+                    loss = criterion(
+                        pred.flatten(end_dim=flatten_idx),
+                        to_device(gold, device).flatten(end_dim=-1)
+                    )
+                    test_losses_.append(loss.item())
 
             mean_test_loss = np.mean(test_losses_)
             test_losses.append(mean_test_loss)
