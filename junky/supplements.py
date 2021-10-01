@@ -407,41 +407,44 @@ def train(loaders, model, criterion, optimizer, scheduler,
           log_file=LOG_FILE):
 
     assert epochs or bad_epochs, \
-           'ERROR: Either epochs or bad_epochs must be specified'
+           'ERROR: Either epochs or bad_epochs must be specified.'
     assert control_metric in ['accuracy', 'f1', 'loss'], \
            "ERROR: Unknown control_metric '{}' ".format(control_metric) \
-         + "(only 'accuracy', 'f1' and 'loss' are available)"
+         + "(only 'accuracy', 'f1' and 'loss' are available)."
     assert loaders or datasets, \
            'ERROR: You must pass a list of Dataloader or Dataset ' \
-           'instances for train and test goals'
+           'instances for train and test goals.'
 
     train_loader = loaders[0] if loaders and loaders[0] else \
                    datasets[0].create_loader(batch_size=batch_size,
                                              shuffle=True, num_workers=0) \
-                       if callable(getattr(datasets[0],
-                                           'create_loader', None)) else \
+                       if datasets and callable(getattr(datasets[0],
+                                                        'create_loader',
+                                                        None)) else \
                    DataLoader(datasets[0], batch_size=batch_size,
                               shuffle=True, num_workers=0,
                               collate_fn=pad_collate if pad_collate else
-                                         datasets[0].pad_collate)
+                                         datasets[0].pad_collate) \
+                       if datasets and datasets[0] else None
     test_loader = loaders[1] \
                       if loaders and len(loaders) > 1 and loaders[1] else \
                   datasets[1].create_loader(batch_size=batch_size,
                                             shuffle=False, num_workers=0) \
                       if datasets and len(datasets) > 1 and datasets[1] \
-                                  and callable(
-                                      getattr(datasets[1],
-                                              'create_loader', None)
-                                  ) else \
+                                  and callable(getattr(datasets[1],
+                                                       'create_loader',
+                                                       None)) else \
                   DataLoader(datasets[1], batch_size=batch_size,
                              shuffle=False, num_workers=0,
                              collate_fn=pad_collate if pad_collate else
                                         datasets[1].pad_collate) \
                       if datasets and len(datasets) > 1 and datasets[1] else \
                   None
+    assert train_loader or test_loader, \
+           'ERROR: Either `loaders` or `dataset` must be not None.'
     assert test_loader or epochs, \
            'ERROR: At least one of the params `loaders[1]`, `dataset[1]` ' \
-           'or `epochs` must be not None'
+           'or `epochs` must be not None.'
 
     is_bce = isinstance(criterion, (nn.BCEWithLogitsLoss, nn.BCELoss))
     flatten_idx = -1 if is_bce else -2
@@ -476,57 +479,59 @@ def train(loaders, model, criterion, optimizer, scheduler,
     print_indent = ' ' * len(log_prefix)
     print_str = ''
     for epoch in range(1, epochs + 1) if epochs else itertools.count(start=1):
-        print_str = '{}Epoch {}: \n'.format(log_prefix, epoch)
-        train_losses_ = []
+        if train_loader:
+            print_str = '{}Epoch {}: \n'.format(log_prefix, epoch)
+            train_losses_ = []
 
-        progress_bar = tqdm(desc='Epoch {}'.format(epoch),
-                            total=len(train_loader.dataset),
-                            file=log_file) \
-                           if with_progress and log_file else \
-                       None
+            progress_bar = tqdm(desc='Epoch {}'.format(epoch),
+                                total=len(train_loader.dataset),
+                                file=log_file) \
+                               if with_progress and log_file else \
+                           None
 
-        model.train()
-        t, n_update = time.time(), 0
-        for batch in train_loader:
-            batch, gold = batch[:-1], to_device(batch[-1], device)
-            if batch_to_device:
-                batch = to_device(batch, device)
-            optimizer.zero_grad()
-            pred = model(*batch)
+            model.train()
+            t, n_update = time.time(), 0
+            for batch in train_loader:
+                batch, gold = batch[:-1], to_device(batch[-1], device)
+                if batch_to_device:
+                    batch = to_device(batch, device)
+                optimizer.zero_grad()
+                pred = model(*batch)
 
-            if is_bce:
-                gold = gold.float()
-            loss = criterion(pred.flatten(end_dim=flatten_idx),
-                             gold.flatten(end_dim=-1))
-            loss.backward()
+                if is_bce:
+                    gold = gold.float()
+                loss = criterion(pred.flatten(end_dim=flatten_idx),
+                                 gold.flatten(end_dim=-1))
+                loss.backward()
 
-            if max_grad_norm:
-                torch.nn.utils.clip_grad_norm_(parameters=model.parameters(),
-                                               max_norm=max_grad_norm)
+                if max_grad_norm:
+                    torch.nn.utils.clip_grad_norm_(
+                        parameters=model.parameters(), max_norm=max_grad_norm
+                    )
 
-            optimizer.step()
-            train_losses_.append(loss.item())
+                optimizer.step()
+                train_losses_.append(loss.item())
+
+                if with_progress:
+                    t_ = time.time()
+                    n_update += len(gold)
+                    if t_ - t >= 2:
+                        t = t_
+                        progress_bar.set_postfix(
+                            train_loss=np.mean(train_losses_[-500:])
+                        )
+                        progress_bar.update(n_update)
+                        n_update = 0
 
             if with_progress:
-                t_ = time.time()
-                n_update += len(gold)
-                if t_ - t >= 2:
-                    t = t_
-                    progress_bar.set_postfix(
-                        train_loss=np.mean(train_losses_[-500:])
-                    )
+                if n_update:
                     progress_bar.update(n_update)
-                    n_update = 0
+                progress_bar.close()
 
-        if with_progress:
-            if n_update:
-                progress_bar.update(n_update)
-            progress_bar.close()
-
-        mean_train_loss = np.mean(train_losses_)
-        train_losses.append(mean_train_loss)
-        print_str += '{}Losses: train = {:.8f}' \
-                         .format(print_indent, mean_train_loss)
+            mean_train_loss = np.mean(train_losses_)
+            train_losses.append(mean_train_loss)
+            print_str += '{}Losses: train = {:.8f}' \
+                             .format(print_indent, mean_train_loss)
 
         test_losses_, test_golds, test_preds = [], [], []
 
@@ -612,6 +617,9 @@ def train(loaders, model, criterion, optimizer, scheduler,
                                      .format(best_score, best_epoch)
                     break
 
+            if not train_loader:
+                break
+
             if log_file:
                 print(print_str, file=log_file)
                 log_file.flush()
@@ -638,7 +646,7 @@ def train(loaders, model, criterion, optimizer, scheduler,
                 else:
                     scheduler.step(score)
 
-    if log_file:
+    if log_file and train_loader:
         if print_str:
             print(print_str, file=log_file)
         print('Elapsed time: {}'
