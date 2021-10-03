@@ -1,8 +1,8 @@
 import junky
 import numpy as np
 import os
-from sklearn.metrics import accuracy_score, confusion_matrix, \
-                            f1_score, precision_score, recall_score
+from sklearn.metrics import accuracy_score, f1_score, \
+                            precision_score, recall_score
 import time
 import torch
 from tqdm import tqdm
