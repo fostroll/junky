@@ -455,6 +455,15 @@ class Trainer():
                              'Best score {} (on epoch {})').format(best_score,
                                                                    best_epoch)
                         break
+                if epoch == config.max_epoch:
+                    print_str += \
+                        '\nMaximum epochs exceeded. ' \
+                        'Process has been stopped. '. \
+                      + ('No models could surpass `best_score={}` given'
+                             if best_epoch is None else
+                         'Best score {} (on epoch {})').format(best_score,
+                                                               best_epoch)
+                    break
 
                 print(print_str, file=log_file)
                 log_file.flush()
