@@ -177,6 +177,7 @@ def enforce_reproducibility(seed=None):
         torch.backends.cudnn.benchmark = False
         # System based
         np.random.seed(seed)
+        random.seed(seed)
 
 def get_rand_vector(shape, norm, shift=0., dtype=np.float64):
     """Creates random vector with the norm given.
