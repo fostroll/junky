@@ -612,16 +612,26 @@ def train(loaders, model, criterion, optimizer, scheduler,
                 print_str += '\n{}BAD EPOCHS: {} ({})' \
                                  .format(log_prefix, bad_epochs_, sgn)
                 if bad_epochs_ >= bad_epochs and epoch >= min_epochs:
-                    print_str += ('\n{}Maximum bad epochs exceeded. Process '
-                                  'has been stopped. ').format(log_prefix) \
-                               + ('No models could surpass `best_score={}` given'
-                                      if best_epoch is None else
-                                  'Best score {} (on epoch {})') \
-                                     .format(best_score, best_epoch)
+                    print_str += \
+                        ('\n{}Maximum bad epochs exceeded. Process '
+                         'has been stopped. ').format(log_prefix) \
+                      + ('No models could surpass `best_score={}` given'
+                             if best_epoch is None else
+                         'Best score {} (on epoch {})').format(best_score,
+                                                               best_epoch)
                     break
 
             if not train_loader:
                 break
+
+            if epoch == epochs:
+                print_str += \
+                    '\nMaximum epochs exceeded. ' \
+                    'Process has been stopped. ' \
+                  + ('No models could surpass `best_score={}` given'
+                         if best_epoch is None else
+                     'Best score {} (on epoch {})').format(best_score,
+                                                           best_epoch)
 
             if log_file:
                 print(print_str, file=log_file)

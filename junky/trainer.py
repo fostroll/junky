@@ -463,7 +463,6 @@ class Trainer():
                              if best_epoch is None else
                          'Best score {} (on epoch {})').format(best_score,
                                                                best_epoch)
-                    break
 
                 print(print_str, file=log_file)
                 log_file.flush()
