@@ -455,14 +455,6 @@ class Trainer():
                              'Best score {} (on epoch {})').format(best_score,
                                                                    best_epoch)
                         break
-                if epoch == config.max_epochs:
-                    print_str += \
-                        '\nMaximum epochs exceeded. ' \
-                        'Process has been stopped. ' \
-                      + ('No models could surpass `best_score={}` given'
-                             if best_epoch is None else
-                         'Best score {} (on epoch {})').format(best_score,
-                                                               best_epoch)
 
                 print(print_str, file=log_file)
                 log_file.flush()
@@ -471,6 +463,15 @@ class Trainer():
 
             if need_backup:
                 self.save_ckpt()
+
+            if epoch == config.max_epochs:
+                print_str += \
+                    '\nMaximum epochs exceeded. ' \
+                    'Process has been stopped. ' \
+                  + ('No models could surpass `best_score={}` given'
+                         if best_epoch is None else
+                     'Best score {} (on epoch {})').format(best_score,
+                                                           best_epoch)
 
         if print_str:
             print(print_str, file=log_file)
