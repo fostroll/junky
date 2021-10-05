@@ -465,8 +465,8 @@ class Trainer():
                 self.save_ckpt()
 
             if epoch == config.max_epochs:
-                print_str += \
-                    '\nMaximum epochs exceeded. ' \
+                print_str = \
+                    'Maximum epochs exceeded. ' \
                     'Process has been stopped. ' \
                   + ('No models could surpass `best_score={}` given'
                          if best_epoch is None else
