@@ -408,9 +408,11 @@ def train(loaders, model, criterion, optimizer, scheduler,
 
     assert epochs or bad_epochs, \
            'ERROR: Either epochs or bad_epochs must be specified.'
-    assert control_metric in ['accuracy', 'f1', 'loss'], \
-           "ERROR: Unknown control_metric '{}' ".format(control_metric) \
-         + "(only 'accuracy', 'f1' and 'loss' are available)."
+    assert control_metric in ['accuracy', 'f1', 'loss',
+                              'precision', 'recall'], \
+          f"ERROR: Unknown control_metric '{control_metric}' " \
+           "(only 'accuracy', 'f1', 'loss', 'precision' and 'recall' are " \
+           'available).'
     assert loaders or datasets, \
            'ERROR: You must pass a list of Dataloader or Dataset ' \
            'instances for train and test goals.'
@@ -585,6 +587,8 @@ def train(loaders, model, criterion, optimizer, scheduler,
 
             score = -mean_test_loss if control_metric == 'loss' else \
                     accuracy if control_metric == 'accuracy' else \
+                    precision if control_metric == 'precision' else \
+                    recall if control_metric == 'recall' else \
                     f1 if control_metric == 'f1' else \
                     None
 
