@@ -117,6 +117,7 @@ from junky.trainer import Trainer
 
 trainer = Trainer(config, model, train_dataloader, test_dataloader=None,
                   force_cpu=False)
+trainer.train(best_score=None)
 ```
 
 Args:
@@ -135,6 +136,9 @@ transfered to the `torch.cuda.current_device()`. So, don't forget to set
 default device with torch.cuda.set_device(\<device>) before create
 the instance of the `Trainer` class. If **force_cpu** is `True` the
 **model** and batches are remained on the CPU during training.
+
+**best_score** (`float`, default is `None`: starting point to compare
+the calculating control metric with.
 
 ### Examples:
 

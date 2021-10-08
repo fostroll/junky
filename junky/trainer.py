@@ -241,6 +241,13 @@ class Trainer():
         return preds, golds
 
     def train(self, best_score=None):
+        """The method that run the training.
+
+        Args:
+
+        **best_score** (`float`, default is `None`: starting point to compare
+        the calculating control metric with.
+        """
         config, model = self.config, self.model
         batch_labels_idx = config.batch_labels_idx
         model_args, model_kwargs = \
