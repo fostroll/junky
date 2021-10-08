@@ -82,7 +82,7 @@ class TrainerConfig(BaseConfig):
     **sgd_weight_decay** (default is `0`), **sgd_dampening** (default is `0`),
     **sgd_nesterov** (default is `False`): params for *SGD* optimizer.
 
-    **grad_norm_clip** (default is `None`): if defined, we clip gradient norm
+    **max_grad_norm** (default is `None`): if defined, we clip gradient norm
     of the model's parameters to that value.
 
     **criterion** (default is `None`): the function to calculate the loss. If
@@ -139,7 +139,7 @@ class TrainerConfig(BaseConfig):
     adamw_lr, adamw_betas, adamw_eps, adamw_weight_decay, adamw_amsgrad = \
         5e-5, (0.9, 0.999), 1e-8, 0.01, False
 
-    grad_norm_clip = None
+    max_grad_norm = None
     criterion = None
     optimizer = 'SGD'
     scheduler = None
@@ -249,7 +249,7 @@ class Trainer():
         output_loss_idx, output_logits_idx = \
             config.output_loss_idx, config.output_logits_idx
 
-        grad_norm_clip = config.grad_norm_clip
+        max_grad_norm = config.max_grad_norm
         criterion = config.criterion
         optimizer = config.optimizer
         scheduler = config.scheduler
@@ -340,9 +340,9 @@ class Trainer():
                     # backprop
                     optimizer.zero_grad()
                     loss.backward()
-                    if grad_norm_clip:
+                    if max_grad_norm:
                         torch.nn.utils.clip_grad_norm_(model.parameters(),
-                                                       grad_norm_clip)
+                                                       max_grad_norm)
                     # update parameters
                     optimizer.step()
                     # update the learning rate
