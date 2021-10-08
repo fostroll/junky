@@ -245,8 +245,8 @@ class Trainer():
 
         Args:
 
-        **best_score** (`float`, default is `None`: starting point to compare
-        the calculating control metric with.
+        **best_score** (`float`, default is `None`): the starting point to
+        compare the calculating control metric with.
         """
         config, model = self.config, self.model
         batch_labels_idx = config.batch_labels_idx

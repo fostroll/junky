@@ -137,8 +137,8 @@ default device with torch.cuda.set_device(\<device>) before create
 the instance of the `Trainer` class. If **force_cpu** is `True` the
 **model** and batches are remained on the CPU during training.
 
-**best_score** (`float`, default is `None`: starting point to compare
-the calculating control metric with.
+**best_score** (`float`, default is `None`): the starting point to
+compare the calculating control metric with.
 
 ### Examples:
 
