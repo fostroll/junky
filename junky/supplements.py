@@ -402,9 +402,9 @@ def to_device(data, device):
 def train(loaders, model, criterion, optimizer, scheduler,
           best_model_backup_method, log_prefix='', datasets=None,
           pad_collate=None, epochs=None, min_epochs=0, bad_epochs=5,
-          batch_size=32, labels_pad_idx=-100, control_metric='accuracy',
-          max_grad_norm=None, batch_to_device=True, best_score=None,
-          with_progress=True, log_file=LOG_FILE):
+          batch_size=32, control_metric='accuracy', max_grad_norm=None,
+          batch_to_device=True, best_score=None, with_progress=True,
+          log_file=LOG_FILE):
 
     assert epochs or bad_epochs, \
            'ERROR: Either epochs or bad_epochs must be specified.'
@@ -503,8 +503,7 @@ def train(loaders, model, criterion, optimizer, scheduler,
                 if is_bce:
                     gold = gold.float()
                 loss = criterion(pred.flatten(end_dim=flatten_idx),
-                                 gold.flatten(end_dim=-1),
-                                 ignore_index=labels_pad_idx)
+                                 gold.flatten(end_dim=-1))
                 loss.backward()
 
                 if max_grad_norm:
