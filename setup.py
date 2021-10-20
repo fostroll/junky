@@ -38,17 +38,18 @@ setup(
         'Topic :: Software Development :: Libraries',
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
     ],
     # What does your project relate to?
     keywords='pytorch autotrain',
 
     packages=find_packages(exclude=['doc', 'examples', 'scripts', 'tests']),
     install_requires=['matplotlib', 'numpy', 'pandas', 'seaborn', 'sklearn',
-                      'torch>=1.2.0', 'transformers>=2.5.1'],
+                      'torch>=1.8.0', 'transformers>=4.3.3'],
     include_package_data=True,
-    python_requires='>=3.5',
+    python_requires='>=3.6',
 )
