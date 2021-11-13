@@ -154,7 +154,7 @@ class BertDataset(BaseDataset):
 
         If you want to get the result placed on some exact device, specify the
         device with *to* param. If *to* is ``None`` (defautl), data will be
-        placed to the very device that `bs.model` is used.
+        placed to the very device that `ds.model` is used.
 
         *with_grad*: calculate gradients during forward propagation through
         self.model. Default is ``False``.

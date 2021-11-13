@@ -871,7 +871,7 @@ one vector for each input word. The ops allowed: `None`, `'absmax'`,
 
 If you want to get the result placed on some exact device, specify the device
 with **to** param. If **to** is `None`, the data will be placed to the very
-device that `bs.model` is used.
+device that `ds.model` is used.
 
 If **save** is `True` (default), we'll keep the converted **sentences** as the
 `Dataset` source.
