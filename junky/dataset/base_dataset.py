@@ -9,7 +9,7 @@ Provides base functionality for junky.dataset.*Dataset classes.
 from copy import deepcopy
 import pickle
 import sys
-from torch import Tensor
+from torch import Tensor, save as torch_save
 from torch.nn import Module
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
@@ -62,7 +62,7 @@ class BaseDataset(Dataset):
                 if method == 'pickle':
                     pickle.dump(self, f, 2)
                 elif method == 'torch':
-                    torch.save(self, f)
+                    torch_save(self, f)
                 else:
                     raise ValueError(f'ERROR: Unknown method "{method}"')
         else:
