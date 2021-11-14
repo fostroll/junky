@@ -52,14 +52,19 @@ class BaseDataset(Dataset):
     def _push_xtrn(self, xtrn):
         pass
 
-    def _clone_or_save(self, with_data=True, file_path=None):
+    def _clone_or_save(self, with_data=True, file_path=None, method='pickle'):
         data, o = None, None
         if not with_data:
             data = self._pull_data()
         xtrn = self._pull_xtrn()
         if file_path:
             with open(file_path, 'wb') as f:
-                pickle.dump(self, f, 2)
+                if method == 'pickle':
+                    pickle.dump(self, f, 2)
+                elif method == 'torch':
+                    torch.save(self, f)
+                else:
+                    raise ValueError(f'ERROR: Unknown method "{method}"')
         else:
             o = deepcopy(self)
         if xtrn is not None:
@@ -75,10 +80,13 @@ class BaseDataset(Dataset):
         the new object will be empty."""
         return self._clone_or_save(with_data=with_data)
 
-    def save(self, file_path, with_data=True):
-        """Save this object to *file_path*. If *with_data* is ``False``, the
-        `data` attr of the new object will be empty."""
-        return self._clone_or_save(with_data=with_data, file_path=file_path)
+    def save(self, file_path, with_data=True, method='pickle'):
+        """Save the object to *file_path*. If *with_data* is ``False``, the
+        `data` attribute of the saved object will be empty. Param *method* can
+        be either 'pickle' (default) or 'torch'.
+        """
+        return self._clone_or_save(with_data=with_data, file_path=file_path,
+                                   method=method)
 
     @staticmethod
     def load(file_path, xtrn=None):

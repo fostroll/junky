@@ -47,11 +47,11 @@ the `Dataset` source in the new object will be empty. The model and all other
 attributes will be copied.
 
 ```python
-ds.save(file_path, with_data=True)
+ds.save(file_path, with_data=True, method='pickle')
 ```
-Saves the `BaseDataset` object to **file_path**. If **with_data** is `False`,
-the `Dataset` source of the saved object will be empty. The model and all
-other attributes will be saved.
+Saves the object to **file_path**. If **with_data** is `False`,
+the `data` attribute of the saved object will be empty. Param **method** can
+be either `'pickle'` (default) or `'torch'`.
 
 ```python
 ds = TokenDataset.load(file_path):
