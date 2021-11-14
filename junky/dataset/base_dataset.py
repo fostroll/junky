@@ -9,7 +9,7 @@ Provides base functionality for junky.dataset.*Dataset classes.
 from copy import deepcopy
 import pickle
 import sys
-from torch import Tensor, save as torch_save
+from torch import Tensor, load as torch_load, save as torch_save
 from torch.nn import Module
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
@@ -89,12 +89,17 @@ class BaseDataset(Dataset):
                                    method=method)
 
     @staticmethod
-    def load(file_path, xtrn=None):
+    def load(file_path, xtrn=None, method='pickle'):
         """Load object from *file_path*. You should pass the *xtrn* object
         that you received as result of the `.save()` method call for this
-        object."""
+        object. Param *method* can be either 'pickle' (default) or 'torch'."""
         with open(file_path, 'rb') as f:
-            o = pickle.load(f)
+            if method == 'pickle':
+                o = pickle.load(f)
+            elif method == 'torch':
+                o = torch_load(f)
+            else:
+                raise ValueError(f'ERROR: Unknown method "{method}"')
         if xtrn is not None:
             o._push_xtrn(xtrn)
         return o

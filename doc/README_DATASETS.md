@@ -54,9 +54,10 @@ the `data` attribute of the saved object will be empty. Param **method** can
 be either `'pickle'` (default) or `'torch'`.
 
 ```python
-ds = TokenDataset.load(file_path):
+ds = TokenDataset.load(file_path, method='pickle'):
 ```
-Load previously saved `BaseDataset` object from **file_path**.
+Load previously saved `BaseDataset` object from **file_path**. Param
+**method** can be either `'pickle'` (default) or `'torch'`.
 
 ```python
 ds.to(*args, **kwargs):
