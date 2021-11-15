@@ -47,24 +47,25 @@ the `Dataset` source in the new object will be empty. The model and all other
 attributes will be copied.
 
 ```python
-ds.save(file_path, with_data=True, method='pickle')
+ds.save(file_path, with_data=True, method='torch')
 ```
 Saves the object to **file_path**. If **with_data** is `False`,
-the `data` attribute of the saved object will be empty. Param **method** can
-be either `'pickle'` (default) or `'torch'`.
+the `data` attribute of the saved object will be empty. The param **method**
+can be either `'torch'` (default) or `'pickle'`.
 
 ```python
-ds = TokenDataset.load(file_path, method='pickle'):
+ds = TokenDataset.load(file_path, method=None):
 ```
-Load previously saved `BaseDataset` object from **file_path**. Param
-**method** can be either `'pickle'` (default) or `'torch'`.
+Load previously saved `BaseDataset` object from **file_path**. The param
+**method** can be either `'torch'` (default) or `'pickle'`. If the **method**
+is `None` (default), we detect it by trial and error.
 
 ```python
 ds.to(*args, **kwargs):
 ```
-Invokes `.to(*args, **kwargs)` methods for all the elements of the `Dataset`
-source that have `torch.Tensor` or `torch.nn.Model` type. All the params will
-be transferred as is.
+Invokes `.to(*args, **kwargs)` for all the elements of the `Dataset` source
+that have `torch.Tensor` or `torch.nn.Model` type. All the params are
+transferred as is.
 
 ```python
 ds.transform(data, append=False)

@@ -52,7 +52,7 @@ class BaseDataset(Dataset):
     def _push_xtrn(self, xtrn):
         pass
 
-    def _clone_or_save(self, with_data=True, file_path=None, method='pickle'):
+    def _clone_or_save(self, with_data=True, file_path=None, method='torch'):
         data, o = None, None
         if not with_data:
             data = self._pull_data()
@@ -80,21 +80,27 @@ class BaseDataset(Dataset):
         the new object will be empty."""
         return self._clone_or_save(with_data=with_data)
 
-    def save(self, file_path, with_data=True, method='pickle'):
+    def save(self, file_path, with_data=True, method='torch'):
         """Save the object to *file_path*. If *with_data* is ``False``, the
-        `data` attribute of the saved object will be empty. Param *method* can
-        be either 'pickle' (default) or 'torch'.
+        `data` attribute of the saved object will be empty. The param *method*
+        can be either 'torch' (default) or 'pickle'.
         """
         return self._clone_or_save(with_data=with_data, file_path=file_path,
                                    method=method)
 
     @staticmethod
-    def load(file_path, xtrn=None, method='pickle'):
+    def load(file_path, xtrn=None, method=None):
         """Load object from *file_path*. You should pass the *xtrn* object
         that you received as result of the `.save()` method call for this
-        object. Param *method* can be either 'pickle' (default) or 'torch'."""
+        object. The param *method* can be either 'torch' or 'pickle'. If the
+        *method* is ``None`` (default), we detect it by trial and error."""
         with open(file_path, 'rb') as f:
-            if method == 'pickle':
+            if method is None:
+                try:
+                    o = pickle.load(f)
+                except UnpicklingError:
+                    o = torch_load(f)
+            elif method == 'pickle':
                 o = pickle.load(f)
             elif method == 'torch':
                 o = torch_load(f)
@@ -116,8 +122,9 @@ class BaseDataset(Dataset):
         return o
 
     def to(self, *args, **kwargs):
-        """Invoke the `.to()` method for all object of `torch.Tensor` or
-        `torch.nn.Module` type."""
+        """Invokes `.to(*args, **kwargs)` for all the elements of the Dataset
+        source that have `torch.Tensor` or `torch.nn.Model` type. All the
+        params are transferred as is."""
         self.data = self._to(self.data, *args, **kwargs)
 
     def transform(self, data, append=False):
