@@ -98,7 +98,7 @@ class BaseDataset(Dataset):
             if method is None:
                 try:
                     o = pickle.load(f)
-                except UnpicklingError:
+                except pickle.UnpicklingError:
                     o = torch_load(f)
             elif method == 'pickle':
                 o = pickle.load(f)
