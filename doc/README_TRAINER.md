@@ -129,7 +129,12 @@ contains initialization data for it.
 
 **train_dataloader**, **test_dataloader**: instances of the
 `torch.utils.data.DataLoader` classes delivered data for training and
-validation steps.
+validation steps. Also, it is possible to pass `callable` to either of
+this params, in which case it should return `torch.utils.data.DataLoader`
+instance. This `callable` will be called before starting each epoch and
+can take two params: `split` that can be either `'train'` or '`test`' and
+`epoch` that is the current epoch number (note that the number of the 1st
+epoch is `1`).
 
 **force_cpu**: if `False` (default), the **model** and batches will be
 transfered to the `torch.cuda.current_device()`. So, don't forget to set
