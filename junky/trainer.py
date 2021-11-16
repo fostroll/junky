@@ -379,7 +379,7 @@ class Trainer():
 
                 else:
                     logits.detach_()
-                    preds_ = (logits > binary_threshold) \
+                    preds_ = (logits >= binary_threshold).int() \
                                  if binary_threshold else \
                              logits.max(dim=-1)[1]
                              
