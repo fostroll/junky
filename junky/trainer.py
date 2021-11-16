@@ -1,3 +1,4 @@
+import itertools
 import junky
 import numpy as np
 import os
