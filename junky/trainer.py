@@ -112,7 +112,11 @@ class TrainerConfig(BaseConfig):
     `save_ckpt_method(model, save_dir)`. If `None`, the standard method of the
     `Trainer` class is used.
 
-    **output_indent** (default is `4`: just for formatting the output.
+    **binary_threshold** (float; default is `None`): a value between `0` and
+    `1` specifying the threshold for rounding. If you specify it, then in the
+    `eval` mode, the final operation of the model must be `torch.sigmoid()`.
+
+    **output_indent** (default is `4`): just for formatting the output.
 
     **log_file** (default is `sys.stdout`): where to print training progress
     messages.
@@ -147,6 +151,8 @@ class TrainerConfig(BaseConfig):
     postprocess_method = 'strip_mask'
     control_metric = 'accuracy'
     save_ckpt_method = None
+
+    binary_threshold = None
 
     output_indent = 4
     log_file = sys.stdout
@@ -269,6 +275,8 @@ class Trainer():
         postprocess_method = config.postprocess_method
         control_metric = config.control_metric
 
+        binary_threshold = config.binary_threshold
+
         if isinstance(optimizer, str):
             # Take care of distributed/parallel training
             raw_model = self.model.module \
@@ -370,7 +378,12 @@ class Trainer():
                     pbar.set_postfix(train_loss_EMA=EMA, refresh=False)
 
                 else:
-                    preds_ = logits.detach().max(dim=-1)[1]
+                    logits.detach_()
+                    preds_ = (logits > binary_threshold) \
+                                 if binary_threshold else \
+                             logits.max(dim=-1)[1]
+                             
+                             
                     golds_ = batch[batch_labels_idx]
                     if postprocess_method:
                         preds_, golds_ = \

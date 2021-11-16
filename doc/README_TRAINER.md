@@ -105,6 +105,10 @@ model. Called every time as the model performance get better. Invoked as
 `save_ckpt_method(model, save_dir)`. If `None`, the standard method of the
 `Trainer` class is used.
 
+**binary_threshold** (float; default is `None`): a value between `0` and
+`1` specifying the threshold for rounding. If you specify it, then in the
+`eval` mode, the final operation of the model must be `torch.sigmoid()`.
+
 **output_indent** (default is `4`: just for formatting the output.
 
 **log_file** (default is `sys.stdout`): where to print training progress
