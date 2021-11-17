@@ -69,6 +69,8 @@ class TrainerConfig(BaseConfig):
     epochs (really, the algorithm is slightly more complex but the meaning is
     like that).
 
+    **epoch_steps** (default is `1`):
+
     **adam_lr** (default is `.0001`), **adam_betas** (default is
     `(0.9, 0.999)`), **adam_eps** (default is `1e-08`), **adam_weight_decay**
     (default is `0`), **adam_amsgrad** (default is `False`): params for *Adam*
@@ -103,9 +105,9 @@ class TrainerConfig(BaseConfig):
     `'strip_mask_bert'` or the callable object implementin the syntax: `preds,
     golds = postprocess_method(<predicted labels>, <gold labels>, batch)`.
 
-    **control_metric** (of `str` type; default is `'accuracy'`): the metric to
-    control the model performance in the validation time. The vaues allowed
-    are: `'loss'`, `'accuracy'`, `'precision'`, `'recall'`, `'f1'`.
+    **control_metric** (default is `'accuracy'`): the metric to control the
+    model performance in the validation time. The vaues allowed are: `'loss'`,
+    `'accuracy'`, `'precision'`, `'recall'`, `'f1'`.
 
     **save_ckpt_method** (default is `None`): the function to save the best
     model. Called every time as the model performance get better. Invoked as
@@ -113,8 +115,9 @@ class TrainerConfig(BaseConfig):
     `Trainer` class is used.
 
     **binary_threshold** (float; default is `None`): a value between `0` and
-    `1` specifying the threshold for rounding. If you specify it, then in the
-    `eval` mode, the final operation of the model must be `torch.sigmoid()`.
+    `1` specifying the threshold of rounding for binary classification. Note
+    that in this case, the final operation of the model in the `eval` mode
+    must be `torch.sigmoid()`.
 
     **output_indent** (default is `4`): just for formatting the output.
 
@@ -136,6 +139,7 @@ class TrainerConfig(BaseConfig):
     min_epochs = 0
     max_epochs = None
     bad_epochs = 5
+    epoch_steps = 1
 
     adam_lr, adam_betas, adam_eps, adam_weight_decay, adam_amsgrad = \
         .0001, (0.9, 0.999), 1e-08, 0, False
@@ -152,7 +156,7 @@ class TrainerConfig(BaseConfig):
     control_metric = 'accuracy'
     save_ckpt_method = None
 
-    binary_threshold = None
+    binary_threshold = .5
 
     output_indent = 4
     log_file = sys.stdout
@@ -177,10 +181,11 @@ class Trainer():
     `torch.utils.data.DataLoader` classes delivered data for training and
     validation steps. Also, it is possible to pass `callable` to either of
     this params, in which case it should return `torch.utils.data.DataLoader`
-    instance. This `callable` will be called before starting each epoch and
-    can take two params: `split` that can be either `'train'` or '`test`' and
-    `epoch` that is the current epoch number (note that the number of the 1st
-    epoch is `1`).
+    instance. This `callable` will be called before starting each epoch step
+    and can take three params: `split` that can be either `'train'` or
+    '`test`', `epoch` that is the current epoch number (note that the number
+    of the 1st epoch is `1`), and `step`. If `config.epoch_steps` is `1`,
+    `step` is always `1`.
 
     **force_cpu**: if `False` (default), the **model** and batches will be
     transfered to the `torch.cuda.current_device()`. So, don't forget to set
@@ -261,6 +266,10 @@ class Trainer():
         compare the calculating control metric with.
         """
         config, model = self.config, self.model
+        min_epochs, max_epochs, bad_epochs  = \
+            config.min_epochs, config.max_epochs, config.bad_epochs
+        epoch_steps = config.epoch_steps
+
         batch_labels_idx = config.batch_labels_idx
         model_args, model_kwargs = \
             config.model_args or [], config.model_kwargs or {}
@@ -326,14 +335,14 @@ class Trainer():
         print_indent = ' ' * config.output_indent
         log_file = config.log_file
 
-        def run_epoch(split, epoch):
+        def run_epoch(split, epoch, step):
             assert split in ['train', 'test']
             is_train = split == 'train'
             model.train(is_train)
             dataloader = self.train_dataloader if is_train else \
                          self.test_dataloader
             if callable(dataloader):
-                dataloader = dataloader(split=split, epoch=epoch)
+                dataloader = dataloader(split, epoch, step)
 
             preds, golds, losses = [], [], []
             pbar = tqdm(dataloader, total=len(dataloader),
@@ -378,13 +387,13 @@ class Trainer():
                     pbar.set_postfix(train_loss_EMA=EMA, refresh=False)
 
                 else:
+                    golds_ = batch[batch_labels_idx]
                     logits.detach_()
                     preds_ = (logits >= binary_threshold).int() \
-                                 if binary_threshold else \
+                                 if len(golds._shape) \
+                                 == len(logits.shape) else \
                              logits.max(dim=-1)[1]
-                             
-                             
-                    golds_ = batch[batch_labels_idx]
+
                     if postprocess_method:
                         preds_, golds_ = \
                             postprocess_method(preds_, golds_, batch)
@@ -414,16 +423,17 @@ class Trainer():
 
         best_loss = prev_loss = float('inf')
         test_loss = None
-        for epoch in range(1, config.max_epochs + 1) \
-                         if config.max_epochs else \
+        for epoch in range(1, max_epochs + 1) if max_epochs else \
                      itertools.count(start=1):
-            print_str = 'Epoch {}: \n'.format(epoch)
-            need_backup = True
+            for step in range(1, epoch_steps + 1) if epoch_steps else \
+                        range(1):
+                step_ = f'.{epoch_step}' if epoch_step else ''
+                print_str = f'Epoch {epoch}{epoch_step}: \n'
+                need_backup = True
 
-            train_loss = run_epoch('train', epoch)
-            train_losses.append(train_loss)
-            print_str += '{}Losses: train = {:.8f}' \
-                             .format(print_indent, train_loss)
+                train_loss = run_epoch('train', epoch, step)
+                train_losses.append(train_loss)
+                print_str += f'{print_indent}Losses: train = {train_loss:.8f}'
             if self.test_dataloader is not None:
                 test_loss, test_preds, test_golds = run_epoch('test', epoch)
                 test_losses.append(test_loss)
@@ -473,8 +483,8 @@ class Trainer():
                                          '>')
                     print_str += '\nBAD EPOCHS: {} ({})' \
                                      .format(bad_epochs_, sgn)
-                    if bad_epochs_ >= config.bad_epochs \
-                   and epoch >= config.min_epochs:
+                    if bad_epochs_ >= bad_epochs \
+                   and epoch >= min_epochs:
                         print_str += \
                             '\nMaximum bad epochs exceeded. ' \
                             'Process has been stopped. ' \
@@ -492,7 +502,7 @@ class Trainer():
             if need_backup:
                 self.save_ckpt()
 
-            if epoch == config.max_epochs:
+            if epoch == max_epochs:
                 print_str = \
                     'Maximum epochs exceeded. ' \
                     'Process has been stopped. ' \

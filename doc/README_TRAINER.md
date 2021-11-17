@@ -96,9 +96,9 @@ remove labels of masked data). Allowed values are: `'strip_mask'`,
 `'strip_mask_bert'` or the callable object implementin the syntax: `preds,
 golds = postprocess_method(<predicted labels>, <gold labels>, batch)`.
 
-**control_metric** (of `str` type; default is `'accuracy'`): the metric to
-control the model performance in the validation time. The vaues allowed
-are: `'loss'`, `'accuracy'`, `'precision'`, `'recall'`, `'f1'`.
+**control_metric** (default is `'accuracy'`): the metric to control the
+model performance in the validation time. The vaues allowed are: `'loss'`,
+`'accuracy'`, `'precision'`, `'recall'`, `'f1'`.
 
 **save_ckpt_method** (default is `None`): the function to save the best
 model. Called every time as the model performance get better. Invoked as
@@ -106,8 +106,9 @@ model. Called every time as the model performance get better. Invoked as
 `Trainer` class is used.
 
 **binary_threshold** (float; default is `None`): a value between `0` and
-`1` specifying the threshold for rounding. If you specify it, then in the
-`eval` mode, the final operation of the model must be `torch.sigmoid()`.
+`1` specifying the threshold of rounding for binary classification. Note
+that in this case, the final operation of the model in the `eval` mode
+must be `torch.sigmoid()`.
 
 **output_indent** (default is `4`: just for formatting the output.
 
@@ -135,10 +136,11 @@ contains initialization data for it.
 `torch.utils.data.DataLoader` classes delivered data for training and
 validation steps. Also, it is possible to pass `callable` to either of
 this params, in which case it should return `torch.utils.data.DataLoader`
-instance. This `callable` will be called before starting each epoch and
-can take two params: `split` that can be either `'train'` or '`test`' and
-`epoch` that is the current epoch number (note that the number of the 1st
-epoch is `1`).
+instance. This `callable` will be called before starting each epoch step
+and can take three params: `split` that can be either `'train'` or
+'`test`', `epoch` that is the current epoch number (note that the number
+of the 1st epoch is `1`), and `step`. If `config.epoch_steps` is `1`,
+`step` is always `1`.
 
 **force_cpu**: if `False` (default), the **model** and batches will be
 transfered to the `torch.cuda.current_device()`. So, don't forget to set
