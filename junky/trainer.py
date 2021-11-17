@@ -31,7 +31,7 @@ class BaseConfig:
     @classmethod
     def load(cls, path):
         with open(path, 'rt', encoding='utf-8') as f:
-            config = json.load(f.read())
+            config = json.loads(f.read())
         return cls(**config)
 
 
