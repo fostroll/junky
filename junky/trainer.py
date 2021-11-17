@@ -346,9 +346,10 @@ class Trainer():
                 dataloader = dataloader(split, epoch, step)
 
             preds, golds, losses = [], [], []
+            step_ = f'.{step}' if step else ''
             pbar = tqdm(dataloader, total=len(dataloader),
-                        desc='Epoch {}'.format(epoch),
-                        mininterval=2, file=log_file) if is_train else \
+                        desc='Epoch {epoch}{step_}', mininterval=2,
+                        file=log_file) if is_train else \
                    dataloader
 
             EMA, K = 0, 2 / (10 - 1)
@@ -426,15 +427,16 @@ class Trainer():
         test_loss = None
         for epoch in range(1, max_epochs + 1) if max_epochs else \
                      itertools.count(start=1):
+            print_str = f'Epoch {epoch}: \n'
+            train_loss = 0
             for step in range(1, epoch_steps + 1) if epoch_steps else \
                         range(1):
-                step_ = f'.{step}' if step else ''
-                print_str = f'Epoch {epoch}{step_}: \n'
                 need_backup = True
-
-                train_loss = run_epoch('train', epoch, step)
-                train_losses.append(train_loss)
-                print_str += f'{print_indent}Losses: train = {train_loss:.8f}'
+                train_loss_ = run_epoch('train', epoch, step)
+                train_loss += train_loss_
+            train_loss /= epoch_steps
+            train_losses.append(train_loss)
+            print_str += f'{print_indent}Losses: train = {train_loss:.8f}'
             if self.test_dataloader is not None:
                 test_loss, test_preds, test_golds = run_epoch('test', epoch)
                 test_losses.append(test_loss)
