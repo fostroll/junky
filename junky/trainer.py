@@ -22,6 +22,17 @@ class BaseConfig:
                                       if not x.startswith('__'))
                     if not callable(y)}
 
+    def save(self, path):
+        with open(path, 'wt', encoding='utf-8') as f:
+            print(json.dumps(self.as_dict(), sort_keys=True, indent=4),
+                  file=f)
+
+    @classmethod
+    def load(cls, path):
+        with open(path, 'rt', encoding='utf-8') as f:
+            config = json.load(f.read())
+        return cls(**config)
+
 
 class TrainerConfig(BaseConfig):
     """
