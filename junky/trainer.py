@@ -428,7 +428,7 @@ class Trainer():
                      itertools.count(start=1):
             for step in range(1, epoch_steps + 1) if epoch_steps else \
                         range(1):
-                step_ = f'.{epoch_step}' if epoch_step else ''
+                step_ = f'.{step}' if step else ''
                 print_str = f'Epoch {epoch}{epoch_step}: \n'
                 need_backup = True
 
