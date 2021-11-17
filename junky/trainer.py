@@ -86,7 +86,9 @@ class TrainerConfig(BaseConfig):
     epochs (really, the algorithm is slightly more complex but the meaning is
     like that).
 
-    **epoch_steps** (default is `1`):
+    **epoch_steps** (default is `1`): the number of passes for each epoch. It
+    has meaning when train dataloader is a function that reload dataset before
+    yielding batches.
 
     **adam_lr** (default is `.0001`), **adam_betas** (default is
     `(0.9, 0.999)`), **adam_eps** (default is `1e-08`), **adam_weight_decay**
@@ -446,7 +448,7 @@ class Trainer():
                      itertools.count(start=1):
             print_str = f'Epoch {epoch}: \n'
             need_backup = True
-            if epoch_steps:
+            if epoch_steps > 1:
                 train_loss = 0
                 for step in range(1, epoch_steps + 1):
                     train_loss_ = run_epoch('train', epoch, step=step)

@@ -62,6 +62,10 @@ doesn't increase on the validation set for a period of this number of
 epochs (really, the algorithm is slightly more complex but the meaning is
 like that).
 
+**epoch_steps** (default is `1`): the number of passes for each epoch. It
+has meaning when train dataloader is a function that reload dataset before
+yielding batches.
+
 **adam_lr** (default is `.0001`), **adam_betas** (default is
 `(0.9, 0.999)`), **adam_eps** (default is `1e-08`), **adam_weight_decay**
 (default is `0`), **adam_amsgrad** (default is `False`): params for *Adam*
