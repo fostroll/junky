@@ -18,8 +18,9 @@ class BaseConfig:
             setattr(self, k, v)
 
     def as_dict(self):
-        return {x: y for x, y in self.__dict__.items() 
-            if not (x.startswith('__') or callable(y))}
+        return {x: y for x, y in ((x, getattr(self, x)) for x in dir(self)
+                                      if not x.startswith('__'))
+                    if not callable(y)}
 
 
 class TrainerConfig(BaseConfig):
