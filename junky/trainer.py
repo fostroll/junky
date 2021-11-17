@@ -348,7 +348,7 @@ class Trainer():
             preds, golds, losses = [], [], []
             step_ = f'.{step}' if step else ''
             pbar = tqdm(dataloader, total=len(dataloader),
-                        desc='Epoch {epoch}{step_}', mininterval=2,
+                        desc=f'Epoch {epoch}{step_}', mininterval=2,
                         file=log_file) if is_train else \
                    dataloader
 
