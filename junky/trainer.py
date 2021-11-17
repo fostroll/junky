@@ -17,6 +17,10 @@ class BaseConfig:
             assert hasattr(self, k), f'ERROR: Unknown config attribute {k}'
             setattr(self, k, v)
 
+    def as_dict(self):
+        return {x: y for x, y in self.__dict__.items() 
+            if not (x.startswith('__') or callable(y))}
+
 
 class TrainerConfig(BaseConfig):
     """
