@@ -392,7 +392,7 @@ class Trainer():
                     golds_ = batch[batch_labels_idx]
                     logits.detach_()
                     preds_ = (logits >= binary_threshold).int() \
-                                 if len(golds._shape) \
+                                 if len(golds_._shape) \
                                  == len(logits.shape) else \
                              logits.max(dim=-1)[1]
 
