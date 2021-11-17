@@ -336,7 +336,7 @@ class Trainer():
         print_indent = ' ' * config.output_indent
         log_file = config.log_file
 
-        def run_epoch(split, epoch, step):
+        def run_epoch(split, epoch, step=0):
             assert split in ['train', 'test']
             is_train = split == 'train'
             model.train(is_train)
@@ -428,13 +428,15 @@ class Trainer():
         for epoch in range(1, max_epochs + 1) if max_epochs else \
                      itertools.count(start=1):
             print_str = f'Epoch {epoch}: \n'
-            train_loss = 0
-            for step in range(1, epoch_steps + 1) if epoch_steps else \
-                        range(1):
-                need_backup = True
-                train_loss_ = run_epoch('train', epoch, step)
-                train_loss += train_loss_
-            train_loss /= epoch_steps
+            need_backup = True
+            if epoch_steps:
+                train_loss = 0
+                for step in range(1, epoch_steps + 1):
+                    train_loss_ = run_epoch('train', epoch, step=step)
+                    train_loss += train_loss_
+                train_loss /= epoch_steps
+            else:
+                train_loss = run_epoch('train', epoch)
             train_losses.append(train_loss)
             print_str += f'{print_indent}Losses: train = {train_loss:.8f}'
             if self.test_dataloader is not None:
