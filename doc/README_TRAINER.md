@@ -90,11 +90,12 @@ of the `torch.optim.Optimizer` class.
 **scheduler** (default is `None`): the function to update the learning
 rate. If defined, it's invoked just as `scheduler.step()`.
 
-**postprocess_method** (default is `'strip_mask'`): the function to
-postprocess both predicted and gold labels after model validation (e.g. to
-remove labels of masked data). Allowed values are: `'strip_mask'`,
-`'strip_mask_bert'` or the callable object implementin the syntax: `preds,
-golds = postprocess_method(<predicted labels>, <gold labels>, batch)`.
+**postprocess_method** (default is `None`): the function to postprocess
+both predicted and gold labels after model validation (e.g. to remove
+labels of masked data). Allowed values are: `None` (no postprocessing),
+`'strip_mask'`, `'strip_mask_bert'` or the callable object implementing
+the syntax: `preds, golds = postprocess_method(<predicted labels>, <gold
+labels>, batch)`.
 
 **control_metric** (default is `'accuracy'`): the metric to control the
 model performance in the validation time. The vaues allowed are: `'loss'`,
