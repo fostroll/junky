@@ -35,7 +35,7 @@ class LabelDataset(BaseDataset):
                            save=True)
 
     def fit(self, labels, unk_label=None, extra_labels=None):
-        """Recreate the internal dict.
+        """Recreates the internal dict.
 
         :param labels: sequences of label values.
         :type labels: list([str])|list[list([str])]).
@@ -58,7 +58,7 @@ class LabelDataset(BaseDataset):
         self.reconstruct_dict = {y: x for x, y in self.transform_dict.items()}
 
     def label_to_idx(self, label, skip_unk=False):
-        """Convert a label value to its index. If the value is not present in
+        """Converts a label value to its index. If the value is not present in
         the internal dict, return index of unk label or None if it's not
         defined."""
         return self.transform_dict[label] \
@@ -67,19 +67,33 @@ class LabelDataset(BaseDataset):
                None
 
     def idx_to_label(self, idx, skip_unk=False):
-        """Convert an index to the corresponding label value. If the index is
+        """Converts an index to the corresponding label value. If the index is
         not present in the internal dict, return unk label or empty string if
         it's not defined or *skip_unk* is `True`."""
+        res = None
+        if isinstance(idx, list) or isinstance(idx, tuple):
+            idx = tensor(idx)
         if isinstance(idx, Tensor):
-            idx = idx.tolist()
-        return self.reconstruct_dict[idx] \
-                   if idx in self.reconstruct_dict else \
-               '' if skip_unk or self.unk is None else \
-               self.reconstruct_dict[self.unk]
+            try:
+                assert idx.shape <= 1
+                if idx.shape == 1:
+                    assert not any((idx != 0) * (idx != 1))
+                    res = [idx_to_label(x, skip_unk=skip_unk)
+                               for x in (idx == 1).nonzero(as_tuple=True)[0]]
+            except AssertionError:
+                raise ValueError(
+                    'ERROR: Only scalars and multi-hot vectors are allowed.'
+                )
+        if res is None:
+            res = self.reconstruct_dict[idx] \
+                      if idx in self.reconstruct_dict else \
+                  '' if skip_unk or self.unk is None else \
+                  self.reconstruct_dict[self.unk]
+        return res
 
     def transform(self, labels, skip_unk=False, keep_empty=False,
                   save=True, append=False):
-        """Convert *labels* of str type to the sequences of the corresponding
+        """Converts *labels* of str type to the sequences of the corresponding
         indices and adjust their format for Dataset. If *skip_unk* is
         `True`, unknown labels will be skipped. If *keep_empty* is `False`,
         we'll remove rows that have no data after converting.
@@ -99,7 +113,6 @@ class LabelDataset(BaseDataset):
         existing Dataset source. Elsewise (default), the existing Dataset
         source will be replaced. The param is used only if *save* is
         `True`."""
-
         if labels and (isinstance(labels[0], list)
                     or isinstance(labels[0], tuple)):
             data = []
@@ -124,14 +137,15 @@ class LabelDataset(BaseDataset):
             return data
 
     def reconstruct(self, ids, skip_unk=False, keep_empty=False):
-        """Convert *sequences* of indices in Dataset format to the rows of the
+        """Converts sequences of indices in Dataset format to the rows of the
         corresponding label values.
+        
         If *skip_unk* is `True`, unknown indices will be skipped.
         If *keep_empty* is `False`, we'll remove labels that are empty after
         converting."""
         return [l for l in (self.idx_to_label(i, skip_unk=skip_unk)
                                 for i in ids)
-                    if keep_empty or l]
+                  if keep_empty or l]
 
     def fit_transform(self, labels, unk_label=None, extra_labels=None,
                       skip_unk=False, keep_empty=False, save=True):
