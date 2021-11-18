@@ -61,10 +61,17 @@ class LabelDataset(BaseDataset):
         """Converts a label value to its index. If the value is not present in
         the internal dict, return index of unk label or None if it's not
         defined."""
-        return self.transform_dict[label] \
-                   if label in self.transform_dict else \
-               self.unk if not skip_unk and self.unk is not None else \
-               None
+        res = None
+        if isinstance(label, list) or isinstance(label, tuple):
+            ids = [self.label_to_idx(x, skip_unk=skip_unk) for x label]
+            res = zeros((len(self.transform_dict),), dtype=self.tensor_dtype)
+            res[ids] = 1
+        else:
+            res = self.transform_dict[label] \
+                      if label in self.transform_dict else \
+                  self.unk if not skip_unk and self.unk is not None else \
+                  None
+        return res
 
     def idx_to_label(self, idx, skip_unk=False):
         """Converts an index to the corresponding label value. If the index is
