@@ -63,7 +63,7 @@ class LabelDataset(BaseDataset):
         defined."""
         res = None
         if isinstance(label, list) or isinstance(label, tuple):
-            ids = [self.label_to_idx(x, skip_unk=skip_unk) for x label]
+            ids = [self.label_to_idx(x, skip_unk=skip_unk) for x in label]
             res = zeros((len(self.transform_dict),), dtype=self.tensor_dtype)
             res[ids] = 1
         else:
