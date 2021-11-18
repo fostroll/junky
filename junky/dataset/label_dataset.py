@@ -75,8 +75,9 @@ class LabelDataset(BaseDataset):
             idx = tensor(idx)
         if isinstance(idx, Tensor):
             try:
-                assert idx.shape <= 1
-                if idx.shape == 1:
+                dim = len(idx.shape)
+                assert dim <= 1
+                if dim == 1:
                     assert not any((idx != 0) * (idx != 1))
                     res = [idx_to_label(x, skip_unk=skip_unk)
                                for x in (idx == 1).nonzero(as_tuple=True)[0]]
