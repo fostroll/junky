@@ -67,7 +67,8 @@ class LabelDataset(BaseDataset):
             res = zeros((len(self.transform_dict),), dtype=self.tensor_dtype)
             res[ids] = 1
         else:
-            res = self.transform_dict[label] \
+            res = tensor(self.transform_dict[label],
+                         dtype=self.tensor_dtype) \
                       if label in self.transform_dict else \
                   self.unk if not skip_unk and self.unk is not None else \
                   None
@@ -123,23 +124,9 @@ class LabelDataset(BaseDataset):
         existing Dataset source. Elsewise (default), the existing Dataset
         source will be replaced. The param is used only if *save* is
         `True`."""
-        '''
-        if labels and (isinstance(labels[0], list)
-                    or isinstance(labels[0], tuple)):
-            data = []
-            for labs in labels:
-                d = zeros((len(self.transform_dict),),
-                          dtype=self.tensor_dtype)
-                for i in (self.label_to_idx(l, skip_unk=skip_unk)
-                              for l in labs):
-                    d[i] = 1
-                data.append(d)
-        else:
-        '''
-        data = [tensor(i, dtype=self.tensor_dtype)
-                    for i in (self.label_to_idx(l, skip_unk=skip_unk)
-                                  for l in labels)
-                    if keep_empty or i is not None]
+        data = [i for i in (self.label_to_idx(l, skip_unk=skip_unk)
+                                for l in labels)
+                  if keep_empty or i is not None]
         if save:
             if append:
                 self.data += data
