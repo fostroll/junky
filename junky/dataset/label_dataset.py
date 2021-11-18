@@ -77,9 +77,11 @@ class LabelDataset(BaseDataset):
             try:
                 dim = len(idx.shape)
                 assert dim <= 1
+                if dim == 0:
+                    idx = idx.item()
                 if dim == 1:
                     assert not any((idx != 0) * (idx != 1))
-                    res = [self.idx_to_label(x, skip_unk=skip_unk)
+                    res = [self.idx_to_label(x.item(), skip_unk=skip_unk)
                                for x in (idx == 1).nonzero(as_tuple=True)[0]]
             except AssertionError:
                 raise ValueError(
