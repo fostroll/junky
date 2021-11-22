@@ -820,26 +820,29 @@ start. We count it in words, so, if sentence has `9` words, the shift will be
 `ds.overlap_shift` > `1`, we will treat it as absolute value (but reduce it to
 `max_len` if your `ds.overlap_shift` would be greater.
 
-`ds.overlap_border = 2`. The overlap is processed as follows. The left zone of
+`ds.overlap_border = 2`: The overlap is processed as follows. The left zone of
 width equal to `ds.overlap_border` is taken from the earlier part of the
 sentence; the right zone - from the later. The zone between borders is
 calculated as weighted sum of both parts. The weights are proportional to
-the distance to the middle of the zone: the beginning has dominance to the left 
-from the middle, the ending has dominance to the right. In the very middle (if it exists),
-both weights are equal to `.5`. If you set `ds.overlap_border` high enough
-(greater than `(max_len - shift) / 2`) or `None`, it will be set to the middle
-of the overlap zone. Thus, weighted algorithm will be dwindled.
+the distance to the middle of the zone: the beginning has dominance to the
+left from the middle, the ending has dominance to the right. In the very
+middle (if it exists), both weights are equal to `.5`. If you set
+`ds.overlap_border` high enough (greater than `(max_len - shift) / 2`) or
+`None`, it will be set to the middle of the overlap zone. Thus, weighted
+algorithm will be dwindled. Also note that weights are applied to tokens (not
+subtokens). I.e. all subtokens of any particular token have equal weights when
+summing.
 
 `ds.use_batch_max_len = True`: Do we want to use the length of the longest
 sentence in the batch instead of the `max_len` param of `.transform()`. We use
 it only if that length is less than `max_len`, and as result, with high
-**max_len**, we have a substantial speed increase without any quality change or
-resulting data.
+**max_len**, we have a substantial speed increase without any quality change
+or resulting data.
 
 `ds.sort_dataset = True`: Do we want to sort the dataset before feeding it to
-`ds.model`. With high **max_len** it highly increases processing speed, and affects
-resulting data only because of different sentences' grouping (deviation is
-about `1e-7`).
+`ds.model`. With high **max_len** it highly increases processing speed, and
+affects resulting data only because of different sentences' grouping
+(deviation is about `1e-7`).
 
 #### Methods
 
