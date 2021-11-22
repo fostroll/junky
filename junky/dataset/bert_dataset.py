@@ -473,7 +473,6 @@ class BertDataset(BaseDataset):
                 if to:
                     hiddens = hiddens.to(to)
 
-                print('overmap', overmap)
                 # sub_to_kens: [sub -> token] map, indexes are absolute!
                 # token_starts: [token -> first sub] map, absolute!
                 # overmap: {new_sent_no: (old_sent_no, old_start_token, old_end_token)}
