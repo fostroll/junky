@@ -472,6 +472,7 @@ class BertDataset(BaseDataset):
 
                 if to:
                     hiddens = hiddens.to(to)
+                data_device = hiddens.device
 
                 # sub_to_kens: [sub -> token] map, indexes are absolute!
                 # token_starts: [token -> first sub] map, absolute!
@@ -496,8 +497,11 @@ class BertDataset(BaseDataset):
                             sub_to_kens_ = sub_to_kens[orig_sent_idx]
                             over_sub_ = token_starts_[over_tok_]
                             cut_sub_ = token_starts_[cut_tok_]
-                            weights = (torch.tensor(sub_to_kens_[over_sub_:cut_sub_],
-                                                    device=device) - over_tok_ + 1) * step
+                            weights = (
+                                torch.tensor(sub_to_kens_[over_sub_:cut_sub_],
+                                             device=data_device)
+                              - over_tok_ + 1
+                            ) * step
                             weights.unsqueeze_(1)
                             sent_token_starts_ = token_starts[sent_idx]
                             sent_sub_to_kens_ = sub_to_kens[sent_idx]
