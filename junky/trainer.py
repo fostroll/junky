@@ -367,9 +367,9 @@ class Trainer():
             preds, golds, losses = [], [], []
             step_ = f'.{step}' if step else ''
             pbar = tqdm(dataloader, total=len(dataloader),
-                        desc=f'Epoch {epoch}{step_}', mininterval=2,
-                        file=log_file) if is_train else \
-                   dataloader
+                        desc=f'Epoch {epoch}{step_}' if is_train else
+                             f'Epoch {epoch} test',
+                        mininterval=2, file=log_file)
 
             EMA, K = 0, 2 / (10 - 1)
             for batch in pbar:
@@ -446,7 +446,6 @@ class Trainer():
         test_loss = None
         for epoch in range(1, max_epochs + 1) if max_epochs else \
                      itertools.count(start=1):
-            print_str = f'Epoch {epoch}: \n'
             need_backup = True
             if epoch_steps > 1:
                 train_loss = 0
