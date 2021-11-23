@@ -456,7 +456,7 @@ class Trainer():
             else:
                 train_loss = run_epoch('train', epoch)
             train_losses.append(train_loss)
-            print_str += f'{print_indent}Losses: train = {train_loss:.8f}'
+            print_str = f'{print_indent}Losses: train = {train_loss:.8f}'
             if self.test_dataloader is not None:
                 test_loss, test_preds, test_golds = run_epoch('test', epoch)
                 test_losses.append(test_loss)
