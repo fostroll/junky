@@ -47,7 +47,7 @@ class BertDataset(BaseDataset):
             only if *sentences* is not ``None``. You can use any args but
             `save` that is set to `True`.
     """
-    overlap_shift = .3  # Defines the overlap's `shift` from the sentence's
+    overlap_shift = .5  # Defines the overlap's `shift` from the sentence's
     # start. We count it in words, so, if sentence has `9` words, the shift
     # will be `int(.5 * 9)`, i.e., `4`. The minimum value for `shift` is `1`.
     # If you set `ds.overlap_shift` > `1`, we will treat it as absolute value
@@ -64,11 +64,11 @@ class BertDataset(BaseDataset):
     # overlap zone. Thus, weighted algorithm will be dwindled.  Also note that
     # weights are applied to tokens (not subtokens). I.e. all subtokens of any
     # particular token have equal weights when summing.
-    use_batch_max_len = True  # Do we want to use the length of the longest
-    # sentence in the batch instead of the `max_len` param of `.transform()`.
-    # We use it only if that length is less than `max_len`, and as result,
-    # with high *max_len*, we have a substantial speed increase without any
-    # quality change or resulting data.
+    use_batch_max_len = True  # Either we want to use the length of the
+    # longest sentence in the batch instead of the `max_len` param of
+    # `.transform()`. We use it only if that length is less than `max_len`,
+    # and as result, with high *max_len*, we have a substantial speed increase
+    # without any quality change or resulting data.
     sort_dataset = True  # Do we want to sort the dataset before feeding it to
     # `ds.model`. With high **max_len** it highly increases processing speed,
     # and affects resulting data only because of different sentences' grouping
@@ -301,16 +301,17 @@ class BertDataset(BaseDataset):
             ######
 
         def process_long_sentences(sents, sent_lens, sub_to_kens,
-                                   token_starts):
+                                   token_starts, first_sent_idx):
             overlap_sents, overlap_sent_lens, overlap_sub_to_kens, \
             overlap_token_starts, overmap = [], [], [], [], []
-            for i, (sent, sent_len, sub_token_ids, token_sub_ids) \
+            for sent_idx, (sent, sent_len, sub_token_ids, token_sub_ids) \
                     in enumerate(zip(sents, sent_lens, sub_to_kens,
                                      token_starts)):
                 if sent_len > max_len_:
                     # индекс первого сабтокена в начальном слове фрагмента
                     # и индекс токена для первого сабтокена во фрагменте
-                    sub0_token, token0_sub = sub_token_ids[0], token_sub_ids[0]
+                    sub0_token, token0_sub = \
+                        sub_token_ids[0], token_sub_ids[0]
                     # индекс начального токена для области пересечения
                     over_tok = sub_token_ids[max_len_ - shift]
                     # вычитаем токен нулевого сабтокена, получаем индекс
@@ -338,18 +339,20 @@ class BertDataset(BaseDataset):
                     overlap_token_starts.append(token_sub_ids[over_tok_:])
                     # индекс начального токена для отрезаемого фрагмента
                     cut_tok = sub_token_ids[max_len_]
-                    # относительный индекс начального токена для отрезаемого фрагмента
+                    # относительный индекс начального токена для отрезаемого
+                    # фрагмента
                     cut_tok_ = cut_tok - sub0_token
                     cut_sub_ = token_sub_ids[cut_tok_] - token0_sub
                     sent[cut_sub_:] = []  # cut long sentence
-                    overmap.append((i, over_tok, cut_tok))
+                    overmap.append((first_sent_idx + sent_idx,
+                                    over_tok, cut_tok))
             return overlap_sents, overlap_sent_lens, overlap_sub_to_kens, \
                    overlap_token_starts, overmap
 
         overlap_sents, overlap_sent_lens, overlap_sub_to_kens, \
         overlap_token_starts, overmap = process_long_sentences(
-            tokenized_sentences, sent_lens,
-            sub_to_kens, token_starts
+            tokenized_sentences, sent_lens, sub_to_kens,
+            token_starts, 0
         )
         num_sents = len(tokenized_sentences)
         overmap = {num_sents + i: x for i, x in enumerate(overmap)}
@@ -357,22 +360,26 @@ class BertDataset(BaseDataset):
         # overlap_sent_lens: their lens in subtokens
         # overlap_sub_to_kens: [sub -> token] map, indexes are absolute!
         # overlap_token_starts: [token_start -> first sub] map, absolute!
-        # overmap: {new_sent_no: (old_sent_no, old_start_token, old_end_token)}
-        #     (old_end_token is not included)
+        # overmap: {sent_no: (orig_sent_no, orig_start_token, orig_end_token)}
+        #     (orig_end_token is not included)
 
         while overlap_sents:
             tokenized_sentences += overlap_sents
             sent_lens += overlap_sent_lens
             sub_to_kens += overlap_sub_to_kens
             token_starts += overlap_token_starts
-            prev_num_sents = num_sents
-            num_sents = len(tokenized_sentences)
             overlap_sents, overlap_sent_lens, overlap_sub_to_kens, \
             overlap_token_starts, overmap_ = process_long_sentences(
-                overlap_sents, overlap_sent_lens,
-                overlap_sub_to_kens, overlap_token_starts
+                overlap_sents, overlap_sent_lens, overlap_sub_to_kens,
+                overlap_token_starts, num_sents
             )
-            overmap.update({num_sents + i: x for i, x in enumerate(overmap_)})
+            num_sents = len(tokenized_sentences)
+            for sent_idx, (orig_sent_idx, over_tok, cut_tok) in enumerate(overmap_):
+                orig_sent_idx_ = overmap.get(orig_sent_idx)
+                if orig_sent_idx_:
+                    orig_sent_idx = orig_sent_idx_[0]
+                overmap[num_sents + sent_idx] = \
+                    (orig_sent_idx, over_tok, cut_tok)
 
         splitted_sent_lens = [len(x) for x in tokenized_sentences]
 
@@ -476,40 +483,52 @@ class BertDataset(BaseDataset):
 
                 # sub_to_kens: [sub -> token] map, indexes are absolute!
                 # token_starts: [token -> first sub] map, absolute!
-                # overmap: {new_sent_no: (old_sent_no, old_start_token, old_end_token)}
-                #     (old_end_token is not included)
+                # overmap: {sent_no: (orig_sent_no, orig_start_token,
+                #                     orig_end_token)}
+                #     (orig_end_token is not included)
                 for sent_idx, sent in enumerate(hiddens, start=batch_i):
                     sent_fin = 1 + splitted_sent_lens[sent_idx]
                     if sent_idx in overmap:
                         orig_sent_idx, over_tok, cut_tok = overmap[sent_idx]
                         orig_data = data[orig_sent_idx]
-                        overlap = cut_tok - over_tok
-                        # overlap in in tokens
-                        # overlap_border: how many tokens on the rims we don't touch
+                        overlap = cut_tok - over_tok  # overlap is in tokens
+                        # overlap_border: how many tokens on the rims we don't
+                        # touch
                         if overlap > overlap_border * 2:
-                            over_tok_ = over_tok + overlap_border  # change starts here
-                            cut_tok_ = cut_tok - overlap_border  # change ends here (not including)
-                            overlap = cut_tok_ - over_tok_  # length of changeable area
-                            sent_over_tok_ = overlap_border  # start of the eff part of the sent
-                            sent_cut_tok_ = sent_over_tok_ + overlap  # end of the eff part of the sent
+                            over_tok_ = over_tok + overlap_border
+                                # change starts here
+                            cut_tok_ = cut_tok - overlap_border
+                                # change ends here (not including)
+                            overlap = cut_tok_ - over_tok_
+                                # length of changeable area
+                            sent_over_tok_ = overlap_border
+                                # start of the eff part of the sent
+                            sent_cut_tok_ = sent_over_tok_ + overlap
+                                # end of the eff part of the sent
                             step = 1 / (overlap + 1)
                             token_starts_ = token_starts[orig_sent_idx]
-                            sub_to_kens_ = sub_to_kens[orig_sent_idx]
                             over_sub_ = token_starts_[over_tok_]
                             cut_sub_ = token_starts_[cut_tok_]
                             weights = (
-                                torch.tensor(sub_to_kens_[over_sub_:cut_sub_],
+                                torch.tensor(sub_to_kens[orig_sent_idx]
+                                                        [over_sub_:cut_sub_],
                                              device=data_device)
                               - over_tok_ + 1
                             ) * step
                             weights.unsqueeze_(1)
                             sent_token_starts_ = token_starts[sent_idx]
-                            sent_sub_to_kens_ = sub_to_kens[sent_idx]
-                            sent_over_sub_ = 1 + sent_token_starts_[sent_over_tok_] - sent_token_starts_[0]
-                            sent_cut_sub_ = 1 + sent_token_starts_[sent_cut_tok_] - sent_token_starts_[0]
+                            sent_token0_start_ = sent_token_starts_[0]
+                            sent_over_sub_ = \
+                                1 + sent_token_starts_[sent_over_tok_] \
+                                  - sent_token0_start_
+                            sent_cut_sub_ = \
+                                1 + sent_token_starts_[sent_cut_tok_] \
+                                  - sent_token0_start_
                             # weighs are used to merge the overlap zone
-                            overlap_data = orig_data[over_sub_:cut_sub_] * (1 - weights) \
-                                         + sent[sent_over_sub_:sent_cut_sub_] * weights
+                            overlap_data = \
+                                orig_data[over_sub_:cut_sub_] * (1
+                                                               - weights) \
+                              + sent[sent_over_sub_:sent_cut_sub_] * weights
 
                         else:
                             over_sub_ = overlap_border

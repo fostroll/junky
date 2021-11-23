@@ -833,7 +833,7 @@ algorithm will be dwindled. Also note that weights are applied to tokens (not
 subtokens). I.e. all subtokens of any particular token have equal weights when
 summing.
 
-`ds.use_batch_max_len = True`: Do we want to use the length of the longest
+`ds.use_batch_max_len = True`: Either we want to use the length of the longest
 sentence in the batch instead of the `max_len` param of `.transform()`. We use
 it only if that length is less than `max_len`, and as result, with high
 **max_len**, we have a substantial speed increase without any quality change
