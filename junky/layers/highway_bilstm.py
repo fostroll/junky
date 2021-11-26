@@ -4,7 +4,7 @@
 # Copyright (C) 2020-present by Sergei Ternovykh, Anastasiya Nikiforova
 # License: BSD, see LICENSE for details
 """
-Provides a Highway LSTM implementagion for PyTorch models.
+Provides a Highway LSTM implementation for PyTorch models.
 """
 import numpy as np
 import torch

@@ -4,7 +4,7 @@
 # Copyright (C) 2020-present by Sergei Ternovykh, Anastasiya Nikiforova
 # License: BSD, see LICENSE for details
 """
-Provides a Highway Netword implementation for PyTorch models.
+Provides a Highway Network implementation for PyTorch models.
 """
 from copy import deepcopy
 import torch
