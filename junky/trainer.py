@@ -218,9 +218,10 @@ class Trainer():
         self.config = TrainerConfig(**config) \
                           if isinstance(config, dict) else \
                       config
-        assert test_dataloader or config.max_epochs, \
-            'ERROR: Either `test_dataloaders` of `config.max_epochs` param' \
-            'must be defined'
+        assert test_dataloader is not None or \
+               (train_dataloader is not None and config.max_epochs), \
+            'ERROR: Either `test_dataloaders` of `train_dataloader` with ' \
+            '`config.max_epochs` param must be defined.'
         self.model = model
         self.train_dataloader = train_dataloader
         self.test_dataloader = test_dataloader
@@ -442,22 +443,30 @@ class Trainer():
         bad_epochs_ = 0
         start_time = time.time()
 
+        with_train = self.train_dataset is not None
+        with_test = self.test_dataset is not None
         best_loss = prev_loss = float('inf')
         test_loss = None
         for epoch in range(1, max_epochs + 1) if max_epochs else \
                      itertools.count(start=1):
-            need_backup = True
-            if epoch_steps > 1:
-                train_loss = 0
-                for step in range(1, epoch_steps + 1):
-                    train_loss_ = run_epoch('train', epoch, step=step)
-                    train_loss += train_loss_
-                train_loss /= epoch_steps
+            print_str = f'{print_indent}Losses: '
+
+            if with_train:
+                need_backup = True
+                if epoch_steps > 1:
+                    train_loss = 0
+                    for step in range(1, epoch_steps + 1):
+                        train_loss_ = run_epoch('train', epoch, step=step)
+                        train_loss += train_loss_
+                    train_loss /= epoch_steps
+                else:
+                    train_loss = run_epoch('train', epoch)
+                train_losses.append(train_loss)
+                print_str = f'train = {train_loss:.8f}'
             else:
-                train_loss = run_epoch('train', epoch)
-            train_losses.append(train_loss)
-            print_str = f'{print_indent}Losses: train = {train_loss:.8f}'
-            if self.test_dataloader is not None:
+                need_backup = False
+
+            if with_test:
                 test_loss, test_preds, test_golds = run_epoch('test', epoch)
                 test_losses.append(test_loss)
 
@@ -479,8 +488,10 @@ class Trainer():
                         f1 if control_metric == 'f1' else \
                         None
 
+                if with_train:
+                    print_str += ', '
                 print_str += \
-                    ', test = {:.8f}\n'.format(test_loss) \
+                    'test = {:.8f}\n'.format(test_loss) \
                   + '{}Test: accuracy = {:.8f}\n'.format(print_indent,
                                                          accuracy) \
                   + '{}Test: precision = {:.8f}\n' \
@@ -488,13 +499,16 @@ class Trainer():
                   + '{}Test: recall = {:.8f}\n'.format(print_indent, recall) \
                   + '{}Test: f1_score = {:.8f}'.format(print_indent, f1)
 
+                if not with_train:
+                    break
                 if score > best_score:
                     best_score = score
                     best_epoch = epoch
                     best_test_golds, best_test_preds = \
                         test_golds[:], test_preds[:]
                     bad_epochs_ = 0
-                    print_str += '\nnew maximum score {:.8f}'.format(score)
+                    print_str += \
+                        '\nnew maximum score {:.8f}'.format(score)
                 else:
                     need_backup = False
                     if score <= prev_score:
@@ -508,13 +522,13 @@ class Trainer():
                                      .format(bad_epochs_, sgn)
                     if bad_epochs_ >= bad_epochs \
                    and epoch >= min_epochs:
-                        print_str += \
-                            '\nMaximum bad epochs exceeded. ' \
-                            'Process has been stopped. ' \
-                          + ('No models could surpass `best_score={}` given'
-                                 if best_epoch is None else
-                             'Best score {} (on epoch {})').format(best_score,
-                                                                   best_epoch)
+                        print_str += '\nMaximum bad epochs exceeded. ' \
+                                     'Process has been stopped. ' \
+                                   + ('No models could surpass '
+                                     f'`best_score={best_score}` given'
+                                          if best_epoch is None else
+                                     f'Best score {best_score} '
+                                     f'(on epoch {best_epoch})')
                         break
 
                 print(print_str, file=log_file)
@@ -526,13 +540,13 @@ class Trainer():
                 self.save_ckpt()
 
             if epoch == max_epochs:
-                print_str = \
-                    'Maximum epochs exceeded. ' \
-                    'Process has been stopped. ' \
-                  + ('No models could surpass `best_score={}` given'
-                         if best_epoch is None else
-                     'Best score {} (on epoch {})').format(best_score,
-                                                           best_epoch)
+                print_str = 'Maximum epochs exceeded. ' \
+                            'Process has been stopped. ' \
+                          + (f'No models could surpass '
+                            f'`best_score={best_score}` given'
+                                 if best_epoch is None else
+                            f'Best score {best_score} '
+                            f'(on epoch {best_epoch})')
 
         if print_str:
             print(print_str, file=log_file)
