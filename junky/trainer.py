@@ -443,8 +443,8 @@ class Trainer():
         bad_epochs_ = 0
         start_time = time.time()
 
-        with_train = self.train_dataset is not None
-        with_test = self.test_dataset is not None
+        with_train = self.train_dataloader is not None
+        with_test = self.test_dataloader is not None
         best_loss = prev_loss = float('inf')
         test_loss = None
         for epoch in range(1, max_epochs + 1) if max_epochs else \
