@@ -65,10 +65,13 @@ class TokenDataset(BaseDataset):
         """Convert a token to its index. If the token is not present in the
         internal dict, return index of unk token or None if it's not
         defined."""
-        return self.transform_dict[token] \
-                   if token in self.transform_dict else \
-               self.unk if not skip_unk and self.unk is not None else \
-               None
+        res = self.transform_dict[token] \
+                  if token in self.transform_dict else \
+              self.unk if not skip_unk and self.unk is not None else \
+              None
+        assert res is not None, \
+            f'Token "{token}" is not present in the dictionary'
+        return res
 
     def idx_to_token(self, idx, skip_unk=False, skip_pad=True):
         """Convert an index to the corresponding token. If the index is not
