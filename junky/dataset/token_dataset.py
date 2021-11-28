@@ -67,10 +67,11 @@ class TokenDataset(BaseDataset):
         defined."""
         res = self.transform_dict[token] \
                   if token in self.transform_dict else \
-              self.unk if not skip_unk and self.unk is not None else \
-              None
-        assert res is not None, \
-            f'Token "{token}" is not present in the dictionary'
+              None if skip_unk else \
+              self.unk if self.unk is not None else \
+              ''
+        assert res != '', f'ERROR: Token "{token}" is not present in the ' \
+                           'dictionary.'
         return res
 
     def idx_to_token(self, idx, skip_unk=False, skip_pad=True):
@@ -79,12 +80,14 @@ class TokenDataset(BaseDataset):
         not defined or *skip_unk* is ``True``. If *skip_pad* is ``True``,
         padding index will be replaced to empty string, too."""
         if isinstance(idx, Tensor):
-            idx = idx.tolist()
-        return '' if skip_pad and idx == self.pad else (
-            self.reconstruct_dict[idx] if idx in self.reconstruct_dict else
-            '' if skip_unk or self.unk is None else
-            self.reconstruct_dict[self.unk]
-        )
+            idx = idx.item()
+        res = '' if skip_pad and idx == self.pad else (
+              self.reconstruct_dict[idx] if idx in self.reconstruct_dict else
+              '' if skip_unk else
+              self.reconstruct_dict[self.unk])
+        assert res is not None, f'ERROR: Token with index "{idx}" is not ' \
+                                 'present in the dictionary.'
+        return res
 
     def transform_tokens(self, tokens, skip_unk=False):
         """Convert a token or a list of tokens to the corresponding
