@@ -12,7 +12,5 @@ from junky.utils import *
 from junky.supplements import *
 
 from junky.autotrain import *
-from junky.layers import *
-from junky.plotter import *
 
 from junky.trainer import BaseConfig
