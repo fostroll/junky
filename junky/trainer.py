@@ -129,10 +129,10 @@ class TrainerConfig(BaseConfig):
     model performance in the validation time. The vaues allowed are: `'loss'`,
     `'accuracy'`, `'precision'`, `'recall'`, `'f1'`.
 
-    **save_ckpt_method** (default is `None`): the function to save the best
-    model. Called every time as the model performance get better. Invoked as
-    `save_ckpt_method(model, save_dir)`. If `None`, the standard method of the
-    `Trainer` class is used.
+    **save_ckpt_method** (`callable`; default is `None`): the function to save
+    the best model. Called every time as the model performance get better.
+    Invoked as `save_ckpt_method(model, save_dir)`. If `None`, the standard
+    method of the `Trainer` class is used.
 
     **binary_threshold** (float; default is `None`): a value between `0` and
     `1` specifying the threshold of rounding for binary classification. Note
@@ -140,6 +140,15 @@ class TrainerConfig(BaseConfig):
     must be `torch.sigmoid()`.
 
     **output_indent** (default is `4`): just for formatting the output.
+
+    **loss_ma_batches** (int; default is `None`): the number of batches to
+    average the loss while the progress indication. `None` means unlimited.
+
+    **loss_ema_smoothing** (int; default is `2`): the "smoothing" parameter
+    for the EMA calculation if **loss_ma_method** is `'EMA'`.
+
+    **loss_ma_method** (default is `'EMA'`): the method to average the loss
+    while progress indication. The values allowed are: `'EMA'`, `'SMA'`.
 
     **log_file** (default is `sys.stdout`): where to print training progress
     messages.
@@ -170,15 +179,19 @@ class TrainerConfig(BaseConfig):
 
     max_grad_norm = None
     criterion = None
-    optimizer = 'SGD'
+    optimizer = 'SGD'  # 'Adam', 'AdamW', 'SGD'
     scheduler = None
     postprocess_method = None
     control_metric = 'accuracy'
+        # 'loss', 'accuracy', 'precision', 'recall', 'f1'
     save_ckpt_method = None
 
     binary_threshold = .5
 
     output_indent = 4
+    loss_ma_batches = None  # `None` means inlimited
+    loss_ema_smoothing = 2
+    loss_ma_method = 'EMA'  # 'EMA', 'SMA'
     log_file = sys.stdout
 
     def __init__(self, save_dir, **kwargs):
@@ -341,7 +354,7 @@ class Trainer():
                     amsgrad=config.adamw_amsgrad
                 )
             else:
-                raise ValueError(f'ERROR: unknown optimizer {optimizer}')
+                raise ValueError(f'ERROR: unknown optimizer "{optimizer}".')
 
         if isinstance(postprocess_method, str):
             postprocess_method = postprocess_method.lower()
@@ -351,7 +364,7 @@ class Trainer():
                 postprocess_method = self.postprocess_strip_mask_bert
             else:
                 raise ValueError('ERROR: unknown postprocess method '
-                                f'{postprocess_method}')
+                                f'"{postprocess_method}".')
 
         print_indent = ' ' * config.output_indent
         log_file = config.log_file
@@ -372,8 +385,13 @@ class Trainer():
                              f'Epoch {epoch} test',
                         mininterval=2, file=log_file)
 
-            EMA, K = 0, 2 / (10 - 1)
-            for batch in pbar:
+            loss_sum = 0
+            loss_ma_method, loss_ma_batches = \
+                config.loss_ma_method, config.loss_ma_batches
+            K = config.loss_ema_smoothing / (1 + loss_ma_batches) \
+                    if loss_ma_batches else \
+                None
+            for batch_no, batch in enumerate(pbar, start=1):
                 batch = [x.to(self.device, non_blocking=True)
                              if isinstance(x, torch.Tensor) else
                          x
@@ -405,8 +423,19 @@ class Trainer():
 
                     # report progress
 #                     pbar.set_postfix(train_loss=loss.item(), refresh=False)
-                    EMA = loss.item() * K + EMA * (1 - K)
-                    pbar.set_postfix(train_loss_EMA=EMA, refresh=False)
+                    #EMA = loss.item() * K + EMA * (1 - K)
+                    loss_sum += losses[-1]
+                    if loss_ma_batches and batch_no <= loss_ma_batches:
+                        MA = loss_sum / batch_no
+                    elif loss_ma_method == 'SMA':
+                        loss_sum -= losses[-1 - loss_ma_batches]
+                        MA = loss_sum / loss_ma_batches
+                    elif loss_ma_method == 'EMA':
+                        MA += K * (losses[-1] - MA)
+                    else:
+                        raise ValueError('ERROR: Unknown loss_ma_method '
+                                        f'"{loss_ma_method}".')
+                    pbar.set_postfix(train_loss_MA=MA, refresh=False)
 
                 else:
                     golds_ = batch[batch_labels_idx]

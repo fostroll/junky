@@ -105,10 +105,10 @@ labels>, batch)`.
 model performance in the validation time. The vaues allowed are: `'loss'`,
 `'accuracy'`, `'precision'`, `'recall'`, `'f1'`.
 
-**save_ckpt_method** (default is `None`): the function to save the best
-model. Called every time as the model performance get better. Invoked as
-`save_ckpt_method(model, save_dir)`. If `None`, the standard method of the
-`Trainer` class is used.
+**save_ckpt_method** (`callable`; default is `None`): the function to save
+the best model. Called every time as the model performance get better.
+Invoked as `save_ckpt_method(model, save_dir)`. If `None`, the standard
+method of the `Trainer` class is used.
 
 **binary_threshold** (float; default is `None`): a value between `0` and
 `1` specifying the threshold of rounding for binary classification. Note
@@ -116,6 +116,15 @@ that in this case, the final operation of the model in the `eval` mode
 must be `torch.sigmoid()`.
 
 **output_indent** (default is `4`: just for formatting the output.
+
+**loss_ma_batches** (int; default is `None`): the number of batches to
+average the loss while the progress indication. `None` means unlimited.
+
+**loss_ema_smoothing** (int; default is `2`): the "smoothing" parameter
+for the EMA calculation if **loss_ma_method** is `'EMA'`.
+
+**loss_ma_method** (default is `'EMA'`): the method to average the loss
+while progress indication. The values allowed are: `'EMA'`, `'SMA'`.
 
 **log_file** (default is `sys.stdout`): where to print training progress
 messages.
