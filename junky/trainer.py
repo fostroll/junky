@@ -424,11 +424,11 @@ class Trainer():
                     # report progress
 #                     pbar.set_postfix(train_loss=loss.item(), refresh=False)
                     #EMA = loss.item() * K + EMA * (1 - K)
-                    loss_sum += losses[-1]
-                    if loss_ma_batches and batch_no <= loss_ma_batches:
+                    if not loss_ma_batches or batch_no <= loss_ma_batches:
+                        loss_sum += losses[-1]
                         MA = loss_sum / batch_no
                     elif loss_ma_method == 'SMA':
-                        loss_sum -= losses[-1 - loss_ma_batches]
+                        loss_sum += losses[-1] - losses[-1 - loss_ma_batches]
                         MA = loss_sum / loss_ma_batches
                     elif loss_ma_method == 'EMA':
                         MA += K * (losses[-1] - MA)
