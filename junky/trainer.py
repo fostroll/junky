@@ -479,11 +479,12 @@ class Trainer():
         with_test = self.test_dataloader is not None
         best_loss = prev_loss = float('inf')
         test_loss = None
-        for epoch in range(1, max_epochs + 1) if max_epochs else \
-                     itertools.count(start=1):
+        test_first = best_score is True
+        for epoch in range(test_first, max_epochs + 1) if max_epochs else \
+                     itertools.count(start=test_first):
             print_str = f'{print_indent}Losses: '
 
-            if with_train and best_score is not True:
+            if with_train and not test_first:
                 need_backup = True
                 if epoch_steps > 1:
                     train_loss = 0
@@ -533,7 +534,10 @@ class Trainer():
 
                 if not with_train:
                     break
-                if best_score is True or score > best_score:
+                if test_first:
+                    need_backup = False
+                    best_score = score
+                elif score > best_score:
                     best_score = score
                     best_epoch = epoch
                     best_test_golds, best_test_preds = \
