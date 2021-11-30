@@ -10,7 +10,7 @@ from junky._version import __version__
 
 from junky.utils import *
 from junky.supplements import *
-from junky import plotter
+from junky.plotter import *
 
 from junky.autotrain import *
 from junky.trainer import BaseConfig
