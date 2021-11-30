@@ -291,13 +291,16 @@ class Trainer():
         golds = [x[1:y + 1] for x, y in zip(golds, lens)]
         return preds, golds
 
-    def train(self, best_score=None):
+    def train(self, best_score=True):
         """The method that run the training.
 
         Args:
 
-        **best_score** (`float`, default is `None`): the starting point to
-        compare the calculating control metric with.
+        **best_score** (`float|bool`, default is `True`): the starting point
+        to compare the calculating control metric with. If `True`, the initial
+        performance of the model will be measured and used as the best score.
+        Thus, we will not save the trained model if it's worse than untrained.
+        `None` of `False` means, don't check it.
         """
         config, model = self.config, self.model
         min_epochs, max_epochs, bad_epochs  = \
@@ -458,7 +461,7 @@ class Trainer():
             return loss if is_train else (loss, preds, golds)
 
         best_epoch = None
-        if best_score is None:
+        if best_score in [None, False]:
             best_score = float('-inf')
         prev_score = best_score
         score = None
@@ -480,7 +483,7 @@ class Trainer():
                      itertools.count(start=1):
             print_str = f'{print_indent}Losses: '
 
-            if with_train:
+            if with_train and best_score is not True:
                 need_backup = True
                 if epoch_steps > 1:
                     train_loss = 0
@@ -530,7 +533,7 @@ class Trainer():
 
                 if not with_train:
                     break
-                if score > best_score:
+                if best_score is True or score > best_score:
                     best_score = score
                     best_epoch = epoch
                     best_test_golds, best_test_preds = \
