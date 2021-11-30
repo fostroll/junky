@@ -14,7 +14,7 @@ import torch.nn.functional as F
 
 class HighwayNetwork(nn.Module):
     """ 
-    Highway Network is described in
+    Highway Network as described in
     https://arxiv.org/abs/1505.00387 and https://arxiv.org/abs/1507.06228 and
     it's formalation is: H(x)*T(x) + x*(1 - T(x)), where:
     .. H(x) - affine trainsformation followed by a non-linear activation;

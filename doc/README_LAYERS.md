@@ -15,10 +15,10 @@ The lib contains several layers to use in *PyTorch* models.
 ### Masking <a name="masking"></a>
 
 ```python
-import junky
-layer = junky.Masking(input_size, mask=float('-inf'),
-                      indices_to_highlight=-1, highlighting_mask=1,
-                      batch_first=False)
+from junky.layers import Masking
+layer = Masking(input_size, mask=float('-inf'),
+                indices_to_highlight=-1, highlighting_mask=1,
+                batch_first=False)
 output = layer(x, lens)
 ```
 Replaces certain elemens of the incoming data **x** to the **mask** given.
@@ -93,8 +93,9 @@ tensor([[[-0.4479, -0.8719, -1.0129, -1.5431],
 ### CharEmbeddingRNN <a name="char_rnn"></a>
 
 ```python
-layer = junky.CharEmbeddingRNN(alphabet_size, emb_layer=None, emb_dim=300,
-                               pad_idx=0, out_type='final_concat')
+from junky.layers import CharEmbeddingRNN
+layer = CharEmbeddingRNN(alphabet_size, emb_layer=None, emb_dim=300,
+                         pad_idx=0, out_type='final_concat')
 ```
 Produces character embeddings using *Bidirectional LSTM*.
 
@@ -140,8 +141,9 @@ restored using the same mask.
 ### CharEmbeddingCNN <a name="char_cnn"></a>
 
 ```python
-layer = junky.CharEmbeddingCNN(alphabet_size, emb_layer=None, emb_dim=300, emb_dropout=0.0,
-                               pad_idx=0, kernels=[3, 4, 5], cnn_kernel_multiplier=1)
+from junky.layers CharEmbeddingCNN
+layer = CharEmbeddingCNN(alphabet_size, emb_layer=None, emb_dim=300, emb_dropout=0.0,
+                         pad_idx=0, kernels=[3, 4, 5], cnn_kernel_multiplier=1)
 ```
 Produces character embeddings using multiple-filter *CNN*. *Max-over-time
 pooling* and *ReLU* are applied to concatenated convolution layers.
@@ -178,12 +180,12 @@ layers.
 ### HighwayNetwork <a name="highway"></a>
 
 ```python
-layer = junky.HighwayNetwork(
-    in_features, out_features=None, U_layer=None, U_init_=None,
-    H_features=None, H_activation=F.relu, gate_type='generic',
-    global_highway_input=False, num_layers=1, dropout=0,
-    last_dropout=0
-)
+from junky.layers import HighwayNetwork
+layer = HighwayNetwork(in_features, out_features=None,
+                       U_layer=None, U_init_=None, U_dropout=0,
+                       H_features=None, H_activation=F.relu, H_dropout=0,
+                       gate_type='generic', global_highway_input=False,
+                       num_layers=1)
 layer(x, x_hw, *U_args, **U_kwargs)
 ```
 *Highway Network* is described in
@@ -246,13 +248,6 @@ the output of the previous layer as the highway input. So, **T(x)** and
 
 **num_layers**: number of highway layers.
 
-**dropout**: if non-zero, introduces a *Dropout* layer on the outputs of each
-layer except the last layer, with dropout probability equal to **dropout**.
-Default: `0`.
-
-**last_dropout**: if non-zero, introduces a Dropout layer on the output of
-last layer with dropout probability equal to **last_dropout**. Default: `0`.
-
 The `.forward()` method receives params as follows:
 
 **x** and **x_hw**: inputs of the network. The first layer of the network
@@ -266,10 +261,10 @@ If **x_hw** is `None`, we adopt **x_hw = x**.
 ### Highway biLSTM <a name="hi_bilstm"></a>
 
 ```python
-layer = junky.HighwayBiLSTM(hw_num_layers, lstm_hidden_dim, lstm_num_layers, 
-                 in_features, out_features, lstm_dropout,
-                 init_weight=True, init_weight_value=2.0, batch_first=True
-                )
+from junky.layers import HighwayBiLSTM
+layer = HighwayBiLSTM(hw_num_layers, lstm_hidden_dim, lstm_num_layers,
+    in_features, out_features, lstm_dropout,
+    init_weight=True, init_weight_value=2.0, batch_first=True
 )
 layer(x)
 ```
