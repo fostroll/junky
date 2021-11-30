@@ -480,8 +480,9 @@ class Trainer():
         best_loss = prev_loss = float('inf')
         test_loss = None
         test_first = best_score is True
-        for epoch in range(test_first, max_epochs + 1) if max_epochs else \
-                     itertools.count(start=test_first):
+        for epoch in range(not test_first, max_epochs + 1) \
+                         if max_epochs else \
+                     itertools.count(start=not test_first):
             print_str = f'{print_indent}Losses: '
 
             if with_train and not test_first:
