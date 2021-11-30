@@ -535,10 +535,8 @@ class Trainer():
 
                 if not with_train:
                     break
-                if test_first:
-                    need_backup = False
-                    best_score = score
-                elif score > best_score:
+                if test_first or score > best_score:
+                    test_first = False
                     best_score = score
                     best_epoch = epoch
                     best_test_golds, best_test_preds = \
