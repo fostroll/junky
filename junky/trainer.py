@@ -522,7 +522,7 @@ class Trainer():
                         f1 if control_metric == 'f1' else \
                         None
 
-                if with_train:
+                if with_train and not test_first:
                     print_str += ', '
                 print_str += \
                     'test = {:.8f}\n'.format(test_loss) \
