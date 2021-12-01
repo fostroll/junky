@@ -248,8 +248,8 @@ maximum and minimum **data** values belonging to the same group.
 values are:<br />
 `'max'` - *\<maximum data value>*<br />
 `'lower'` - `'max'` / **distinction_coef**<br />
-`'min'` - the value from **data**` immediately preceding `'lower'`<br />
-`'upper'` - *`'min'` * **distinction_coef**<br />
+`'min'` - the value from **data** immediately preceding `'lower'`<br />
+`'upper'` - `'min'` * **distinction_coef**<br />
 `'mean'` - the middle point between `'upper'` and `'lower'`<br />
 `'middle'` (default) - the middle point between `'max'` and `'min'`<br />
 In order to calculate the number of groups, the sum of all the values of
