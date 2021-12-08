@@ -135,7 +135,7 @@ messages.
 from junky.trainer import Trainer
 
 trainer = Trainer(config, model, train_dataloader, test_dataloader=None,
-                  force_cpu=False)
+                  device=None)
 trainer.train(best_score=None)
 ```
 
@@ -156,11 +156,8 @@ and can take three params: `split` that can be either `'train'` or
 of the 1st epoch is `1`), and `step`. If `config.epoch_steps` is `1`,
 `step` is always `1`.
 
-**force_cpu**: if `False` (default), the **model** and batches will be
-transfered to the `torch.cuda.current_device()`. So, don't forget to set
-default device with torch.cuda.set_device(\<device>) before create
-the instance of the `Trainer` class. If **force_cpu** is `True` the
-**model** and batches are remained on the CPU during training.
+**device**: if not `None`, the **model** will be transfered to the
+specified device.
 
 **best_score** (`float`, default is `None`): the starting point to
 compare the calculating control metric with.
