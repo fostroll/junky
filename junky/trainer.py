@@ -220,14 +220,11 @@ class Trainer():
     of the 1st epoch is `1`), and `step`. If `config.epoch_steps` is `1`,
     `step` is always `1`.
 
-    **force_cpu**: if `False` (default), the **model** and batches will be
-    transfered to the `torch.cuda.current_device()`. So, don't forget to set
-    default device with torch.cuda.set_device(\<device>) before create
-    the instance of the `Trainer` class. If **force_cpu** is `True` the
-    **model** and batches are remained on the CPU during training.
+    **device**: if not `None`, the **model** will be transfered to the
+    specified device.
     """
     def __init__(self, config, model, train_dataloader, test_dataloader=None,
-                 force_cpu=False):
+                 device=False):
         self.config = TrainerConfig(**config) \
                           if isinstance(config, dict) else \
                       config
@@ -239,14 +236,12 @@ class Trainer():
         self.train_dataloader = train_dataloader
         self.test_dataloader = test_dataloader
 
-        self.device = 'cpu'
-        if torch.cuda.is_available() and not force_cpu:
-            self.device = torch.cuda.current_device()
         if config.parallel:
-            self.model = torch.nn.DataParallel(self.model).to(self.device)
-#                 self.model = torch.nn.parallel.DistributedDataParallel(self.model).to(self.device)
-        else:
-            self.model.to(self.device)
+            self.model = torch.nn.DataParallel(self.model)
+#             self.model = torch.nn.parallel.DistributedDataParallel(self.model)
+        if device:
+            self.model.cpu().to(device)
+        self.device = next(self.model.parameters()).device
 
     def save_ckpt(self):
         config = self.config
