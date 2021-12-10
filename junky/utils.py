@@ -21,6 +21,18 @@ import math
 CPU = torch.device('cpu')
 
 
+def save_model(model: torch.nn.Module, path: str):
+    """Saves the **model** with zero gradients and moved to the CPU."""
+    torch.save(model, path)
+    model = torch.load(path, map_location=CPU)
+    torch.optim.Optimizer(model.parameters()).zero_grad()
+    model.eval()
+    torch.save(model, path)
+
+def load_model(path: str, device=None):
+    """Just a wrapper for `torch.load()`."""
+    return torch.load(path, map_location=device)
+
 def get_max_dims(array, str_isarray=False, max_dims=None, dim_no=0):
     """Returns max sizes of nested *array* on the all levels of nestedness.
 

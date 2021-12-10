@@ -6,6 +6,16 @@ The lib contains a bunch of utilities to use with *PyTorch* models or without.
 
 ```python
 import junky
+save_model(model: torch.nn.Module, path: str)
+```
+Saves the **model** with zero gradients and moved to the CPU.
+
+```python
+load_model(path: str, device=None)
+```
+Just a wrapper for `torch.load()`.
+
+```python
 max_dims = junky.get_max_dims(array, str_isarray=False, max_dims=None,
                               dim_no=0)
 ```
