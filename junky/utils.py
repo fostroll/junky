@@ -25,7 +25,7 @@ def save_model(model: torch.nn.Module, path: str):
     """Saves the **model** with zero gradients and moved to the CPU."""
     torch.save(model, path)
     model = torch.load(path, map_location=CPU)
-    torch.optim.Optimizer(model.parameters()).zero_grad()
+    torch.optim.Optimizer(model.parameters(), {}).zero_grad()
     model.eval()
     torch.save(model, path)
 
