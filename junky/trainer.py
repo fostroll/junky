@@ -550,8 +550,7 @@ class Trainer():
                                          '>')
                     print_str += '\nBAD EPOCHS: {} ({})' \
                                      .format(bad_epochs_, sgn)
-                    if bad_epochs_ >= bad_epochs \
-                   and epoch >= min_epochs:
+                    if epoch >= min_epochs and bad_epochs_ >= bad_epochs:
                         print_str += '\nMaximum bad epochs exceeded. ' \
                                      'Process has been stopped. ' \
                                    + ('No models could surpass '

@@ -48,8 +48,9 @@ setup(
     keywords='pytorch autotrain',
 
     packages=find_packages(exclude=['doc', 'examples', 'scripts', 'tests']),
-    install_requires=['matplotlib', 'numpy', 'pandas', 'seaborn', 'sklearn',
-                      'torch>=1.8.0', 'transformers>=4.3.3'],
+    install_requires=['corpuscula>=1.0.56', 'matplotlib', 'numpy', 'pandas',
+                      'seaborn', 'sklearn', 'torch>=1.8.0',
+                      'transformers>=4.3.3'],
     include_package_data=True,
     python_requires='>=3.6',
 )
