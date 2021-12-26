@@ -298,8 +298,9 @@ class Trainer():
         `None` of `False` means, don't check it.
         """
         config, model = self.config, self.model
-        min_epochs, max_epochs, bad_epochs  = \
-            config.min_epochs, config.max_epochs, config.bad_epochs
+        min_epochs = config.min_epochs or 0
+        max_epochs = config.max_epochs
+        bad_epochs = config.bad_epochs or float('inf')
         epoch_steps = config.epoch_steps
 
         batch_labels_idx = config.batch_labels_idx
