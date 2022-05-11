@@ -262,7 +262,7 @@ def absmax(array, axis=None):
             ), array.shape
         )
 
-        shape = [(*[None] * len(amax.shape))]
+        shape = [None] * len(amax.shape)
         shape[axis] = ...
         mask = np.broadcast_to(
             np.arange(amax.shape[axis])[tuple(shape)],
@@ -303,7 +303,7 @@ def absmax_torch(tensors, dim=None):
                       .unsqueeze(dim=dim) \
                       .expand(tensors.shape)
 
-        shape = [(*[None] * len(amax.shape))]
+        shape = [None] * len(amax.shape)
         shape[dim] = ...
         mask = torch.arange(amax.shape[dim])[tuple(shape)] \
                     .expand(amax.shape)
